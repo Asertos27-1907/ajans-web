@@ -49,42 +49,10 @@ export interface Application {
   age: number;
   gender: Gender;
   city: string;
-  district: string;
   phone: string;
-  whatsapp: string;
-  email: string;
-  address: string;
-  guardianName?: string;
-  guardianPhone?: string;
-  heightCm: number;
-  weightKg: number;
-  hairColor: string;
-  eyeColor: string;
-  skinTone: string;
-  shoeSize: string;
-  topSize: string;
-  bottomSize: string;
-  bust?: string;
-  waist?: string;
-  hips?: string;
-  actingExperience: string;
-  actingEducation: string;
-  projects: string;
-  roles: string;
-  languages: string;
-  accents: string;
-  sports: string;
-  dance: string;
-  instruments: string;
-  specialSkills: string;
-  drivingLicense: string;
-  occupation: string;
-  bio: string;
-  showreelUrl?: string;
-  youtubeUrl?: string;
-  vimeoUrl?: string;
-  instagram?: string;
-  portfolioUrl?: string;
+  heightCm?: number;
+  weightKg?: number;
+  experience: string;
   photos: ApplicationPhoto[];
   status: ApplicationStatus;
   tags: string[];
@@ -103,16 +71,10 @@ export interface Actor {
   age: number;
   city: string;
   gender: Gender;
-  heightCm: number;
-  weightKg: number;
-  hairColor: string;
-  eyeColor: string;
-  bodySize: string;
   phone?: string;
-  email?: string;
-  bio: string;
-  experiences: string;
-  projects: string;
+  heightCm?: number;
+  weightKg?: number;
+  experience: string;
   photos: ActorPhoto[];
   coverPhotoUrl: string;
   isActive: boolean;
@@ -193,25 +155,20 @@ export interface AboutFeature {
 }
 
 export interface SiteSettings {
-  /** Firma bilgileri */
   companyName: string;
-  /** Kısa marka adı (navbar vb.) */
   agencyName: string;
   logoUrl: string;
   phone?: string;
   whatsapp?: string;
   email?: string;
   addressLines: string[];
-  /** Maps link (yeni sekme) */
   googleMapsUrl?: string;
-  /** iframe src — iletişim sayfası haritası */
   googleMapsEmbedUrl?: string;
   instagram?: string;
   facebook?: string;
   youtube?: string;
   tiktok?: string;
   linkedin?: string;
-  /** @deprecated use slides — kept for soft migration */
   heroTitle: string;
   heroDescription: string;
   heroImageUrl: string;
@@ -251,12 +208,8 @@ export interface ApplicationFilters {
   city?: string;
   gender?: Gender;
   status?: ApplicationStatus;
-  hairColor?: string;
-  eyeColor?: string;
   ageMin?: number;
   ageMax?: number;
-  heightMin?: number;
-  heightMax?: number;
   dateFrom?: string;
   dateTo?: string;
   page?: number;
@@ -265,11 +218,10 @@ export interface ApplicationFilters {
 
 export interface ActorFilters {
   search?: string;
-  city?: string;
   gender?: Gender;
+  isActive?: boolean;
   showOnWebsite?: boolean;
   isFeatured?: boolean;
-  isActive?: boolean;
   page?: number;
   pageSize?: number;
 }

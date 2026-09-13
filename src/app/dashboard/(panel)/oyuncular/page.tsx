@@ -1,32 +1,42 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Eye, Pencil, Plus, RotateCcw } from "lucide-react";
+import { Eye, Pencil, Plus, RotateCcw, X } from "lucide-react";
 import { actorRepository } from "@/lib/repositories";
 import type { Actor, Gender } from "@/types";
 import { Button } from "@/components/ui/Button";
-import { FormField, Input, Select } from "@/components/ui/Field";
+import { FormField, Input, Select, Textarea } from "@/components/ui/Field";
 import { EmptyState, PageHeader } from "@/components/ui/StatusBadge";
 import { GENDER_LABELS } from "@/config/constants";
-import { fullName, cn } from "@/lib/utils";
+import { calcAge, cn, fullName } from "@/lib/utils";
+
+const emptyForm = {
+  firstName: "",
+  lastName: "",
+  phone: "",
+  birthDate: "",
+  gender: "kadin" as Gender,
+  city: "",
+  heightCm: "",
+  weightKg: "",
+  experience: "",
+  isActive: true,
+  coverPhotoUrl: "/assets/actor-01.jpg",
+};
 
 export default function ActorsAdminPage() {
-  const router = useRouter();
   const [items, setItems] = useState<Actor[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [city, setCity] = useState("");
   const [gender, setGender] = useState("");
-  const [ageMin, setAgeMin] = useState("");
-  const [ageMax, setAgeMax] = useState("");
-  const [activeFilter, setActiveFilter] = useState("");
-  const [webFilter, setWebFilter] = useState("");
-  const [featuredFilter, setFeaturedFilter] = useState("");
+  const [status, setStatus] = useState("");
+  const [editing, setEditing] = useState<Actor | null>(null);
   const [creating, setCreating] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
   const [, startTransition] = useTransition();
 
   function load() {
@@ -34,22 +44,13 @@ export default function ActorsAdminPage() {
     startTransition(async () => {
       const result = await actorRepository.list({
         search: search || undefined,
-        city: city || undefined,
         gender: (gender as Gender) || undefined,
-        isActive:
-          activeFilter === "" ? undefined : activeFilter === "1",
-        showOnWebsite:
-          webFilter === "" ? undefined : webFilter === "1",
-        isFeatured:
-          featuredFilter === "" ? undefined : featuredFilter === "1",
+        isActive: status === "" ? undefined : status === "1",
         page: 1,
         pageSize: 60,
       });
-      let data = result.data;
-      if (ageMin) data = data.filter((a) => a.age >= Number(ageMin));
-      if (ageMax) data = data.filter((a) => a.age <= Number(ageMax));
-      setItems(data);
-      setTotal(data.length);
+      setItems(result.data);
+      setTotal(result.total);
       setLoading(false);
     });
   }
@@ -59,36 +60,97 @@ export default function ActorsAdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const cities = useMemo(
-    () => Array.from(new Set(items.map((i) => i.city))).sort(),
-    [items],
-  );
-
-  async function createActor() {
+  function openCreate() {
     setCreating(true);
-    const actor = await actorRepository.create({
-      firstName: "Yeni",
-      lastName: "Oyuncu",
-      birthDate: "2000-01-01",
-      age: 26,
-      city: "İzmir",
-      gender: "kadin",
-      heightCm: 170,
-      weightKg: 55,
-      hairColor: "Kahverengi",
-      eyeColor: "Kahverengi",
-      bodySize: "M",
-      bio: "Yeni eklenen oyuncu profili.",
-      experiences: "",
-      projects: "",
-      photos: [],
-      coverPhotoUrl: "/assets/photos/p01.jpg",
-      isActive: true,
-      showOnWebsite: false,
-      isFeatured: false,
-    });
+    setEditing(null);
+    setForm(emptyForm);
+  }
+
+  function openEdit(actor: Actor) {
     setCreating(false);
-    router.push(`/dashboard/oyuncular/${actor.id}`);
+    setEditing(actor);
+    setForm({
+      firstName: actor.firstName,
+      lastName: actor.lastName,
+      phone: actor.phone || "",
+      birthDate: actor.birthDate,
+      gender: actor.gender,
+      city: actor.city,
+      heightCm: actor.heightCm ? String(actor.heightCm) : "",
+      weightKg: actor.weightKg ? String(actor.weightKg) : "",
+      experience: actor.experience || "",
+      isActive: actor.isActive,
+      coverPhotoUrl: actor.coverPhotoUrl,
+    });
+  }
+
+  function closeModal() {
+    setEditing(null);
+    setCreating(false);
+  }
+
+  async function save() {
+    setSaving(true);
+    const age = form.birthDate ? calcAge(form.birthDate) : 0;
+    const payload = {
+      firstName: form.firstName.trim() || "Yeni",
+      lastName: form.lastName.trim() || "Oyuncu",
+      phone: form.phone.trim() || undefined,
+      birthDate: form.birthDate || "2000-01-01",
+      age,
+      gender: form.gender,
+      city: form.city.trim() || "İzmir",
+      heightCm: Number(form.heightCm) || undefined,
+      weightKg: Number(form.weightKg) || undefined,
+      experience: form.experience.trim(),
+      isActive: form.isActive,
+      coverPhotoUrl: form.coverPhotoUrl,
+    };
+
+    if (editing) {
+      const updated = await actorRepository.update(editing.id, {
+        ...payload,
+        photos: editing.photos.length
+          ? editing.photos.map((p, i) =>
+              i === 0 ? { ...p, url: form.coverPhotoUrl, thumbnailUrl: form.coverPhotoUrl } : p,
+            )
+          : [
+              {
+                id: `${editing.id}-1`,
+                actorId: editing.id,
+                url: form.coverPhotoUrl,
+                thumbnailUrl: form.coverPhotoUrl,
+                alt: fullName(payload.firstName, payload.lastName),
+                isCover: true,
+                sortOrder: 1,
+              },
+            ],
+      });
+      if (updated) {
+        setItems((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+      }
+    } else {
+      const actor = await actorRepository.create({
+        ...payload,
+        photos: [
+          {
+            id: `new-1`,
+            actorId: "",
+            url: form.coverPhotoUrl,
+            thumbnailUrl: form.coverPhotoUrl,
+            alt: fullName(payload.firstName, payload.lastName),
+            isCover: true,
+            sortOrder: 1,
+          },
+        ],
+        showOnWebsite: false,
+        isFeatured: false,
+      });
+      setItems((prev) => [actor, ...prev]);
+      setTotal((t) => t + 1);
+    }
+    setSaving(false);
+    closeModal();
   }
 
   async function toggleActive(actor: Actor, e: React.MouseEvent) {
@@ -104,15 +166,12 @@ export default function ActorsAdminPage() {
 
   function clearFilters() {
     setSearch("");
-    setCity("");
     setGender("");
-    setAgeMin("");
-    setAgeMax("");
-    setActiveFilter("");
-    setWebFilter("");
-    setFeaturedFilter("");
+    setStatus("");
     setTimeout(() => load(), 0);
   }
+
+  const modalOpen = creating || !!editing;
 
   return (
     <div>
@@ -120,70 +179,36 @@ export default function ActorsAdminPage() {
         title="Oyuncular"
         description={`${total} kayıt`}
         actions={
-          <Button size="sm" onClick={createActor} disabled={creating}>
+          <Button size="sm" onClick={openCreate}>
             <Plus size={14} /> Yeni oyuncu
           </Button>
         }
       />
 
-      <div className="mb-5 grid gap-3 rounded border border-border bg-surface p-4 md:grid-cols-3 xl:grid-cols-4">
-        <FormField label="Ara (ad / şehir)">
+      <div className="mb-5 grid gap-3 rounded border border-border bg-surface p-4 md:grid-cols-4">
+        <FormField label="Arama">
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Ad soyad veya şehir"
+            placeholder="Ad veya şehir ara"
           />
-        </FormField>
-        <FormField label="Şehir">
-          <Select value={city} onChange={(e) => setCity(e.target.value)}>
-            <option value="">Tümü</option>
-            {["İzmir", "İstanbul", "Ankara", "Antalya", "Bursa", "Muğla", "Eskişehir", ...cities]
-              .filter((v, i, arr) => arr.indexOf(v) === i)
-              .map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-          </Select>
         </FormField>
         <FormField label="Cinsiyet">
           <Select value={gender} onChange={(e) => setGender(e.target.value)}>
             <option value="">Tümü</option>
-            {Object.entries(GENDER_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v}
-              </option>
-            ))}
+            <option value="erkek">Erkek</option>
+            <option value="kadin">Kadın</option>
+            <option value="diger">Diğer</option>
           </Select>
         </FormField>
-        <FormField label="Yaş min">
-          <Input type="number" value={ageMin} onChange={(e) => setAgeMin(e.target.value)} />
-        </FormField>
-        <FormField label="Yaş max">
-          <Input type="number" value={ageMax} onChange={(e) => setAgeMax(e.target.value)} />
-        </FormField>
         <FormField label="Durum">
-          <Select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value)}>
+          <Select value={status} onChange={(e) => setStatus(e.target.value)}>
             <option value="">Tümü</option>
             <option value="1">Aktif</option>
             <option value="0">Pasif</option>
           </Select>
         </FormField>
-        <FormField label="Web görünürlüğü">
-          <Select value={webFilter} onChange={(e) => setWebFilter(e.target.value)}>
-            <option value="">Tümü</option>
-            <option value="1">Webde gösteriliyor</option>
-            <option value="0">Gizli</option>
-          </Select>
-        </FormField>
-        <FormField label="Öne çıkan">
-          <Select value={featuredFilter} onChange={(e) => setFeaturedFilter(e.target.value)}>
-            <option value="">Tümü</option>
-            <option value="1">Öne çıkan</option>
-            <option value="0">Diğer</option>
-          </Select>
-        </FormField>
-        <div className="flex items-end gap-2 md:col-span-3 xl:col-span-4">
+        <div className="flex items-end gap-2">
           <Button onClick={load}>Filtrele</Button>
           <Button variant="outline" onClick={clearFilters}>
             <RotateCcw size={14} /> Temizle
@@ -194,17 +219,20 @@ export default function ActorsAdminPage() {
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="skeleton aspect-[3/4] rounded" />
+            <div key={i} className="skeleton aspect-[3/4]" />
           ))}
         </div>
       ) : !items.length ? (
-        <EmptyState title="Oyuncu bulunamadı" description="Filtreleri değiştirmeyi deneyin." />
+        <EmptyState
+          title="Oyuncu bulunamadı"
+          description="Filtreleri değiştirmeyi deneyin."
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {items.map((actor) => (
             <article
               key={actor.id}
-              className="group overflow-hidden border border-border bg-surface transition-shadow duration-200 hover:shadow-[var(--shadow-soft)]"
+              className="group overflow-hidden border border-border bg-surface transition hover:border-secondary/40"
             >
               <div className="relative aspect-[3/4] bg-bg-muted">
                 <Link
@@ -226,49 +254,177 @@ export default function ActorsAdminPage() {
                   title={actor.isActive ? "Pasif yap" : "Aktif yap"}
                   aria-label={actor.isActive ? "Pasif yap" : "Aktif yap"}
                   className={cn(
-                    "absolute top-3 left-3 z-10 inline-flex cursor-pointer items-center gap-1.5 rounded px-2 py-1 text-[11px] font-semibold text-white shadow",
+                    "absolute top-3 left-3 z-10 inline-flex cursor-pointer items-center gap-1.5 rounded px-2.5 py-1.5 text-[11px] font-semibold text-white shadow",
                     actor.isActive ? "bg-success" : "bg-danger",
                   )}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
                   {actor.isActive ? "Aktif" : "Pasif"}
                 </button>
                 <div className="absolute top-3 right-3 z-10 flex gap-1">
                   <Link
                     href={`/dashboard/oyuncular/${actor.id}`}
-                    className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-black/65 text-white hover:bg-primary"
+                    className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded bg-black/65 text-white hover:bg-primary"
                     aria-label="Görüntüle"
                   >
                     <Eye size={14} />
                   </Link>
-                  <Link
-                    href={`/dashboard/oyuncular/${actor.id}`}
-                    className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-black/65 text-white hover:bg-secondary"
+                  <button
+                    type="button"
+                    onClick={() => openEdit(actor)}
+                    className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded bg-black/65 text-white hover:bg-secondary"
                     aria-label="Düzenle"
                   >
                     <Pencil size={14} />
-                  </Link>
+                  </button>
                 </div>
               </div>
               <div className="p-3">
-                <Link
-                  href={`/dashboard/oyuncular/${actor.id}`}
-                  className="cursor-pointer text-sm font-semibold text-ink hover:text-primary"
+                <button
+                  type="button"
+                  onClick={() => openEdit(actor)}
+                  className="cursor-pointer text-left text-sm font-semibold text-ink hover:text-primary"
                 >
                   {fullName(actor.firstName, actor.lastName)}
-                </Link>
+                </button>
                 <p className="mt-1 text-xs text-ink-muted">
                   {actor.city} · {actor.age} · {GENDER_LABELS[actor.gender]}
-                </p>
-                <p className="mt-1 text-[11px] text-ink-soft">
-                  {actor.showOnWebsite ? "Web’de görünür" : "Web’de gizli"}
-                  {actor.isFeatured ? " · Öne çıkan" : ""}
                 </p>
               </div>
             </article>
           ))}
         </div>
       )}
+
+      {modalOpen ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="flex max-h-[95vh] w-full max-w-2xl flex-col overflow-hidden bg-surface shadow-[var(--shadow-soft)] sm:rounded"
+          >
+            <div className="flex items-center justify-between border-b border-border bg-secondary px-4 py-3 text-white">
+              <h2 className="font-display text-lg font-semibold">
+                {editing ? "Oyuncu düzenle" : "Yeni oyuncu"}
+              </h2>
+              <button
+                type="button"
+                onClick={closeModal}
+                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded hover:bg-white/10"
+                aria-label="Kapat"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 md:p-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField label="Ad">
+                  <Input
+                    value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                  />
+                </FormField>
+                <FormField label="Soyad">
+                  <Input
+                    value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                  />
+                </FormField>
+                <FormField label="Telefon">
+                  <Input
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                </FormField>
+                <FormField label="Doğum Tarihi">
+                  <Input
+                    type="date"
+                    value={form.birthDate}
+                    onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
+                  />
+                </FormField>
+                <FormField label="Cinsiyet">
+                  <Select
+                    value={form.gender}
+                    onChange={(e) =>
+                      setForm({ ...form, gender: e.target.value as Gender })
+                    }
+                  >
+                    <option value="kadin">Kadın</option>
+                    <option value="erkek">Erkek</option>
+                    <option value="diger">Diğer</option>
+                    <option value="belirtmek_istemiyor">Belirtmek istemiyor</option>
+                  </Select>
+                </FormField>
+                <FormField label="Şehir">
+                  <Input
+                    value={form.city}
+                    onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  />
+                </FormField>
+                <FormField label="Boy (cm)">
+                  <Input
+                    type="number"
+                    value={form.heightCm}
+                    onChange={(e) => setForm({ ...form, heightCm: e.target.value })}
+                  />
+                </FormField>
+                <FormField label="Kilo (kg)">
+                  <Input
+                    type="number"
+                    value={form.weightKg}
+                    onChange={(e) => setForm({ ...form, weightKg: e.target.value })}
+                  />
+                </FormField>
+                <FormField label="Deneyim" className="sm:col-span-2">
+                  <Textarea
+                    value={form.experience}
+                    onChange={(e) => setForm({ ...form, experience: e.target.value })}
+                    rows={3}
+                  />
+                </FormField>
+                <FormField label="Kapak fotoğrafı URL" className="sm:col-span-2">
+                  <Input
+                    value={form.coverPhotoUrl}
+                    onChange={(e) =>
+                      setForm({ ...form, coverPhotoUrl: e.target.value })
+                    }
+                  />
+                </FormField>
+                <label className="flex cursor-pointer items-center gap-2 text-sm sm:col-span-2">
+                  <input
+                    type="checkbox"
+                    className="cursor-pointer"
+                    checked={form.isActive}
+                    onChange={(e) =>
+                      setForm({ ...form, isActive: e.target.checked })
+                    }
+                  />
+                  Aktif
+                </label>
+                {form.coverPhotoUrl ? (
+                  <div className="relative aspect-[3/4] max-w-[160px] overflow-hidden border border-border sm:col-span-2">
+                    <Image
+                      src={form.coverPhotoUrl}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="160px"
+                    />
+                  </div>
+                ) : null}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-border bg-bg-muted px-4 py-3">
+              <Button variant="outline" onClick={closeModal}>
+                İptal
+              </Button>
+              <Button onClick={save} disabled={saving}>
+                {saving ? "Kaydediliyor..." : "Güncelle"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

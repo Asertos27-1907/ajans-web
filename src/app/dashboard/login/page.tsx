@@ -28,7 +28,7 @@ export default function DashboardLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f3f1ec] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-bg-muted px-4">
       <div className="w-full max-w-md rounded border border-border bg-surface p-8 shadow-[var(--shadow-soft)]">
         <div className="mb-6 inline-block rounded bg-white p-2">
           <BrandLogo />

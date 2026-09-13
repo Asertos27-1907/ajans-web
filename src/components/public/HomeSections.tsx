@@ -53,8 +53,9 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
         className="object-cover object-[center_20%] opacity-70"
         sizes="100vw"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-secondary/35" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(122,31,43,0.28),transparent_55%)]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-secondary/50 to-secondary/25" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(122,31,43,0.32),transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(24,60,70,0.35),transparent_45%)]" />
 
       {/* Cinema framing */}
       <div className="pointer-events-none absolute inset-6 border border-white/10 md:inset-10" />

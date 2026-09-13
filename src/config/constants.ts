@@ -54,12 +54,10 @@ export const APPLICATION_EXPORT_COLUMNS = [
   { key: "lastName", label: "Soyad" },
   { key: "age", label: "Yaş" },
   { key: "heightCm", label: "Boy" },
+  { key: "weightKg", label: "Kilo" },
   { key: "city", label: "Şehir" },
   { key: "phone", label: "Telefon" },
-  { key: "email", label: "E-mail" },
   { key: "gender", label: "Cinsiyet" },
-  { key: "hairColor", label: "Saç" },
-  { key: "eyeColor", label: "Göz" },
   { key: "status", label: "Durum" },
   { key: "createdAt", label: "Başvuru Tarihi" },
 ] as const;

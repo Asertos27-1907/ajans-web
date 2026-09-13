@@ -46,7 +46,9 @@ export default function ApplicationDetailPage() {
   async function saveNote() {
     if (!app) return;
     setSaving(true);
-    const updated = await applicationRepository.update(app.id, { adminNotes: note });
+    const updated = await applicationRepository.update(app.id, {
+      adminNotes: note,
+    });
     setApp(updated);
     setSaving(false);
   }
@@ -90,12 +92,19 @@ export default function ApplicationDetailPage() {
     router.push("/dashboard/oyuncular");
   }
 
-  if (loading) {
-    return <div className="skeleton h-64 rounded" />;
-  }
-  if (!app) {
-    return <p>Başvuru bulunamadı.</p>;
-  }
+  if (loading) return <div className="skeleton h-64 rounded" />;
+  if (!app) return <p>Başvuru bulunamadı.</p>;
+
+  const infoRows: [string, string | number | undefined][] = [
+    ["Telefon", app.phone],
+    ["Doğum tarihi", app.birthDate],
+    ["Yaş", app.age],
+    ["Cinsiyet", GENDER_LABELS[app.gender]],
+    ["Şehir", app.city],
+    ["Boy", app.heightCm ? `${app.heightCm} cm` : undefined],
+    ["Kilo", app.weightKg ? `${app.weightKg} kg` : undefined],
+    ["Başvuru tarihi", formatDateTR(app.createdAt)],
+  ];
 
   return (
     <div>
@@ -124,107 +133,70 @@ export default function ApplicationDetailPage() {
         <StatusBadge status={app.status} />
         <div className="flex flex-wrap gap-1">
           {app.tags.map((t) => (
-            <span key={t} className="rounded bg-bg-muted px-2 py-0.5 text-xs">
+            <span
+              key={t}
+              className="rounded bg-secondary-soft px-2 py-0.5 text-xs text-secondary"
+            >
               {t}
             </span>
           ))}
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
         <div className="space-y-6">
-          <section className="rounded border border-border bg-surface p-5">
-            <h2 className="font-semibold">Kişisel bilgiler</h2>
+          <section className="border border-border bg-surface p-5">
+            <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
+              Başvuru bilgileri
+            </h2>
             <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-              {[
-                ["Yaş", app.age],
-                ["Cinsiyet", GENDER_LABELS[app.gender]],
-                ["Şehir", `${app.city} / ${app.district}`],
-                ["Telefon", app.phone],
-                ["WhatsApp", app.whatsapp],
-                ["E-posta", app.email],
-                ["Adres", app.address],
-                ["Veli", app.guardianName || "-"],
-              ].map(([k, v]) => (
-                <div key={String(k)}>
-                  <dt className="text-ink-soft">{k}</dt>
-                  <dd className="mt-0.5 font-medium">{v}</dd>
-                </div>
-              ))}
+              {infoRows
+                .filter(([, v]) => v !== undefined && v !== "")
+                .map(([k, v]) => (
+                  <div key={k}>
+                    <dt className="text-ink-soft">{k}</dt>
+                    <dd className="mt-0.5 font-medium">{v}</dd>
+                  </div>
+                ))}
             </dl>
           </section>
 
-          <section className="rounded border border-border bg-surface p-5">
-            <h2 className="font-semibold">Fiziksel bilgiler</h2>
-            <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
-              {[
-                ["Boy", `${app.heightCm} cm`],
-                ["Kilo", `${app.weightKg} kg`],
-                ["Saç", app.hairColor],
-                ["Göz", app.eyeColor],
-                ["Ten", app.skinTone],
-                ["Ayakkabı", app.shoeSize],
-                ["Üst", app.topSize],
-                ["Alt", app.bottomSize],
-                ["Göğüs/Bel/Kalça", `${app.bust || "-"} / ${app.waist || "-"} / ${app.hips || "-"}`],
-              ].map(([k, v]) => (
-                <div key={String(k)}>
-                  <dt className="text-ink-soft">{k}</dt>
-                  <dd className="mt-0.5 font-medium">{v}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
+          {app.experience ? (
+            <section className="border border-border bg-surface p-5">
+              <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
+                Deneyim
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+                {app.experience}
+              </p>
+            </section>
+          ) : null}
 
-          <section className="rounded border border-border bg-surface p-5">
-            <h2 className="font-semibold">Kariyer</h2>
-            <div className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
-              {[
-                ["Deneyim", app.actingExperience],
-                ["Eğitim", app.actingEducation],
-                ["Projeler", app.projects],
-                ["Roller", app.roles],
-                ["Diller", app.languages],
-                ["Aksan", app.accents],
-                ["Spor", app.sports],
-                ["Dans", app.dance],
-                ["Enstrüman", app.instruments],
-                ["Yetenekler", app.specialSkills],
-                ["Ehliyet", app.drivingLicense],
-                ["Meslek", app.occupation],
-              ].map(([k, v]) => (
-                <div key={String(k)}>
-                  <p className="text-ink-soft">{k}</p>
-                  <p className="mt-1">{v || "-"}</p>
-                </div>
-              ))}
-              <div className="sm:col-span-2">
-                <p className="text-ink-soft">Biyografi</p>
-                <p className="mt-1">{app.bio || "-"}</p>
-              </div>
-            </div>
-          </section>
-
-          <section className="rounded border border-border bg-surface p-5">
-            <h2 className="font-semibold">Fotoğraflar & medya</h2>
+          <section className="border border-border bg-surface p-5">
+            <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
+              Fotoğraflar
+            </h2>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {app.photos.map((photo) => (
-                <div key={photo.id} className="relative aspect-[3/4] overflow-hidden rounded bg-bg-muted">
-                  <Image src={photo.thumbnailUrl} alt={photo.alt} fill className="object-cover" sizes="160px" />
+                <div
+                  key={photo.id}
+                  className="relative aspect-[3/4] overflow-hidden bg-bg-muted"
+                >
+                  <Image
+                    src={photo.thumbnailUrl || photo.url}
+                    alt={photo.alt}
+                    fill
+                    className="object-cover"
+                    sizes="160px"
+                  />
                 </div>
               ))}
-            </div>
-            <div className="mt-4 space-y-1 text-sm text-ink-muted">
-              {app.showreelUrl ? <p>Showreel: {app.showreelUrl}</p> : null}
-              {app.instagram ? <p>Instagram: {app.instagram}</p> : null}
-              {app.youtubeUrl ? <p>YouTube: {app.youtubeUrl}</p> : null}
-              {app.portfolioUrl ? <p>Portföy: {app.portfolioUrl}</p> : null}
             </div>
           </section>
         </div>
 
         <aside className="space-y-4">
-          <div className="rounded border border-border bg-surface p-4">
+          <div className="border border-border bg-surface p-4">
             <FormField label="Durum">
               <Select
                 value={status}
@@ -241,15 +213,20 @@ export default function ApplicationDetailPage() {
               Durumu kaydet
             </Button>
           </div>
-          <div className="rounded border border-border bg-surface p-4">
+          <div className="border border-border bg-surface p-4">
             <FormField label="Admin notu">
               <Textarea value={note} onChange={(e) => setNote(e.target.value)} />
             </FormField>
-            <Button className="mt-3 w-full" variant="outline" onClick={saveNote} disabled={saving}>
+            <Button
+              className="mt-3 w-full"
+              variant="outline"
+              onClick={saveNote}
+              disabled={saving}
+            >
               Notu kaydet
             </Button>
           </div>
-          <div className="rounded border border-border bg-surface p-4">
+          <div className="border border-border bg-surface p-4">
             <FormField label="Etiket ekle">
               <Input value={tag} onChange={(e) => setTag(e.target.value)} />
             </FormField>
@@ -257,7 +234,10 @@ export default function ApplicationDetailPage() {
               Ekle
             </Button>
           </div>
-          <Link href="/dashboard/basvurular" className="block text-sm text-ink-muted hover:text-ink">
+          <Link
+            href="/dashboard/basvurular"
+            className="block cursor-pointer text-sm text-ink-muted hover:text-primary"
+          >
             ← Listeye dön
           </Link>
         </aside>

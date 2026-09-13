@@ -20,7 +20,6 @@ import type {
   SiteSettings,
 } from "@/types";
 
-/** In-memory stores — later swap with Supabase repositories */
 let applications = [...mockApplications];
 let actors = [...mockActors];
 let references = [...mockReferences];
@@ -28,7 +27,7 @@ let contactMessages = [...mockContactMessages];
 let siteSettings: SiteSettings = structuredClone(mockSiteSettings);
 let admins = [...mockAdmins];
 
-function delay(ms = 80) {
+function delay(ms = 60) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
@@ -41,12 +40,8 @@ export const applicationRepository = {
       city,
       gender,
       status,
-      hairColor,
-      eyeColor,
       ageMin,
       ageMax,
-      heightMin,
-      heightMax,
       dateFrom,
       dateTo,
       page = 1,
@@ -65,12 +60,8 @@ export const applicationRepository = {
     if (city) items = items.filter((a) => a.city === city);
     if (gender) items = items.filter((a) => a.gender === gender);
     if (status) items = items.filter((a) => a.status === status);
-    if (hairColor) items = items.filter((a) => a.hairColor === hairColor);
-    if (eyeColor) items = items.filter((a) => a.eyeColor === eyeColor);
     if (ageMin != null) items = items.filter((a) => a.age >= ageMin);
     if (ageMax != null) items = items.filter((a) => a.age <= ageMax);
-    if (heightMin != null) items = items.filter((a) => a.heightCm >= heightMin);
-    if (heightMax != null) items = items.filter((a) => a.heightCm <= heightMax);
     if (dateFrom) items = items.filter((a) => a.createdAt >= dateFrom);
     if (dateTo) items = items.filter((a) => a.createdAt <= dateTo);
 
@@ -133,7 +124,6 @@ export const actorRepository = {
     let items = [...actors];
     const {
       search,
-      city,
       gender,
       showOnWebsite,
       isFeatured,
@@ -152,8 +142,15 @@ export const actorRepository = {
           `${a.firstName} ${a.lastName}`.toLocaleLowerCase("tr-TR").includes(q),
       );
     }
-    if (city) items = items.filter((a) => a.city === city);
-    if (gender) items = items.filter((a) => a.gender === gender);
+    if (gender) {
+      if (gender === "diger") {
+        items = items.filter(
+          (a) => a.gender === "diger" || a.gender === "belirtmek_istemiyor",
+        );
+      } else {
+        items = items.filter((a) => a.gender === gender);
+      }
+    }
     if (showOnWebsite != null)
       items = items.filter((a) => a.showOnWebsite === showOnWebsite);
     if (isFeatured != null) items = items.filter((a) => a.isFeatured === isFeatured);
@@ -186,7 +183,9 @@ export const actorRepository = {
     return actors.find((a) => a.id === id) ?? null;
   },
 
-  async create(input: Omit<Actor, "id" | "createdAt" | "updatedAt" | "slug"> & { slug?: string }) {
+  async create(
+    input: Omit<Actor, "id" | "createdAt" | "updatedAt" | "slug"> & { slug?: string },
+  ) {
     await delay();
     const item: Actor = {
       ...input,
@@ -216,7 +215,7 @@ export const actorRepository = {
     const cover =
       app.photos.find((p) => p.type === "portre")?.url ??
       app.photos[0]?.url ??
-      "/placeholders/actor-01.jpg";
+      "/assets/actor-01.jpg";
     return this.create({
       firstName: app.firstName,
       lastName: app.lastName,
@@ -226,14 +225,8 @@ export const actorRepository = {
       gender: app.gender,
       heightCm: app.heightCm,
       weightKg: app.weightKg,
-      hairColor: app.hairColor,
-      eyeColor: app.eyeColor,
-      bodySize: app.topSize,
       phone: app.phone,
-      email: app.email,
-      bio: app.bio,
-      experiences: app.actingExperience,
-      projects: app.projects,
+      experience: app.experience,
       photos: app.photos.map((p, i) => ({
         id: `from-${app.id}-${i}`,
         actorId: "",
@@ -258,9 +251,7 @@ export const actorRepository = {
 
   async stats() {
     await delay();
-    return {
-      active: actors.filter((a) => a.isActive).length,
-    };
+    return { active: actors.filter((a) => a.isActive).length };
   },
 };
 
@@ -272,12 +263,10 @@ export const referenceRepository = {
     if (opts?.featuredOnly) items = items.filter((r) => r.isFeatured);
     return items;
   },
-
   async getById(id: string) {
     await delay();
     return references.find((r) => r.id === id) ?? null;
   },
-
   async create(input: Omit<ReferenceProject, "id" | "createdAt">) {
     await delay();
     const item: ReferenceProject = {
@@ -288,18 +277,15 @@ export const referenceRepository = {
     references = [...references, item];
     return item;
   },
-
   async update(id: string, patch: Partial<ReferenceProject>) {
     await delay();
     references = references.map((r) => (r.id === id ? { ...r, ...patch } : r));
     return references.find((r) => r.id === id) ?? null;
   },
-
   async remove(id: string) {
     await delay();
     references = references.filter((r) => r.id !== id);
   },
-
   async stats() {
     await delay();
     return { total: references.filter((r) => r.isActive).length };
@@ -309,11 +295,8 @@ export const referenceRepository = {
 export const contactRepository = {
   async list() {
     await delay();
-    return [...contactMessages].sort((a, b) =>
-      b.createdAt.localeCompare(a.createdAt),
-    );
+    return [...contactMessages].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
-
   async create(input: Omit<ContactMessage, "id" | "createdAt" | "isRead">) {
     await delay();
     const item: ContactMessage = {
@@ -325,14 +308,12 @@ export const contactRepository = {
     contactMessages = [item, ...contactMessages];
     return item;
   },
-
   async markRead(id: string, isRead = true) {
     await delay();
     contactMessages = contactMessages.map((m) =>
       m.id === id ? { ...m, isRead } : m,
     );
   },
-
   async stats() {
     await delay();
     return {

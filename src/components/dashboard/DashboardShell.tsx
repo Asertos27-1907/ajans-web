@@ -62,7 +62,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#f3f1ec] text-ink">
+    <div className="min-h-screen bg-bg-muted text-ink">
       <div className="flex min-h-screen">
         <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">
           <div className="border-b border-border p-4">
