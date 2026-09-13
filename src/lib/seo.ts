@@ -3,13 +3,13 @@ import { SITE_URL } from "@/config/constants";
 
 const defaultTitle = "+Akademi Oyunculuk & Menajerlik";
 const defaultDescription =
-  "Oyunculuk eğitimi, casting, menajerlik ve model ajansı. Yeni yetenekleri sektörle buluşturan profesyonel yapı.";
+  "+Akademi; oyunculuk eğitimi, cast, menajerlik ve prodüksiyon alanlarında yetenekleri sektörün ihtiyaçlarıyla buluşturan profesyonel yapı.";
 
 export function createMetadata({
   title,
   description,
   path = "/",
-  image = "/placeholders/hero.jpg",
+  image = "/images/hero/hero-main.jpg",
 }: {
   title?: string;
   description?: string;

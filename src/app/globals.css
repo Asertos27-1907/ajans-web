@@ -188,6 +188,30 @@ select,
   border: 1px solid color-mix(in oklab, var(--secondary) 28%, transparent);
   transform: rotate(14deg);
   pointer-events: none;
+  animation: float-slow 16s ease-in-out infinite;
+}
+
+.decor-float::after {
+  content: "";
+  position: absolute;
+  bottom: 12%;
+  left: -20px;
+  width: 96px;
+  height: 96px;
+  border: 1px solid color-mix(in oklab, var(--primary) 18%, transparent);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: float-slow 18s ease-in-out infinite reverse;
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0) rotate(14deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(18deg);
+  }
 }
 
 .petrol-band {
@@ -239,4 +263,19 @@ select,
 
 .animate-fade-up-delay-2 {
   animation: fade-up 0.7s ease 0.24s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-fade-up,
+  .animate-fade-up-delay,
+  .animate-fade-up-delay-2,
+  .decor-geo::before,
+  .decor-float::after,
+  .skeleton {
+    animation: none !important;
+  }
 }

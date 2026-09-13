@@ -30,12 +30,11 @@ export const ROLE_LABELS: Record<string, string> = {
   VIEWER: "Görüntüleyici",
 };
 
+/** Public navbar/footer links. Oyuncular & Referanslar hidden until content is ready. */
 export const NAV_LINKS = [
   { href: "/", label: "Ana Sayfa" },
   { href: "/hakkimizda", label: "Hakkımızda" },
-  { href: "/oyuncular", label: "Oyuncular" },
   { href: "/hizmetler", label: "Hizmetler" },
-  { href: "/referanslar", label: "Referanslar" },
   { href: "/iletisim", label: "İletişim" },
 ] as const;
 

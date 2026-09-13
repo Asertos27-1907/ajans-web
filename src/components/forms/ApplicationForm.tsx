@@ -128,8 +128,8 @@ export function ApplicationForm({
           <Link href="/">
             <Button variant="outline">Ana sayfa</Button>
           </Link>
-          <Link href="/oyuncular">
-            <Button>Oyuncuları incele</Button>
+          <Link href="/hizmetler">
+            <Button>Hizmetlerimizi Keşfedin</Button>
           </Link>
         </div>
       </div>

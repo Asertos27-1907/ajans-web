@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -10,6 +12,14 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import {
+  FloatDecor,
+  HeroImageMotion,
+  HeroMotion,
+  Reveal,
+  Stagger,
+} from "@/components/motion/Reveal";
+import { SERVICE_IMAGE_FALLBACKS } from "@/config/site-images";
 import { fullName, hasValue } from "@/lib/utils";
 import type { Actor, ReferenceProject, SiteSettings } from "@/types";
 import { CATEGORY_LABELS } from "@/config/constants";
@@ -22,15 +32,6 @@ const icons = {
   Briefcase,
   Clapperboard,
 } as const;
-
-const SERVICE_IMAGES = [
-  "/assets/services-edu.jpg",
-  "/assets/photos/p02.jpg",
-  "/assets/photos/p08.jpg",
-  "/assets/services-prod.jpg",
-  "/assets/photos/p12.jpg",
-  "/assets/services-cast.jpg",
-];
 
 export function HeroSection({ settings }: { settings: SiteSettings }) {
   const slide =
@@ -45,26 +46,27 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
 
   return (
     <section className="relative isolate min-h-[88vh] overflow-hidden bg-bg-deep text-white">
-      <Image
-        src={imageUrl}
-        alt=""
-        fill
-        priority
-        className="object-cover object-[center_20%] opacity-70"
-        sizes="100vw"
-      />
+      <HeroImageMotion className="absolute inset-0">
+        <Image
+          src={imageUrl}
+          alt=""
+          fill
+          priority
+          className="object-cover object-[center_20%] opacity-70"
+          sizes="100vw"
+        />
+      </HeroImageMotion>
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-secondary/50 to-secondary/25" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(122,31,43,0.32),transparent_55%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(24,60,70,0.35),transparent_45%)]" />
 
-      {/* Cinema framing */}
       <div className="pointer-events-none absolute inset-6 border border-white/10 md:inset-10" />
       <div className="pointer-events-none absolute top-10 left-10 hidden h-16 w-16 border-t border-l border-primary/50 md:block" />
       <div className="pointer-events-none absolute right-10 bottom-10 hidden h-16 w-16 border-r border-b border-white/25 md:block" />
 
       <div className="container-wide relative flex min-h-[88vh] flex-col justify-end pb-16 pt-28 md:justify-center md:pb-24 md:pt-32">
         <div className="max-w-3xl">
-          <div className="animate-fade-up mb-6 inline-flex rounded bg-white/95 p-2 shadow-[var(--shadow-soft)]">
+          <HeroMotion delay={0.05} direction="none" className="mb-6 inline-flex rounded bg-white/95 p-2 shadow-[var(--shadow-soft)]">
             <span className="relative block h-11 w-[160px] sm:h-12 sm:w-[180px]">
               <Image
                 src={settings.logoUrl || "/brand/logo.jpeg"}
@@ -75,17 +77,21 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
                 priority
               />
             </span>
-          </div>
-          <p className="eyebrow animate-fade-up text-white/60">
-            {settings.agencyName || settings.companyName}
-          </p>
-          <h1 className="font-display animate-fade-up-delay mt-4 max-w-3xl text-4xl leading-[1.02] font-semibold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-            {title}
-          </h1>
-          <p className="animate-fade-up-delay-2 mt-5 max-w-xl text-base leading-relaxed text-white/78 md:text-lg">
-            {description}
-          </p>
-          <div className="animate-fade-up-delay-2 mt-9 flex flex-wrap gap-3">
+          </HeroMotion>
+          <HeroMotion delay={0.12} direction="left">
+            <p className="eyebrow text-white/60">
+              {settings.agencyName || settings.companyName}
+            </p>
+            <h1 className="font-display mt-4 max-w-3xl text-4xl leading-[1.02] font-semibold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+              {title}
+            </h1>
+          </HeroMotion>
+          <HeroMotion delay={0.26} direction="up">
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/78 md:text-lg">
+              {description}
+            </p>
+          </HeroMotion>
+          <HeroMotion delay={0.38} direction="up" className="mt-9 flex flex-wrap gap-3">
             <Link href={ctaLink}>
               <Button size="lg">{ctaText}</Button>
             </Link>
@@ -95,10 +101,10 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
                 variant="secondary"
                 className="cursor-pointer border border-white/10"
               >
-                Hizmetleri İncele
+                Hizmetlerimizi Keşfedin
               </Button>
             </Link>
-          </div>
+          </HeroMotion>
         </div>
       </div>
     </section>
@@ -110,16 +116,18 @@ export function StatsSection({ settings }: { settings: SiteSettings }) {
   if (!stats.length) return null;
   return (
     <section className="border-b border-border bg-surface">
-      <div className="container-wide grid grid-cols-2 gap-6 py-10 md:grid-cols-4 md:gap-8 md:py-12">
-        {stats.map((stat) => (
-          <div key={stat.id}>
-            <p className="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">
-              {stat.value}
-              <span className="text-primary">{stat.suffix}</span>
-            </p>
-            <p className="mt-2 text-sm text-ink-muted">{stat.label}</p>
-          </div>
-        ))}
+      <div className="container-wide">
+        <Stagger className="grid grid-cols-2 gap-6 py-10 md:grid-cols-4 md:gap-8 md:py-12" direction="scale">
+          {stats.map((stat) => (
+            <div key={stat.id}>
+              <p className="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">
+                {stat.value}
+                <span className="text-primary">{stat.suffix}</span>
+              </p>
+              <p className="mt-2 text-sm text-ink-muted">{stat.label}</p>
+            </div>
+          ))}
+        </Stagger>
       </div>
     </section>
   );
@@ -127,19 +135,19 @@ export function StatsSection({ settings }: { settings: SiteSettings }) {
 
 export function AboutTeaser({ settings }: { settings: SiteSettings }) {
   return (
-    <section className="section-pad decor-geo">
+    <section className="section-pad decor-geo decor-float">
       <div className="container-wide grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
-        <div className="frame-corner relative aspect-[4/5] overflow-hidden bg-bg-muted lg:col-span-5">
+        <Reveal direction="left" className="frame-corner relative aspect-[4/5] overflow-hidden bg-bg-muted lg:col-span-5">
           <Image
             src={settings.aboutImageUrl}
             alt="+Akademi hakkında"
             fill
-            className="object-cover"
+            className="object-cover transition duration-700 hover:scale-[1.03]"
             sizes="(max-width:1024px) 100vw, 42vw"
           />
-        </div>
-        <div className="lg:col-span-7">
-          <p className="eyebrow">Kurumsal</p>
+        </Reveal>
+        <Reveal direction="up" delay={0.08} className="lg:col-span-7">
+          <p className="eyebrow">Hakkımızda</p>
           <h2 className="font-display title-accent mt-3 text-3xl font-semibold tracking-tight md:text-5xl">
             {settings.aboutTitle}
           </h2>
@@ -153,20 +161,12 @@ export function AboutTeaser({ settings }: { settings: SiteSettings }) {
               <p key={p.id}>{p.text}</p>
             ))}
           </div>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2">
-            {settings.aboutFeatures.slice(0, 4).map((item) => (
-              <div key={item.id} className="border-l-2 border-primary pl-4">
-                <h3 className="text-sm font-semibold text-ink">{item.title}</h3>
-                <p className="mt-1.5 text-sm text-ink-muted">{item.description}</p>
-              </div>
-            ))}
-          </div>
           <Link href="/hakkimizda" className="mt-8 inline-flex">
             <Button variant="outline">
               Daha fazla <ArrowRight size={16} />
             </Button>
           </Link>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -178,76 +178,64 @@ export function ServicesSection({ settings }: { settings: SiteSettings }) {
     .sort((a, b) => a.sortOrder - b.sortOrder);
   return (
     <section className="section-pad relative overflow-hidden bg-bg-muted">
-      <div className="pointer-events-none absolute -bottom-10 left-8 h-32 w-32 rotate-6 border border-secondary/20" />
+      <FloatDecor className="bottom-8 left-6 h-28 w-28 rotate-6 border border-secondary/20 opacity-70" />
       <div className="container-wide">
-        <div className="max-w-2xl">
+        <Reveal direction="up" className="max-w-2xl">
           <p className="eyebrow">Hizmetler</p>
           <h2 className="font-display title-accent mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
             {settings.servicesSectionTitle}
           </h2>
           <p className="mt-3 text-ink-muted">
-            Profesyonel eğitimden cast hizmetlerine, menajerlikten prodüksiyon
-            desteğine kadar uçtan uca yetenek yönetimi.
+            Eğitimden casting süreçlerine, menajerlikten prodüksiyon desteğine
+            kadar profesyonel yetenek yönetimi.
           </p>
-        </div>
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        </Reveal>
+        <Stagger className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service, idx) => {
             const Icon =
               icons[service.icon as keyof typeof icons] ?? Clapperboard;
-            const image = service.imageUrl ?? SERVICE_IMAGES[idx % SERVICE_IMAGES.length];
-            const featured = idx < 2;
+            const image =
+              service.imageUrl ??
+              SERVICE_IMAGE_FALLBACKS[idx % SERVICE_IMAGE_FALLBACKS.length];
             return (
               <article
                 key={service.id}
-                className={
-                  featured
-                    ? "group relative overflow-hidden bg-secondary text-white md:col-span-1"
-                    : "group border-t border-border-strong bg-surface pt-0"
-                }
+                className="group border border-transparent border-t border-border-strong bg-surface pt-0 shadow-none transition duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[var(--shadow-soft)]"
               >
-                {featured || service.imageUrl ? (
-                  <div className="relative aspect-[16/10] overflow-hidden">
-                    <Image
-                      src={image}
-                      alt=""
-                      fill
-                      className="object-cover opacity-80 transition duration-500 group-hover:scale-[1.03]"
-                      sizes="(max-width:768px) 100vw, 33vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-secondary/90 via-secondary/40 to-transparent" />
-                  </div>
-                ) : null}
-                <div className={featured ? "p-6" : "p-6"}>
-                  <Icon
-                    className={featured ? "text-white/80" : "text-primary"}
-                    size={22}
-                    strokeWidth={1.6}
+                <div className="relative aspect-[16/10] overflow-hidden">
+                  <Image
+                    src={image}
+                    alt=""
+                    fill
+                    className="object-cover opacity-85 transition duration-300 group-hover:scale-[1.04]"
+                    sizes="(max-width:768px) 100vw, 33vw"
                   />
-                  <h3
-                    className={`mt-4 text-lg font-semibold ${featured ? "text-white" : "text-ink"}`}
-                  >
+                  <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 via-secondary/25 to-transparent" />
+                </div>
+                <div className="border-l-2 border-transparent p-6 transition duration-300 group-hover:border-primary">
+                  <Icon className="text-primary" size={22} strokeWidth={1.6} />
+                  <h3 className="mt-4 text-lg font-semibold text-ink">
                     {service.title}
                   </h3>
-                  <p
-                    className={`mt-2 text-sm leading-relaxed ${featured ? "text-white/70" : "text-ink-muted"}`}
-                  >
+                  <p className="mt-2 text-sm leading-relaxed text-ink-muted">
                     {service.description}
                   </p>
                 </div>
               </article>
             );
           })}
-        </div>
-        <div className="mt-10">
+        </Stagger>
+        <Reveal delay={0.1} className="mt-10">
           <Link href="/hizmetler">
             <Button variant="outline">Tüm hizmetler</Button>
           </Link>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
 }
 
+/** Kept for later re-enable when public talent roster is ready. */
 export function FeaturedActors({ actors }: { actors: Actor[] }) {
   if (!actors.length) return null;
   return (
@@ -282,7 +270,6 @@ export function FeaturedActors({ actors }: { actors: Actor[] }) {
                   className="object-cover transition duration-500 group-hover:scale-[1.03]"
                   sizes="(max-width:768px) 50vw, 16vw"
                 />
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent opacity-0 transition group-hover:opacity-100" />
               </div>
               <p className="mt-3 text-sm font-medium text-ink group-hover:text-primary">
                 {fullName(actor.firstName, actor.lastName)}
@@ -298,6 +285,7 @@ export function FeaturedActors({ actors }: { actors: Actor[] }) {
   );
 }
 
+/** Kept for later re-enable when public references are ready. */
 export function FeaturedReferences({ items }: { items: ReferenceProject[] }) {
   if (!items.length) return null;
   return (
@@ -346,15 +334,16 @@ export function FeaturedReferences({ items }: { items: ReferenceProject[] }) {
 
 export function WhySection({ settings }: { settings: SiteSettings }) {
   return (
-    <section className="section-pad">
+    <section className="section-pad relative overflow-hidden">
+      <FloatDecor className="-right-4 top-16 h-24 w-24 border border-primary/15 opacity-60" />
       <div className="container-wide">
-        <div className="max-w-2xl">
+        <Reveal direction="up" className="max-w-2xl">
           <p className="eyebrow">Neden +Akademi</p>
           <h2 className="font-display mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
             Güvenilir süreç, profesyonel yaklaşım
           </h2>
-        </div>
-        <div className="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        </Reveal>
+        <Stagger className="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {settings.aboutFeatures.map((item) => (
             <article key={item.id} className="border-l-2 border-primary pl-4">
               <h3 className="text-base font-semibold text-ink">{item.title}</h3>
@@ -363,7 +352,7 @@ export function WhySection({ settings }: { settings: SiteSettings }) {
               </p>
             </article>
           ))}
-        </div>
+        </Stagger>
       </div>
     </section>
   );
@@ -371,7 +360,7 @@ export function WhySection({ settings }: { settings: SiteSettings }) {
 
 export function CtaBand() {
   return (
-    <section className="relative overflow-hidden border-y border-border bg-primary-soft">
+    <Reveal as="section" direction="up" className="relative overflow-hidden border-y border-border bg-primary-soft">
       <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rotate-12 border border-primary/15" />
       <div className="container-wide flex flex-col items-start justify-between gap-6 py-14 md:flex-row md:items-center">
         <div className="max-w-xl">
@@ -387,7 +376,7 @@ export function CtaBand() {
           <Button size="lg">Oyuncu Başvurusu</Button>
         </Link>
       </div>
-    </section>
+    </Reveal>
   );
 }
 
@@ -395,7 +384,7 @@ export function ContactTeaser({ settings }: { settings: SiteSettings }) {
   return (
     <section className="section-pad">
       <div className="container-wide grid gap-10 lg:grid-cols-2">
-        <div>
+        <Reveal direction="left">
           <p className="eyebrow">İletişim</p>
           <h2 className="font-display mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
             Ofisimiz İzmir Alsancak&apos;ta
@@ -420,8 +409,8 @@ export function ContactTeaser({ settings }: { settings: SiteSettings }) {
               <Button>İletişim formu</Button>
             </Link>
           </div>
-        </div>
-        <div className="relative min-h-64 overflow-hidden bg-secondary p-8 text-white">
+        </Reveal>
+        <Reveal direction="right" delay={0.08} className="relative min-h-64 overflow-hidden bg-secondary p-8 text-white">
           <div className="pointer-events-none absolute -right-6 -bottom-6 h-28 w-28 rotate-12 border border-white/15" />
           <p className="relative text-sm leading-relaxed text-white/75">
             Yapım şirketleri, reklam ajansları ve profesyonel iş ortakları için
@@ -438,7 +427,7 @@ export function ContactTeaser({ settings }: { settings: SiteSettings }) {
               Haritada aç
             </a>
           ) : null}
-        </div>
+        </Reveal>
       </div>
     </section>
   );
