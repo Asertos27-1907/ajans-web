@@ -1,0 +1,62 @@
+import Image from "next/image";
+import { referenceRepository } from "@/lib/repositories";
+import { createMetadata } from "@/lib/seo";
+import { CATEGORY_LABELS } from "@/config/constants";
+import { EmptyState } from "@/components/ui/StatusBadge";
+
+export const metadata = createMetadata({
+  title: "Referanslar",
+  description: "+Akademi referans proje ve prodüksiyon çalışmaları.",
+  path: "/referanslar",
+});
+
+export default async function ReferencesPage() {
+  const items = await referenceRepository.list({ activeOnly: true });
+
+  return (
+    <div>
+      <section className="border-b border-border bg-bg-warm/50">
+        <div className="container-wide py-14 md:py-20">
+          <p className="eyebrow">Referanslar</p>
+          <h1 className="font-display mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+            Projelerimizden seçkiler
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg text-ink-muted">
+            Dizi, sinema, reklam ve prodüksiyon çalışmalarından örnekler.
+          </p>
+        </div>
+      </section>
+
+      <section className="section-pad">
+        <div className="container-wide">
+          {!items.length ? (
+            <EmptyState title="Referans bulunamadı" />
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {items.map((item) => (
+                <article key={item.id} className="overflow-hidden border border-border bg-surface">
+                  <div className="relative aspect-[16/10] bg-bg-warm">
+                    <Image
+                      src={item.coverImageUrl}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width:768px) 100vw, 33vw"
+                    />
+                  </div>
+                  <div className="p-5">
+                    <p className="text-xs tracking-wide text-ink-soft uppercase">
+                      {CATEGORY_LABELS[item.category]} · {item.year}
+                    </p>
+                    <h2 className="mt-2 text-lg font-semibold">{item.title}</h2>
+                    <p className="mt-2 text-sm text-ink-muted">{item.description}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
