@@ -381,7 +381,7 @@ export function ApplicationWizard() {
         </div>
         <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-bg-warm">
           <div
-            className="h-full bg-accent transition-all duration-300"
+            className="h-full bg-primary transition-all duration-300"
             style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
           />
         </div>

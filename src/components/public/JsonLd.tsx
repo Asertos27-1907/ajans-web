@@ -14,7 +14,7 @@ export function JsonLd({ settings }: { settings: SiteSettings }) {
   const organization = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: settings.fullName,
+    name: settings.companyName,
     alternateName: settings.agencyName,
     url: SITE_URL,
     logo: `${SITE_URL}${settings.logoUrl}`,
@@ -31,7 +31,7 @@ export function JsonLd({ settings }: { settings: SiteSettings }) {
   const service = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
-    name: settings.fullName,
+    name: settings.companyName,
     description: settings.heroDescription,
     url: SITE_URL,
     areaServed: "TR",

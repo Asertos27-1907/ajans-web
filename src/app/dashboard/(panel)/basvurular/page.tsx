@@ -260,7 +260,7 @@ export default function ApplicationsAdminPage() {
                   <td className="px-3 py-2 font-medium">
                     <span className="inline-flex items-center gap-1">
                       {fullName(app.firstName, app.lastName)}
-                      {app.isFavorite ? <Star size={12} className="fill-accent text-accent" /> : null}
+                      {app.isFavorite ? <Star size={12} className="fill-primary text-primary" /> : null}
                     </span>
                   </td>
                   <td className="px-3 py-2">{app.age}</td>

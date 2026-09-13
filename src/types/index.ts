@@ -154,7 +154,18 @@ export interface SiteStat {
   label: string;
   value: number;
   suffix: string;
-  visible: boolean;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export interface HeroSlide {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  buttonText: string;
+  buttonLink: string;
+  isActive: boolean;
   sortOrder: number;
 }
 
@@ -163,36 +174,59 @@ export interface ServiceItem {
   title: string;
   description: string;
   icon: string;
+  imageUrl?: string;
   sortOrder: number;
-  visible: boolean;
+  isActive: boolean;
+}
+
+export interface AboutParagraph {
+  id: string;
+  text: string;
+  sortOrder: number;
+}
+
+export interface AboutFeature {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
 }
 
 export interface SiteSettings {
+  /** Firma bilgileri */
+  companyName: string;
+  /** Kısa marka adı (navbar vb.) */
   agencyName: string;
-  fullName: string;
   logoUrl: string;
   phone?: string;
   whatsapp?: string;
   email?: string;
   addressLines: string[];
+  /** Maps link (yeni sekme) */
   googleMapsUrl?: string;
+  /** iframe src — iletişim sayfası haritası */
+  googleMapsEmbedUrl?: string;
   instagram?: string;
   facebook?: string;
   youtube?: string;
   tiktok?: string;
   linkedin?: string;
+  /** @deprecated use slides — kept for soft migration */
   heroTitle: string;
   heroDescription: string;
   heroImageUrl: string;
   ctaText: string;
   ctaLink: string;
+  slides: HeroSlide[];
+  servicesSectionTitle: string;
+  services: ServiceItem[];
   aboutTitle: string;
-  aboutContent: string;
+  aboutVision: string;
+  aboutParagraphs: AboutParagraph[];
+  aboutFeatures: AboutFeature[];
   aboutImageUrl: string;
   stats: SiteStat[];
-  services: ServiceItem[];
   footerText: string;
-  whyUs: { title: string; description: string }[];
 }
 
 export interface AdminUser {

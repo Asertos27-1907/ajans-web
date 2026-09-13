@@ -49,8 +49,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             className={cn(
               "flex items-center gap-3 rounded px-3 py-2.5 text-sm font-medium transition-colors",
               active
-                ? "bg-ink text-white"
-                : "text-ink-muted hover:bg-bg-warm hover:text-ink",
+                ? "bg-primary text-white"
+                : "cursor-pointer text-ink-muted hover:bg-primary-soft hover:text-primary",
             )}
           >
             <Icon size={18} />

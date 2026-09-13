@@ -6,11 +6,12 @@ type Size = "sm" | "md" | "lg";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-accent text-white hover:bg-accent-hover shadow-[0_8px_24px_rgba(200,16,46,0.2)]",
+    "bg-primary text-white hover:bg-primary-hover shadow-[0_8px_24px_rgba(122,31,43,0.18)]",
   secondary: "bg-ink text-white hover:bg-black",
-  ghost: "bg-transparent text-ink hover:bg-bg-warm",
+  ghost: "bg-transparent text-ink hover:bg-primary-soft hover:text-primary",
   danger: "bg-danger text-white hover:opacity-90",
-  outline: "border border-border-strong bg-surface text-ink hover:bg-bg-warm",
+  outline:
+    "border border-border-strong bg-surface text-ink hover:border-primary/40 hover:bg-primary-soft hover:text-primary",
 };
 
 const sizes: Record<Size, string> = {
@@ -25,11 +26,13 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "primary", size = "md", ...props }, ref) => (
+  ({ className, variant = "primary", size = "md", disabled, ...props }, ref) => (
     <button
       ref={ref}
+      disabled={disabled}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-[var(--radius)] font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none",
+        "inline-flex items-center justify-center gap-2 rounded-[var(--radius)] font-medium transition-colors duration-200",
+        disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
         variants[variant],
         sizes[size],
         className,

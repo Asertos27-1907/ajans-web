@@ -24,10 +24,20 @@ const icons = {
 } as const;
 
 export function HeroSection({ settings }: { settings: SiteSettings }) {
+  const slide =
+    [...settings.slides]
+      .filter((s) => s.isActive)
+      .sort((a, b) => a.sortOrder - b.sortOrder)[0] ?? null;
+  const title = slide?.title ?? settings.heroTitle;
+  const description = slide?.description ?? settings.heroDescription;
+  const imageUrl = slide?.imageUrl ?? settings.heroImageUrl;
+  const ctaText = slide?.buttonText ?? settings.ctaText;
+  const ctaLink = slide?.buttonLink ?? settings.ctaLink;
+
   return (
     <section className="relative isolate min-h-[78vh] overflow-hidden bg-bg-deep text-white">
       <Image
-        src={settings.heroImageUrl}
+        src={imageUrl}
         alt=""
         fill
         priority
@@ -35,27 +45,28 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
         sizes="100vw"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/25" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(200,16,46,0.18),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(122,31,43,0.22),transparent_50%)]" />
+      <div className="pointer-events-none absolute top-16 right-10 hidden h-40 w-40 rotate-12 border border-primary/30 md:block" />
 
       <div className="container-wide relative flex min-h-[78vh] flex-col justify-end pb-16 pt-28 md:pb-20">
         <p className="eyebrow animate-fade-up text-white/55">
-          {settings.fullName}
+          {settings.companyName}
         </p>
         <h1 className="font-display animate-fade-up-delay mt-4 max-w-3xl text-4xl leading-[1.05] font-semibold tracking-tight sm:text-5xl md:text-6xl">
-          {settings.heroTitle}
+          {title}
         </h1>
         <p className="animate-fade-up-delay-2 mt-5 max-w-xl text-base leading-relaxed text-white/75 md:text-lg">
-          {settings.heroDescription}
+          {description}
         </p>
         <div className="animate-fade-up-delay-2 mt-8 flex flex-wrap gap-3">
-          <Link href={settings.ctaLink}>
-            <Button size="lg">{settings.ctaText}</Button>
+          <Link href={ctaLink}>
+            <Button size="lg">{ctaText}</Button>
           </Link>
           <Link href="/hizmetler">
             <Button
               size="lg"
               variant="outline"
-              className="border-white/30 bg-transparent text-white hover:bg-white/10"
+              className="cursor-pointer border-white/30 bg-transparent text-white hover:border-white/50 hover:bg-white/10"
             >
               Hizmetlerimizi İncele
             </Button>
@@ -67,7 +78,7 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
 }
 
 export function StatsSection({ settings }: { settings: SiteSettings }) {
-  const stats = settings.stats.filter((s) => s.visible);
+  const stats = settings.stats.filter((s) => s.isActive);
   if (!stats.length) return null;
   return (
     <section className="border-b border-border bg-surface">
@@ -76,7 +87,7 @@ export function StatsSection({ settings }: { settings: SiteSettings }) {
           <div key={stat.id}>
             <p className="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">
               {stat.value}
-              <span className="text-accent">{stat.suffix}</span>
+              <span className="text-primary">{stat.suffix}</span>
             </p>
             <p className="mt-2 text-sm text-ink-muted">{stat.label}</p>
           </div>
@@ -105,7 +116,9 @@ export function AboutTeaser({ settings }: { settings: SiteSettings }) {
             {settings.aboutTitle}
           </h2>
           <div className="prose-site mt-5 space-y-4 text-base">
-            <p>{settings.aboutContent}</p>
+            {settings.aboutParagraphs.map((p) => (
+            <p key={p.id}>{p.text}</p>
+          ))}
           </div>
           <Link href="/hakkimizda" className="mt-7 inline-flex">
             <Button variant="outline">
@@ -120,15 +133,16 @@ export function AboutTeaser({ settings }: { settings: SiteSettings }) {
 
 export function ServicesSection({ settings }: { settings: SiteSettings }) {
   const services = settings.services
-    .filter((s) => s.visible)
+    .filter((s) => s.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder);
   return (
-    <section className="section-pad bg-bg-warm/60">
+    <section className="section-pad relative overflow-hidden bg-bg-warm/60">
+      <div className="pointer-events-none absolute -bottom-10 left-8 h-32 w-32 rotate-6 border border-primary/15" />
       <div className="container-wide">
         <div className="max-w-2xl">
           <p className="eyebrow">Hizmetler</p>
-          <h2 className="font-display mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-            Faaliyet alanlarımız
+          <h2 className="font-display title-accent mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+            {settings.servicesSectionTitle}
           </h2>
           <p className="mt-3 text-ink-muted">
             Profesyonel eğitimden cast hizmetlerine, menajerlikten prodüksiyon
@@ -141,7 +155,7 @@ export function ServicesSection({ settings }: { settings: SiteSettings }) {
               icons[service.icon as keyof typeof icons] ?? Clapperboard;
             return (
               <article key={service.id} className="border-t border-border-strong pt-5">
-                <Icon className="text-accent" size={22} strokeWidth={1.6} />
+                <Icon className="text-primary" size={22} strokeWidth={1.6} />
                 <h3 className="mt-4 text-lg font-semibold text-ink">
                   {service.title}
                 </h3>
@@ -268,8 +282,8 @@ export function WhySection({ settings }: { settings: SiteSettings }) {
           </h2>
         </div>
         <div className="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {settings.whyUs.map((item) => (
-            <article key={item.title} className="border-l-2 border-accent/80 pl-4">
+          {settings.aboutFeatures.map((item) => (
+            <article key={item.id} className="border-l-2 border-primary/80 pl-4">
               <h3 className="text-base font-semibold text-ink">{item.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-ink-muted">
                 {item.description}

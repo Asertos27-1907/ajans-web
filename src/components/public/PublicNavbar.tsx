@@ -45,8 +45,10 @@ export function PublicNavbar() {
                 href={link.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "rounded px-3 py-2 text-sm font-medium transition-colors",
-                  active ? "text-ink" : "text-ink-muted hover:text-ink",
+                  "cursor-pointer rounded px-3 py-2 text-sm font-medium transition-colors duration-200",
+                  active
+                    ? "text-primary"
+                    : "text-ink-muted hover:text-primary",
                 )}
               >
                 {link.label}
@@ -61,7 +63,7 @@ export function PublicNavbar() {
           </Link>
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded border border-border bg-surface lg:hidden"
+            className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded border border-border bg-surface lg:hidden"
             aria-label={open ? "Menüyü kapat" : "Menüyü aç"}
             onClick={() => setOpen((v) => !v)}
           >

@@ -95,7 +95,7 @@ export function PublicFooter({ settings }: { settings: SiteSettings }) {
       </div>
       <div className="border-t border-white/10">
         <div className="container-wide flex flex-col gap-2 py-5 text-xs text-white/45 sm:flex-row sm:justify-between">
-          <p>© {new Date().getFullYear()} {settings.fullName}</p>
+          <p>© {new Date().getFullYear()} {settings.companyName}</p>
           <p>İzmir</p>
         </div>
       </div>

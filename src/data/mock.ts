@@ -394,8 +394,8 @@ export const mockAdmins: AdminUser[] = [
 ];
 
 export const mockSiteSettings: SiteSettings = {
+  companyName: "+Akademi Oyunculuk & Menajerlik",
   agencyName: "+Akademi",
-  fullName: "+Akademi Oyunculuk & Menajerlik",
   logoUrl: "/brand/logo.jpeg",
   phone: undefined,
   whatsapp: undefined,
@@ -406,7 +406,9 @@ export const mockSiteSettings: SiteSettings = {
     "Konak / İzmir",
   ],
   googleMapsUrl:
-    "https://www.google.com/maps/search/?api=1&query=Alsancak+Konak+%C4%B0zmir",
+    "https://www.google.com/maps/search/?api=1&query=1471+Sokak+No:9+Alsancak+Konak+%C4%B0zmir",
+  googleMapsEmbedUrl:
+    "https://maps.google.com/maps?q=1471%20Sokak%20No%3A9%20Alsancak%20Mahallesi%20Konak%20%C4%B0zmir&hl=tr&z=16&output=embed",
   instagram: "https://www.instagram.com/artiakademioyunculukmenajerlik",
   facebook: "https://www.facebook.com/share/1LmC9CvhLf/",
   youtube: undefined,
@@ -418,44 +420,20 @@ export const mockSiteSettings: SiteSettings = {
   heroImageUrl: "/placeholders/hero.jpg",
   ctaText: "Oyuncu Başvurusu",
   ctaLink: "/basvuru",
-  aboutTitle: "Hakkımızda",
-  aboutContent:
-    "+Akademi; oyunculuk eğitimi, menajerlik, casting ve model ajansı hizmetlerini bir araya getiren profesyonel bir yapıdır. Türkiye genelindeki yetenekleri yapım şirketleri, reklam ajansları ve prodüksiyon ekipleriyle buluşturmayı hedefler. Kurumsal yaklaşımımız; güvenilir süreçler, kariyer desteği ve doğru projeyle doğru yeteneği eşleştirme üzerine kuruludur.",
-  aboutImageUrl: "/placeholders/ref-05.jpg",
-  stats: [
+  slides: [
     {
-      id: "st-1",
-      label: "Profesyonel Oyuncu",
-      value: 120,
-      suffix: "+",
-      visible: true,
+      id: "slide-1",
+      title: "Yeteneğini Geleceğinle Buluştur.",
+      description:
+        "Oyunculuk, casting, menajerlik ve profesyonel eğitim alanında yeni yetenekleri sektörle buluşturan güçlü bir yapı.",
+      imageUrl: "/placeholders/hero.jpg",
+      buttonText: "Oyuncu Başvurusu",
+      buttonLink: "/basvuru",
+      isActive: true,
       sortOrder: 1,
     },
-    {
-      id: "st-2",
-      label: "Oyuncu Adayı",
-      value: 850,
-      suffix: "+",
-      visible: true,
-      sortOrder: 2,
-    },
-    {
-      id: "st-3",
-      label: "Hizmet Verilen Şehir",
-      value: 25,
-      suffix: "+",
-      visible: true,
-      sortOrder: 3,
-    },
-    {
-      id: "st-4",
-      label: "Tamamlanan Proje",
-      value: 60,
-      suffix: "+",
-      visible: true,
-      sortOrder: 4,
-    },
   ],
+  servicesSectionTitle: "Faaliyet alanlarımız",
   services: [
     {
       id: "svc-1",
@@ -464,7 +442,7 @@ export const mockSiteSettings: SiteSettings = {
         "Kamera önü, sahne ve karakter çalışmalarıyla profesyonel eğitim programları.",
       icon: "GraduationCap",
       sortOrder: 1,
-      visible: true,
+      isActive: true,
     },
     {
       id: "svc-2",
@@ -473,7 +451,7 @@ export const mockSiteSettings: SiteSettings = {
         "Yeteneklerin doğru projelerle buluşması için ajans ve temsil süreçleri.",
       icon: "Drama",
       sortOrder: 2,
-      visible: true,
+      isActive: true,
     },
     {
       id: "svc-3",
@@ -482,7 +460,7 @@ export const mockSiteSettings: SiteSettings = {
         "Reklam, katalog ve moda çekimleri için model & manken koordinasyonu.",
       icon: "Sparkles",
       sortOrder: 3,
-      visible: true,
+      isActive: true,
     },
     {
       id: "svc-4",
@@ -491,7 +469,7 @@ export const mockSiteSettings: SiteSettings = {
         "Prodüksiyon ekipleriyle uyumlu casting ve yetenek yönetimi desteği.",
       icon: "Film",
       sortOrder: 4,
-      visible: true,
+      isActive: true,
     },
     {
       id: "svc-5",
@@ -500,7 +478,7 @@ export const mockSiteSettings: SiteSettings = {
         "Kariyer planlama, görüşme süreçleri ve uzun soluklu profesyonel temsil.",
       icon: "Briefcase",
       sortOrder: 5,
-      visible: true,
+      isActive: true,
     },
     {
       id: "svc-6",
@@ -509,31 +487,82 @@ export const mockSiteSettings: SiteSettings = {
         "Yapım şirketleri ve ajanslar için hızlı, düzenli ve güvenilir cast çözümleri.",
       icon: "Clapperboard",
       sortOrder: 6,
-      visible: true,
+      isActive: true,
+    },
+  ],
+  aboutTitle: "Hakkımızda",
+  aboutVision:
+    "Türkiye genelindeki yetenekleri yapım şirketleri, reklam ajansları ve prodüksiyon ekipleriyle güvenilir süreçlerle buluşturmak.",
+  aboutParagraphs: [
+    {
+      id: "ap-1",
+      text: "+Akademi; oyunculuk eğitimi, menajerlik, casting ve model ajansı hizmetlerini bir araya getiren profesyonel bir yapıdır.",
+      sortOrder: 1,
+    },
+    {
+      id: "ap-2",
+      text: "Kurumsal yaklaşımımız; güvenilir süreçler, kariyer desteği ve doğru projeyle doğru yeteneği eşleştirme üzerine kuruludur.",
+      sortOrder: 2,
+    },
+  ],
+  aboutFeatures: [
+    {
+      id: "af-1",
+      title: "Profesyonel Eğitim",
+      description:
+        "Sektör odaklı atölyelerle kamera önü ve sahne becerilerini geliştiriyoruz.",
+      icon: "GraduationCap",
+    },
+    {
+      id: "af-2",
+      title: "Geniş Network",
+      description:
+        "Yapım şirketleri, reklam ajansları ve prodüksiyon ekipleriyle çalışan bir ağ.",
+      icon: "Network",
+    },
+    {
+      id: "af-3",
+      title: "Kariyer Desteği",
+      description:
+        "Başvurudan projeye kadar adayın gelişimini ve yönlendirmesini destekliyoruz.",
+      icon: "Briefcase",
+    },
+  ],
+  aboutImageUrl: "/placeholders/ref-05.jpg",
+  stats: [
+    {
+      id: "st-1",
+      label: "Profesyonel Oyuncu",
+      value: 120,
+      suffix: "+",
+      isActive: true,
+      sortOrder: 1,
+    },
+    {
+      id: "st-2",
+      label: "Oyuncu Adayı",
+      value: 850,
+      suffix: "+",
+      isActive: true,
+      sortOrder: 2,
+    },
+    {
+      id: "st-3",
+      label: "Hizmet Verilen Şehir",
+      value: 25,
+      suffix: "+",
+      isActive: true,
+      sortOrder: 3,
+    },
+    {
+      id: "st-4",
+      label: "Tamamlanan Proje",
+      value: 60,
+      suffix: "+",
+      isActive: true,
+      sortOrder: 4,
     },
   ],
   footerText:
     "Profesyonel eğitim, geniş sektör ağı ve kariyer desteğiyle yetenekleri geleceğe hazırlıyoruz.",
-  whyUs: [
-    {
-      title: "Profesyonel Eğitim",
-      description:
-        "Sektör odaklı atölyelerle kamera önü ve sahne becerilerini geliştiriyoruz.",
-    },
-    {
-      title: "Geniş Network",
-      description:
-        "Yapım şirketleri, reklam ajansları ve prodüksiyon ekipleriyle çalışan bir ağ.",
-    },
-    {
-      title: "Kariyer Desteği",
-      description:
-        "Başvurudan projeye kadar adayın gelişimini ve yönlendirmesini destekliyoruz.",
-    },
-    {
-      title: "Doğru Eşleştirme",
-      description:
-        "Doğru projeyle doğru yeteneği buluşturarak her iki taraf için güvenilir süreçler kuruyoruz.",
-    },
-  ],
 };

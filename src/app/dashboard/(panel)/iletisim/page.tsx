@@ -64,7 +64,7 @@ export default function ContactAdminPage() {
                     </div>
                     <div className="text-right">
                       {!msg.isRead ? (
-                        <span className="rounded bg-accent/10 px-1.5 py-0.5 text-[10px] font-semibold text-accent">
+                        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
                           Yeni
                         </span>
                       ) : null}

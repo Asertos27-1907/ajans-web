@@ -1,25 +1,34 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f7f5f1;
-  --bg-warm: #efebe4;
-  --bg-deep: #1a1816;
+  /* +Akademi design tokens */
+  --primary: #7a1f2b;
+  --primary-hover: #651824;
+  --primary-soft: #f7ecee;
+  --bg: #faf9f7;
+  --bg-warm: #f3efe9;
+  --bg-deep: #171717;
   --surface: #ffffff;
-  --ink: #141414;
-  --ink-muted: #5a5752;
+  --ink: #171717;
+  --ink-muted: #5c5852;
   --ink-soft: #8a857c;
-  --accent: #c8102e;
-  --accent-hover: #a50d25;
-  --border: #e5e1da;
-  --border-strong: #d0cbc2;
+  --accent: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --accent-soft: var(--primary-soft);
+  --border: #e8e4df;
+  --border-strong: #d9d3cb;
   --success: #1f7a4c;
   --warning: #9a6b1f;
   --danger: #b42318;
   --radius: 4px;
-  --shadow-soft: 0 12px 40px rgba(20, 20, 20, 0.06);
+  --shadow-soft: 0 12px 40px rgba(23, 23, 23, 0.06);
+  --transition: 180ms ease;
 }
 
 @theme inline {
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
   --color-bg: var(--bg);
   --color-bg-warm: var(--bg-warm);
   --color-bg-deep: var(--bg-deep);
@@ -29,6 +38,7 @@
   --color-ink-soft: var(--ink-soft);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-success: var(--success);
@@ -62,7 +72,26 @@ h3,
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--accent) 25%, white);
+  background: color-mix(in oklab, var(--primary) 22%, white);
+}
+
+a,
+button,
+[role="button"],
+summary,
+label[for],
+input[type="checkbox"],
+input[type="radio"],
+input[type="file"],
+select,
+.cursor-pointer {
+  cursor: pointer;
+}
+
+:disabled,
+[aria-disabled="true"],
+.cursor-not-allowed {
+  cursor: not-allowed;
 }
 
 .container-site {
@@ -73,6 +102,10 @@ h3,
 .container-wide {
   width: min(1280px, calc(100% - 2rem));
   margin-inline: auto;
+}
+
+.container-settings {
+  width: min(920px, 100%);
 }
 
 .section-pad {
@@ -90,6 +123,67 @@ h3,
 .prose-site p {
   color: var(--ink-muted);
   line-height: 1.75;
+}
+
+/* Decorative accents — subtle, not overwhelming */
+.decor-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.decor-section::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  border: 1px solid color-mix(in oklab, var(--primary) 18%, transparent);
+  border-radius: 2px;
+  pointer-events: none;
+  transform: rotate(12deg);
+}
+
+.decor-section::after {
+  content: "";
+  position: absolute;
+  bottom: 24px;
+  left: 8%;
+  width: 72px;
+  height: 1px;
+  background: color-mix(in oklab, var(--primary) 35%, transparent);
+  pointer-events: none;
+}
+
+.title-accent {
+  position: relative;
+  padding-left: 0.85rem;
+}
+
+.title-accent::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.35em;
+  width: 3px;
+  height: 1.1em;
+  background: var(--primary);
+}
+
+.dot-pattern {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--primary) 14%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 14px 14px;
+}
+
+.cta-soft {
+  background: linear-gradient(
+    135deg,
+    var(--primary-soft) 0%,
+    color-mix(in oklab, var(--bg-warm) 70%, white) 100%
+  );
 }
 
 .skeleton {

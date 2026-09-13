@@ -30,16 +30,17 @@ const icons = {
 export default async function ServicesPage() {
   const settings = await settingsRepository.get();
   const services = settings.services
-    .filter((s) => s.visible)
+    .filter((s) => s.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
     <div>
-      <section className="border-b border-border bg-bg-warm/50">
+      <section className="relative overflow-hidden border-b border-border bg-bg-warm/50">
+        <div className="pointer-events-none absolute top-10 right-[12%] h-16 w-16 rotate-6 border border-primary/20" />
         <div className="container-wide py-14 md:py-20">
           <p className="eyebrow">Hizmetler</p>
-          <h1 className="font-display mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
-            Faaliyet alanlarımız
+          <h1 className="font-display title-accent mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
+            {settings.servicesSectionTitle}
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-ink-muted">
             Profesyonel eğitim, geniş sektör ağı ve kariyer desteğiyle yetenekleri
@@ -55,9 +56,9 @@ export default async function ServicesPage() {
             return (
               <article
                 key={service.id}
-                className="border border-border bg-surface p-7 md:p-8"
+                className="border border-border bg-surface p-7 transition-shadow duration-200 hover:shadow-[var(--shadow-soft)] md:p-8"
               >
-                <Icon className="text-accent" size={24} strokeWidth={1.6} />
+                <Icon className="text-primary" size={24} strokeWidth={1.6} />
                 <h2 className="mt-5 text-xl font-semibold">{service.title}</h2>
                 <p className="mt-3 text-sm leading-relaxed text-ink-muted">
                   {service.description}
@@ -67,7 +68,7 @@ export default async function ServicesPage() {
           })}
         </div>
         <div className="container-wide mt-12">
-          <Link href="/basvuru">
+          <Link href="/basvuru" className="inline-flex cursor-pointer">
             <Button size="lg">Oyuncu Başvurusu</Button>
           </Link>
         </div>
