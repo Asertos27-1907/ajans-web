@@ -1,18 +1,17 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Download, Plus } from "lucide-react";
+import { Eye, Pencil, Plus, RotateCcw } from "lucide-react";
 import { actorRepository } from "@/lib/repositories";
-import type { Actor } from "@/types";
+import type { Actor, Gender } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { FormField, Input, Select } from "@/components/ui/Field";
 import { EmptyState, PageHeader } from "@/components/ui/StatusBadge";
-import { ExportDialog } from "@/components/dashboard/ExportDialog";
-import { ACTOR_EXPORT_COLUMNS, GENDER_LABELS } from "@/config/constants";
-import { fullName } from "@/lib/utils";
+import { GENDER_LABELS } from "@/config/constants";
+import { fullName, cn } from "@/lib/utils";
 
 export default function ActorsAdminPage() {
   const router = useRouter();
@@ -20,10 +19,13 @@ export default function ActorsAdminPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [showOnWebsite, setShowOnWebsite] = useState("");
-  const [selected, setSelected] = useState<string[]>([]);
-  const [exportOpen, setExportOpen] = useState(false);
-  const [exportRows, setExportRows] = useState<Actor[]>([]);
+  const [city, setCity] = useState("");
+  const [gender, setGender] = useState("");
+  const [ageMin, setAgeMin] = useState("");
+  const [ageMax, setAgeMax] = useState("");
+  const [activeFilter, setActiveFilter] = useState("");
+  const [webFilter, setWebFilter] = useState("");
+  const [featuredFilter, setFeaturedFilter] = useState("");
   const [creating, setCreating] = useState(false);
   const [, startTransition] = useTransition();
 
@@ -32,13 +34,22 @@ export default function ActorsAdminPage() {
     startTransition(async () => {
       const result = await actorRepository.list({
         search: search || undefined,
+        city: city || undefined,
+        gender: (gender as Gender) || undefined,
+        isActive:
+          activeFilter === "" ? undefined : activeFilter === "1",
         showOnWebsite:
-          showOnWebsite === "" ? undefined : showOnWebsite === "1",
+          webFilter === "" ? undefined : webFilter === "1",
+        isFeatured:
+          featuredFilter === "" ? undefined : featuredFilter === "1",
         page: 1,
-        pageSize: 30,
+        pageSize: 60,
       });
-      setItems(result.data);
-      setTotal(result.total);
+      let data = result.data;
+      if (ageMin) data = data.filter((a) => a.age >= Number(ageMin));
+      if (ageMax) data = data.filter((a) => a.age <= Number(ageMax));
+      setItems(data);
+      setTotal(data.length);
       setLoading(false);
     });
   }
@@ -47,6 +58,11 @@ export default function ActorsAdminPage() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const cities = useMemo(
+    () => Array.from(new Set(items.map((i) => i.city))).sort(),
+    [items],
+  );
 
   async function createActor() {
     setCreating(true);
@@ -66,7 +82,7 @@ export default function ActorsAdminPage() {
       experiences: "",
       projects: "",
       photos: [],
-      coverPhotoUrl: "/placeholders/actor-01.jpg",
+      coverPhotoUrl: "/assets/photos/p01.jpg",
       isActive: true,
       showOnWebsite: false,
       isFeatured: false,
@@ -75,15 +91,27 @@ export default function ActorsAdminPage() {
     router.push(`/dashboard/oyuncular/${actor.id}`);
   }
 
-  async function openExport(mode: "all" | "filtered" | "selected") {
-    if (mode === "selected") {
-      setExportRows(items.filter((i) => selected.includes(i.id)));
-    } else if (mode === "all") {
-      setExportRows(await actorRepository.getAllRaw());
-    } else {
-      setExportRows(items);
+  async function toggleActive(actor: Actor, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    const updated = await actorRepository.update(actor.id, {
+      isActive: !actor.isActive,
+    });
+    if (updated) {
+      setItems((prev) => prev.map((a) => (a.id === actor.id ? updated : a)));
     }
-    setExportOpen(true);
+  }
+
+  function clearFilters() {
+    setSearch("");
+    setCity("");
+    setGender("");
+    setAgeMin("");
+    setAgeMax("");
+    setActiveFilter("");
+    setWebFilter("");
+    setFeaturedFilter("");
+    setTimeout(() => load(), 0);
   }
 
   return (
@@ -92,121 +120,155 @@ export default function ActorsAdminPage() {
         title="Oyuncular"
         description={`${total} kayıt`}
         actions={
-          <>
-            <Button variant="outline" size="sm" onClick={() => openExport("filtered")}>
-              <Download size={14} /> Export
-            </Button>
-            <Button size="sm" onClick={createActor} disabled={creating}>
-              <Plus size={14} /> Yeni oyuncu
-            </Button>
-          </>
+          <Button size="sm" onClick={createActor} disabled={creating}>
+            <Plus size={14} /> Yeni oyuncu
+          </Button>
         }
       />
 
-      <div className="mb-4 flex flex-wrap gap-3 rounded border border-border bg-surface p-4">
-        <FormField label="Ara">
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} />
+      <div className="mb-5 grid gap-3 rounded border border-border bg-surface p-4 md:grid-cols-3 xl:grid-cols-4">
+        <FormField label="Ara (ad / şehir)">
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Ad soyad veya şehir"
+          />
         </FormField>
-        <FormField label="Web'de göster">
-          <Select value={showOnWebsite} onChange={(e) => setShowOnWebsite(e.target.value)}>
+        <FormField label="Şehir">
+          <Select value={city} onChange={(e) => setCity(e.target.value)}>
             <option value="">Tümü</option>
-            <option value="1">Evet</option>
-            <option value="0">Hayır</option>
+            {["İzmir", "İstanbul", "Ankara", "Antalya", "Bursa", "Muğla", "Eskişehir", ...cities]
+              .filter((v, i, arr) => arr.indexOf(v) === i)
+              .map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
           </Select>
         </FormField>
-        <div className="flex items-end">
+        <FormField label="Cinsiyet">
+          <Select value={gender} onChange={(e) => setGender(e.target.value)}>
+            <option value="">Tümü</option>
+            {Object.entries(GENDER_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </Select>
+        </FormField>
+        <FormField label="Yaş min">
+          <Input type="number" value={ageMin} onChange={(e) => setAgeMin(e.target.value)} />
+        </FormField>
+        <FormField label="Yaş max">
+          <Input type="number" value={ageMax} onChange={(e) => setAgeMax(e.target.value)} />
+        </FormField>
+        <FormField label="Durum">
+          <Select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value)}>
+            <option value="">Tümü</option>
+            <option value="1">Aktif</option>
+            <option value="0">Pasif</option>
+          </Select>
+        </FormField>
+        <FormField label="Web görünürlüğü">
+          <Select value={webFilter} onChange={(e) => setWebFilter(e.target.value)}>
+            <option value="">Tümü</option>
+            <option value="1">Webde gösteriliyor</option>
+            <option value="0">Gizli</option>
+          </Select>
+        </FormField>
+        <FormField label="Öne çıkan">
+          <Select value={featuredFilter} onChange={(e) => setFeaturedFilter(e.target.value)}>
+            <option value="">Tümü</option>
+            <option value="1">Öne çıkan</option>
+            <option value="0">Diğer</option>
+          </Select>
+        </FormField>
+        <div className="flex items-end gap-2 md:col-span-3 xl:col-span-4">
           <Button onClick={load}>Filtrele</Button>
+          <Button variant="outline" onClick={clearFilters}>
+            <RotateCcw size={14} /> Temizle
+          </Button>
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded border border-border bg-surface">
-        {loading ? (
-          <div className="space-y-2 p-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="skeleton h-12 rounded" />
-            ))}
-          </div>
-        ) : !items.length ? (
-          <div className="p-4">
-            <EmptyState title="Oyuncu bulunamadı" />
-          </div>
-        ) : (
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-border bg-bg-warm/50 text-xs text-ink-muted">
-              <tr>
-                <th className="px-3 py-3">
-                  <input
-                    type="checkbox"
-                    checked={items.length > 0 && items.every((i) => selected.includes(i.id))}
-                    onChange={(e) =>
-                      setSelected(e.target.checked ? items.map((i) => i.id) : [])
-                    }
+      {loading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="skeleton aspect-[3/4] rounded" />
+          ))}
+        </div>
+      ) : !items.length ? (
+        <EmptyState title="Oyuncu bulunamadı" description="Filtreleri değiştirmeyi deneyin." />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {items.map((actor) => (
+            <article
+              key={actor.id}
+              className="group overflow-hidden border border-border bg-surface transition-shadow duration-200 hover:shadow-[var(--shadow-soft)]"
+            >
+              <div className="relative aspect-[3/4] bg-bg-muted">
+                <Link
+                  href={`/dashboard/oyuncular/${actor.id}`}
+                  className="absolute inset-0 cursor-pointer"
+                  aria-label={`${fullName(actor.firstName, actor.lastName)} detay`}
+                >
+                  <Image
+                    src={actor.coverPhotoUrl}
+                    alt={fullName(actor.firstName, actor.lastName)}
+                    fill
+                    className="object-cover transition duration-500 group-hover:scale-[1.02]"
+                    sizes="(max-width:768px) 50vw, 25vw"
                   />
-                </th>
-                <th className="px-3 py-3">Foto</th>
-                <th className="px-3 py-3">Ad Soyad</th>
-                <th className="px-3 py-3">Yaş</th>
-                <th className="px-3 py-3">Şehir</th>
-                <th className="px-3 py-3">Cinsiyet</th>
-                <th className="px-3 py-3">Web</th>
-                <th className="px-3 py-3">Öne çıkan</th>
-                <th className="px-3 py-3">Aktif</th>
-                <th className="px-3 py-3">İşlem</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((actor) => (
-                <tr key={actor.id} className="border-b border-border last:border-0">
-                  <td className="px-3 py-2">
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(actor.id)}
-                      onChange={(e) =>
-                        setSelected((prev) =>
-                          e.target.checked
-                            ? [...prev, actor.id]
-                            : prev.filter((id) => id !== actor.id),
-                        )
-                      }
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="relative h-10 w-10 overflow-hidden rounded bg-bg-warm">
-                      <Image src={actor.coverPhotoUrl} alt="" fill className="object-cover" sizes="40px" />
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 font-medium">
-                    {fullName(actor.firstName, actor.lastName)}
-                  </td>
-                  <td className="px-3 py-2">{actor.age}</td>
-                  <td className="px-3 py-2">{actor.city}</td>
-                  <td className="px-3 py-2">{GENDER_LABELS[actor.gender]}</td>
-                  <td className="px-3 py-2">{actor.showOnWebsite ? "Evet" : "Hayır"}</td>
-                  <td className="px-3 py-2">{actor.isFeatured ? "Evet" : "Hayır"}</td>
-                  <td className="px-3 py-2">{actor.isActive ? "Evet" : "Hayır"}</td>
-                  <td className="px-3 py-2">
-                    <Link
-                      href={`/dashboard/oyuncular/${actor.id}`}
-                      className="font-medium underline-offset-2 hover:underline"
-                    >
-                      Düzenle
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      <ExportDialog
-        open={exportOpen}
-        onClose={() => setExportOpen(false)}
-        title="Oyuncu dışa aktar"
-        columns={[...ACTOR_EXPORT_COLUMNS]}
-        rows={exportRows as unknown as Record<string, unknown>[]}
-        filename="oyuncular"
-      />
+                </Link>
+                <button
+                  type="button"
+                  onClick={(e) => toggleActive(actor, e)}
+                  title={actor.isActive ? "Pasif yap" : "Aktif yap"}
+                  aria-label={actor.isActive ? "Pasif yap" : "Aktif yap"}
+                  className={cn(
+                    "absolute top-3 left-3 z-10 inline-flex cursor-pointer items-center gap-1.5 rounded px-2 py-1 text-[11px] font-semibold text-white shadow",
+                    actor.isActive ? "bg-success" : "bg-danger",
+                  )}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                  {actor.isActive ? "Aktif" : "Pasif"}
+                </button>
+                <div className="absolute top-3 right-3 z-10 flex gap-1">
+                  <Link
+                    href={`/dashboard/oyuncular/${actor.id}`}
+                    className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-black/65 text-white hover:bg-primary"
+                    aria-label="Görüntüle"
+                  >
+                    <Eye size={14} />
+                  </Link>
+                  <Link
+                    href={`/dashboard/oyuncular/${actor.id}`}
+                    className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-black/65 text-white hover:bg-secondary"
+                    aria-label="Düzenle"
+                  >
+                    <Pencil size={14} />
+                  </Link>
+                </div>
+              </div>
+              <div className="p-3">
+                <Link
+                  href={`/dashboard/oyuncular/${actor.id}`}
+                  className="cursor-pointer text-sm font-semibold text-ink hover:text-primary"
+                >
+                  {fullName(actor.firstName, actor.lastName)}
+                </Link>
+                <p className="mt-1 text-xs text-ink-muted">
+                  {actor.city} · {actor.age} · {GENDER_LABELS[actor.gender]}
+                </p>
+                <p className="mt-1 text-[11px] text-ink-soft">
+                  {actor.showOnWebsite ? "Web’de görünür" : "Web’de gizli"}
+                  {actor.isFeatured ? " · Öne çıkan" : ""}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

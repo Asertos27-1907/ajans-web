@@ -25,7 +25,7 @@ export default async function ContactPage() {
 
   return (
     <div>
-      <section className="border-b border-border bg-bg-warm/50">
+      <section className="border-b border-border bg-bg-muted/50">
         <div className="container-wide py-14 md:py-16">
           <p className="eyebrow">İletişim</p>
           <h1 className="font-display title-accent mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
@@ -111,7 +111,7 @@ export default async function ContactPage() {
             </div>
           </div>
 
-          <div className="min-h-[320px] overflow-hidden border border-border bg-bg-warm lg:min-h-[520px]">
+          <div className="min-h-[320px] overflow-hidden border border-border bg-bg-muted lg:min-h-[520px]">
             {hasValue(settings.googleMapsEmbedUrl) ? (
               <iframe
                 title="+Akademi konum haritası"

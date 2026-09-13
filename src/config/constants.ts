@@ -1,8 +1,8 @@
 export const STATUS_LABELS: Record<string, string> = {
-  yeni: "Yeni Başvuru",
+  yeni: "Yeni",
   inceleniyor: "İnceleniyor",
   gorusme: "Görüşme",
-  kabul: "Kabul Edildi",
+  kabul: "Kabul",
   red: "Reddedildi",
   arsiv: "Arşiv",
 };

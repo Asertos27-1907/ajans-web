@@ -83,7 +83,7 @@ export default function ReferencesAdminPage() {
                 key={item.id}
                 className="flex gap-3 rounded border border-border bg-surface p-3"
               >
-                <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded bg-bg-warm">
+                <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded bg-bg-muted">
                   <Image src={item.coverImageUrl} alt="" fill className="object-cover" sizes="96px" />
                 </div>
                 <div className="min-w-0 flex-1">

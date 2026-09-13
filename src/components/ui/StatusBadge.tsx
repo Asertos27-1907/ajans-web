@@ -32,7 +32,7 @@ export function EmptyState({
   description?: string;
 }) {
   return (
-    <div className="rounded-[var(--radius)] border border-dashed border-border-strong bg-bg-warm/50 px-6 py-12 text-center">
+    <div className="rounded-[var(--radius)] border border-dashed border-border-strong bg-bg-muted/50 px-6 py-12 text-center">
       <p className="font-medium text-ink">{title}</p>
       {description ? (
         <p className="mt-2 text-sm text-ink-muted">{description}</p>

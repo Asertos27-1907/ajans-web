@@ -11,6 +11,13 @@ export const metadata = createMetadata({
   path: "/hakkimizda",
 });
 
+const FEATURE_IMAGES = [
+  "/assets/services-edu.jpg",
+  "/assets/services-cast.jpg",
+  "/assets/photos/p10.jpg",
+  "/assets/about-editorial.jpg",
+];
+
 export default async function AboutPage() {
   const settings = await settingsRepository.get();
   const paragraphs = [...settings.aboutParagraphs].sort(
@@ -19,50 +26,87 @@ export default async function AboutPage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden border-b border-border bg-bg-warm/50">
-        <div className="pointer-events-none absolute -top-8 right-8 h-28 w-28 rotate-12 border border-primary/20" />
-        <div className="container-wide py-14 md:py-20">
-          <p className="eyebrow">Kurumsal</p>
-          <h1 className="font-display title-accent mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
+      <section className="relative min-h-[48vh] overflow-hidden bg-bg-deep text-white">
+        <Image
+          src="/assets/about-editorial.jpg"
+          alt=""
+          fill
+          priority
+          className="object-cover opacity-45"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-secondary/50 to-transparent" />
+        <div className="container-wide relative flex min-h-[48vh] flex-col justify-end py-16 md:py-20">
+          <p className="eyebrow text-white/55">Kurumsal</p>
+          <h1 className="font-display mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">
             {settings.aboutTitle}
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-ink-muted">
+          <p className="mt-4 max-w-2xl text-lg text-white/75">
             {settings.companyName}
           </p>
         </div>
       </section>
 
-      <section className="section-pad decor-section">
-        <div className="container-wide grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
-          <div className="relative aspect-[4/5] overflow-hidden bg-bg-warm">
-            <div className="pointer-events-none absolute -bottom-4 -left-4 z-10 h-24 w-24 border border-primary/25" />
+      <section className="section-pad">
+        <div className="container-wide grid items-start gap-10 lg:grid-cols-12 lg:gap-16">
+          <div className="frame-corner relative aspect-[4/5] overflow-hidden bg-bg-muted lg:col-span-5">
             <Image
               src={settings.aboutImageUrl}
               alt="+Akademi ofis ve prodüksiyon atmosferi"
               fill
               className="object-cover"
-              sizes="(max-width:1024px) 100vw, 50vw"
+              sizes="(max-width:1024px) 100vw, 42vw"
               priority
             />
           </div>
-          <div className="prose-site space-y-5 text-base">
+          <div className="lg:col-span-7">
             {settings.aboutVision ? (
-              <p className="text-lg font-medium text-ink">{settings.aboutVision}</p>
+              <p className="font-display text-2xl leading-snug font-medium tracking-tight text-ink md:text-3xl">
+                {settings.aboutVision}
+              </p>
             ) : null}
-            {paragraphs.map((p) => (
-              <p key={p.id}>{p.text}</p>
-            ))}
-            <div className="grid gap-5 pt-4 sm:grid-cols-2">
-              {settings.aboutFeatures.map((item) => (
-                <div key={item.id} className="border-t border-border pt-4">
-                  <h2 className="text-base font-semibold text-ink">{item.title}</h2>
-                  <p className="mt-2 text-sm text-ink-muted">{item.description}</p>
-                </div>
+            <div className="prose-site mt-8 space-y-5 text-base">
+              {paragraphs.map((p) => (
+                <p key={p.id}>{p.text}</p>
               ))}
             </div>
-            <Link href="/basvuru" className="inline-flex cursor-pointer pt-4">
+            <Link href="/basvuru" className="mt-8 inline-flex cursor-pointer">
               <Button>Oyuncu Başvurusu</Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-pad bg-bg-muted">
+        <div className="container-wide">
+          <p className="eyebrow">Yaklaşımımız</p>
+          <h2 className="font-display title-accent mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+            Vizyon ve değerler
+          </h2>
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            {settings.aboutFeatures.map((item, idx) => (
+              <article
+                key={item.id}
+                className="group overflow-hidden bg-surface"
+              >
+                <div className="relative aspect-[16/9] overflow-hidden">
+                  <Image
+                    src={FEATURE_IMAGES[idx % FEATURE_IMAGES.length]}
+                    alt=""
+                    fill
+                    className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                    sizes="(max-width:768px) 100vw, 50vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
+                  <h3 className="absolute bottom-4 left-4 font-display text-xl font-semibold text-white">
+                    {item.title}
+                  </h3>
+                </div>
+                <p className="p-5 text-sm leading-relaxed text-ink-muted">
+                  {item.description}
+                </p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

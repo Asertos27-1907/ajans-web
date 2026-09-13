@@ -1,27 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  /* +Akademi design tokens */
+  /* +Akademi — burgundy / petrol / white */
   --primary: #7a1f2b;
-  --primary-hover: #651824;
-  --primary-soft: #f7ecee;
-  --bg: #faf9f7;
-  --bg-warm: #f3efe9;
-  --bg-deep: #171717;
+  --primary-hover: #641822;
+  --primary-soft: #f3e8ea;
+  --secondary: #183c46;
+  --secondary-hover: #102f37;
+  --secondary-soft: #e8eef0;
+  --white: #ffffff;
+  --bg: #ffffff;
+  --bg-muted: #f4f5f5;
+  --bg-deep: #151515;
   --surface: #ffffff;
-  --ink: #171717;
-  --ink-muted: #5c5852;
-  --ink-soft: #8a857c;
-  --accent: var(--primary);
-  --accent-hover: var(--primary-hover);
-  --accent-soft: var(--primary-soft);
-  --border: #e8e4df;
-  --border-strong: #d9d3cb;
+  --ink: #151515;
+  --ink-muted: #4a4f50;
+  --ink-soft: #7a8082;
+  --border: #e2e5e5;
+  --border-strong: #cfd4d4;
   --success: #1f7a4c;
-  --warning: #9a6b1f;
   --danger: #b42318;
-  --radius: 4px;
-  --shadow-soft: 0 12px 40px rgba(23, 23, 23, 0.06);
+  --warning: #9a6b1f;
+  --radius: 2px;
+  --shadow-soft: 0 16px 48px rgba(21, 21, 21, 0.08);
   --transition: 180ms ease;
 }
 
@@ -29,21 +30,21 @@
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-soft: var(--secondary-soft);
   --color-bg: var(--bg);
-  --color-bg-warm: var(--bg-warm);
+  --color-bg-muted: var(--bg-muted);
   --color-bg-deep: var(--bg-deep);
   --color-surface: var(--surface);
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-ink-soft: var(--ink-soft);
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-accent-soft: var(--accent-soft);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-success: var(--success);
-  --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-warning: var(--warning);
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
 }
@@ -68,13 +69,14 @@ h2,
 h3,
 .font-display {
   font-family: var(--font-display), var(--font-body), sans-serif;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 ::selection {
   background: color-mix(in oklab, var(--primary) 22%, white);
 }
 
+/* Clickable defaults */
 a,
 button,
 [role="button"],
@@ -91,7 +93,12 @@ select,
 :disabled,
 [aria-disabled="true"],
 .cursor-not-allowed {
-  cursor: not-allowed;
+  cursor: not-allowed !important;
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--primary) 70%, white);
+  outline-offset: 2px;
 }
 
 .container-site {
@@ -104,17 +111,13 @@ select,
   margin-inline: auto;
 }
 
-.container-settings {
-  width: min(920px, 100%);
-}
-
 .section-pad {
-  padding-block: clamp(3.5rem, 8vw, 6rem);
+  padding-block: clamp(3.75rem, 8vw, 6.5rem);
 }
 
 .eyebrow {
-  font-size: 0.75rem;
-  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-soft);
   font-weight: 600;
@@ -122,42 +125,12 @@ select,
 
 .prose-site p {
   color: var(--ink-muted);
-  line-height: 1.75;
-}
-
-/* Decorative accents — subtle, not overwhelming */
-.decor-section {
-  position: relative;
-  overflow: hidden;
-}
-
-.decor-section::before {
-  content: "";
-  position: absolute;
-  top: -40px;
-  right: -40px;
-  width: 180px;
-  height: 180px;
-  border: 1px solid color-mix(in oklab, var(--primary) 18%, transparent);
-  border-radius: 2px;
-  pointer-events: none;
-  transform: rotate(12deg);
-}
-
-.decor-section::after {
-  content: "";
-  position: absolute;
-  bottom: 24px;
-  left: 8%;
-  width: 72px;
-  height: 1px;
-  background: color-mix(in oklab, var(--primary) 35%, transparent);
-  pointer-events: none;
+  line-height: 1.8;
 }
 
 .title-accent {
   position: relative;
-  padding-left: 0.85rem;
+  padding-left: 0.9rem;
 }
 
 .title-accent::before {
@@ -166,28 +139,72 @@ select,
   left: 0;
   top: 0.35em;
   width: 3px;
-  height: 1.1em;
+  height: 1.05em;
   background: var(--primary);
 }
 
-.dot-pattern {
-  background-image: radial-gradient(
-    color-mix(in oklab, var(--primary) 14%, transparent) 1px,
-    transparent 1px
-  );
-  background-size: 14px 14px;
+/* Cinema framing accents */
+.frame-corner {
+  position: relative;
 }
 
-.cta-soft {
+.frame-corner::before,
+.frame-corner::after {
+  content: "";
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-color: color-mix(in oklab, var(--primary) 55%, transparent);
+  border-style: solid;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.frame-corner::before {
+  top: 12px;
+  left: 12px;
+  border-width: 1px 0 0 1px;
+}
+
+.frame-corner::after {
+  right: 12px;
+  bottom: 12px;
+  border-width: 0 1px 1px 0;
+  border-color: color-mix(in oklab, var(--secondary) 55%, transparent);
+}
+
+.decor-geo {
+  position: relative;
+  overflow: hidden;
+}
+
+.decor-geo::before {
+  content: "";
+  position: absolute;
+  top: -48px;
+  right: -36px;
+  width: 160px;
+  height: 160px;
+  border: 1px solid color-mix(in oklab, var(--secondary) 28%, transparent);
+  transform: rotate(14deg);
+  pointer-events: none;
+}
+
+.petrol-band {
+  background: var(--secondary);
+  color: #f4f5f5;
+}
+
+.cta-band {
   background: linear-gradient(
-    135deg,
+    120deg,
     var(--primary-soft) 0%,
-    color-mix(in oklab, var(--bg-warm) 70%, white) 100%
+    var(--secondary-soft) 100%
   );
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #ebe7e0 25%, #f5f2eb 50%, #ebe7e0 75%);
+  background: linear-gradient(90deg, #e8eaeb 25%, #f4f5f5 50%, #e8eaeb 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
@@ -204,7 +221,7 @@ select,
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -217,9 +234,9 @@ select,
 }
 
 .animate-fade-up-delay {
-  animation: fade-up 0.7s ease 0.15s both;
+  animation: fade-up 0.7s ease 0.12s both;
 }
 
 .animate-fade-up-delay-2 {
-  animation: fade-up 0.7s ease 0.28s both;
+  animation: fade-up 0.7s ease 0.24s both;
 }

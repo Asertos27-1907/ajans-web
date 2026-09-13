@@ -56,7 +56,7 @@ export default function ContactAdminPage() {
                   <button
                     type="button"
                     onClick={() => openMessage(msg)}
-                    className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left hover:bg-bg-warm/50"
+                    className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left hover:bg-bg-muted/50"
                   >
                     <div>
                       <p className="text-sm font-medium">{msg.name}</p>

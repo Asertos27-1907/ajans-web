@@ -23,6 +23,15 @@ const icons = {
   Clapperboard,
 } as const;
 
+const SERVICE_IMAGES = [
+  "/assets/services-edu.jpg",
+  "/assets/photos/p02.jpg",
+  "/assets/photos/p08.jpg",
+  "/assets/services-prod.jpg",
+  "/assets/photos/p12.jpg",
+  "/assets/services-cast.jpg",
+];
+
 export function HeroSection({ settings }: { settings: SiteSettings }) {
   const slide =
     [...settings.slides]
@@ -35,42 +44,60 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
   const ctaLink = slide?.buttonLink ?? settings.ctaLink;
 
   return (
-    <section className="relative isolate min-h-[78vh] overflow-hidden bg-bg-deep text-white">
+    <section className="relative isolate min-h-[88vh] overflow-hidden bg-bg-deep text-white">
       <Image
         src={imageUrl}
         alt=""
         fill
         priority
-        className="object-cover opacity-55"
+        className="object-cover object-[center_20%] opacity-70"
         sizes="100vw"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/25" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(122,31,43,0.22),transparent_50%)]" />
-      <div className="pointer-events-none absolute top-16 right-10 hidden h-40 w-40 rotate-12 border border-primary/30 md:block" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-secondary/35" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(122,31,43,0.28),transparent_55%)]" />
 
-      <div className="container-wide relative flex min-h-[78vh] flex-col justify-end pb-16 pt-28 md:pb-20">
-        <p className="eyebrow animate-fade-up text-white/55">
-          {settings.companyName}
-        </p>
-        <h1 className="font-display animate-fade-up-delay mt-4 max-w-3xl text-4xl leading-[1.05] font-semibold tracking-tight sm:text-5xl md:text-6xl">
-          {title}
-        </h1>
-        <p className="animate-fade-up-delay-2 mt-5 max-w-xl text-base leading-relaxed text-white/75 md:text-lg">
-          {description}
-        </p>
-        <div className="animate-fade-up-delay-2 mt-8 flex flex-wrap gap-3">
-          <Link href={ctaLink}>
-            <Button size="lg">{ctaText}</Button>
-          </Link>
-          <Link href="/hizmetler">
-            <Button
-              size="lg"
-              variant="outline"
-              className="cursor-pointer border-white/30 bg-transparent text-white hover:border-white/50 hover:bg-white/10"
-            >
-              Hizmetlerimizi İncele
-            </Button>
-          </Link>
+      {/* Cinema framing */}
+      <div className="pointer-events-none absolute inset-6 border border-white/10 md:inset-10" />
+      <div className="pointer-events-none absolute top-10 left-10 hidden h-16 w-16 border-t border-l border-primary/50 md:block" />
+      <div className="pointer-events-none absolute right-10 bottom-10 hidden h-16 w-16 border-r border-b border-white/25 md:block" />
+
+      <div className="container-wide relative flex min-h-[88vh] flex-col justify-end pb-16 pt-28 md:justify-center md:pb-24 md:pt-32">
+        <div className="max-w-3xl">
+          <div className="animate-fade-up mb-6 inline-flex rounded bg-white/95 p-2 shadow-[var(--shadow-soft)]">
+            <span className="relative block h-11 w-[160px] sm:h-12 sm:w-[180px]">
+              <Image
+                src={settings.logoUrl || "/brand/logo.jpeg"}
+                alt={settings.companyName}
+                fill
+                className="object-contain object-left"
+                sizes="180px"
+                priority
+              />
+            </span>
+          </div>
+          <p className="eyebrow animate-fade-up text-white/60">
+            {settings.agencyName || settings.companyName}
+          </p>
+          <h1 className="font-display animate-fade-up-delay mt-4 max-w-3xl text-4xl leading-[1.02] font-semibold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+            {title}
+          </h1>
+          <p className="animate-fade-up-delay-2 mt-5 max-w-xl text-base leading-relaxed text-white/78 md:text-lg">
+            {description}
+          </p>
+          <div className="animate-fade-up-delay-2 mt-9 flex flex-wrap gap-3">
+            <Link href={ctaLink}>
+              <Button size="lg">{ctaText}</Button>
+            </Link>
+            <Link href="/hizmetler">
+              <Button
+                size="lg"
+                variant="secondary"
+                className="cursor-pointer border border-white/10"
+              >
+                Hizmetleri İncele
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </section>
@@ -99,28 +126,41 @@ export function StatsSection({ settings }: { settings: SiteSettings }) {
 
 export function AboutTeaser({ settings }: { settings: SiteSettings }) {
   return (
-    <section className="section-pad">
-      <div className="container-wide grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-        <div className="relative aspect-[4/5] overflow-hidden bg-bg-warm md:aspect-[5/6]">
+    <section className="section-pad decor-geo">
+      <div className="container-wide grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+        <div className="frame-corner relative aspect-[4/5] overflow-hidden bg-bg-muted lg:col-span-5">
           <Image
             src={settings.aboutImageUrl}
             alt="+Akademi hakkında"
             fill
             className="object-cover"
-            sizes="(max-width:1024px) 100vw, 50vw"
+            sizes="(max-width:1024px) 100vw, 42vw"
           />
         </div>
-        <div>
+        <div className="lg:col-span-7">
           <p className="eyebrow">Kurumsal</p>
-          <h2 className="font-display mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+          <h2 className="font-display title-accent mt-3 text-3xl font-semibold tracking-tight md:text-5xl">
             {settings.aboutTitle}
           </h2>
+          {settings.aboutVision ? (
+            <p className="mt-5 text-lg leading-relaxed text-ink md:text-xl">
+              {settings.aboutVision}
+            </p>
+          ) : null}
           <div className="prose-site mt-5 space-y-4 text-base">
             {settings.aboutParagraphs.map((p) => (
-            <p key={p.id}>{p.text}</p>
-          ))}
+              <p key={p.id}>{p.text}</p>
+            ))}
           </div>
-          <Link href="/hakkimizda" className="mt-7 inline-flex">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2">
+            {settings.aboutFeatures.slice(0, 4).map((item) => (
+              <div key={item.id} className="border-l-2 border-primary pl-4">
+                <h3 className="text-sm font-semibold text-ink">{item.title}</h3>
+                <p className="mt-1.5 text-sm text-ink-muted">{item.description}</p>
+              </div>
+            ))}
+          </div>
+          <Link href="/hakkimizda" className="mt-8 inline-flex">
             <Button variant="outline">
               Daha fazla <ArrowRight size={16} />
             </Button>
@@ -136,8 +176,8 @@ export function ServicesSection({ settings }: { settings: SiteSettings }) {
     .filter((s) => s.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder);
   return (
-    <section className="section-pad relative overflow-hidden bg-bg-warm/60">
-      <div className="pointer-events-none absolute -bottom-10 left-8 h-32 w-32 rotate-6 border border-primary/15" />
+    <section className="section-pad relative overflow-hidden bg-bg-muted">
+      <div className="pointer-events-none absolute -bottom-10 left-8 h-32 w-32 rotate-6 border border-secondary/20" />
       <div className="container-wide">
         <div className="max-w-2xl">
           <p className="eyebrow">Hizmetler</p>
@@ -149,19 +189,50 @@ export function ServicesSection({ settings }: { settings: SiteSettings }) {
             desteğine kadar uçtan uca yetenek yönetimi.
           </p>
         </div>
-        <div className="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => {
+        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {services.map((service, idx) => {
             const Icon =
               icons[service.icon as keyof typeof icons] ?? Clapperboard;
+            const image = service.imageUrl ?? SERVICE_IMAGES[idx % SERVICE_IMAGES.length];
+            const featured = idx < 2;
             return (
-              <article key={service.id} className="border-t border-border-strong pt-5">
-                <Icon className="text-primary" size={22} strokeWidth={1.6} />
-                <h3 className="mt-4 text-lg font-semibold text-ink">
-                  {service.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-                  {service.description}
-                </p>
+              <article
+                key={service.id}
+                className={
+                  featured
+                    ? "group relative overflow-hidden bg-secondary text-white md:col-span-1"
+                    : "group border-t border-border-strong bg-surface pt-0"
+                }
+              >
+                {featured || service.imageUrl ? (
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    <Image
+                      src={image}
+                      alt=""
+                      fill
+                      className="object-cover opacity-80 transition duration-500 group-hover:scale-[1.03]"
+                      sizes="(max-width:768px) 100vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-secondary/90 via-secondary/40 to-transparent" />
+                  </div>
+                ) : null}
+                <div className={featured ? "p-6" : "p-6"}>
+                  <Icon
+                    className={featured ? "text-white/80" : "text-primary"}
+                    size={22}
+                    strokeWidth={1.6}
+                  />
+                  <h3
+                    className={`mt-4 text-lg font-semibold ${featured ? "text-white" : "text-ink"}`}
+                  >
+                    {service.title}
+                  </h3>
+                  <p
+                    className={`mt-2 text-sm leading-relaxed ${featured ? "text-white/70" : "text-ink-muted"}`}
+                  >
+                    {service.description}
+                  </p>
+                </div>
               </article>
             );
           })}
@@ -190,19 +261,19 @@ export function FeaturedActors({ actors }: { actors: Actor[] }) {
           </div>
           <Link
             href="/oyuncular"
-            className="hidden text-sm font-medium text-ink underline-offset-4 hover:underline sm:inline"
+            className="hidden cursor-pointer text-sm font-medium text-ink underline-offset-4 hover:text-primary hover:underline sm:inline"
           >
             Tümünü gör
           </Link>
         </div>
-        <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-6">
+        <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
           {actors.map((actor) => (
             <Link
               key={actor.id}
               href={`/oyuncular/${actor.slug}`}
-              className="group block"
+              className="group block cursor-pointer"
             >
-              <div className="relative aspect-[3/4] overflow-hidden bg-bg-warm">
+              <div className="relative aspect-[3/4] overflow-hidden bg-bg-muted">
                 <Image
                   src={actor.coverPhotoUrl}
                   alt={fullName(actor.firstName, actor.lastName)}
@@ -210,12 +281,13 @@ export function FeaturedActors({ actors }: { actors: Actor[] }) {
                   className="object-cover transition duration-500 group-hover:scale-[1.03]"
                   sizes="(max-width:768px) 50vw, 16vw"
                 />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent opacity-0 transition group-hover:opacity-100" />
               </div>
-              <p className="mt-3 text-sm font-medium text-ink">
+              <p className="mt-3 text-sm font-medium text-ink group-hover:text-primary">
                 {fullName(actor.firstName, actor.lastName)}
               </p>
               <p className="text-xs text-ink-muted">
-                {actor.city} · {actor.heightCm} cm
+                {actor.city} · {actor.age}
               </p>
             </Link>
           ))}
@@ -228,7 +300,7 @@ export function FeaturedActors({ actors }: { actors: Actor[] }) {
 export function FeaturedReferences({ items }: { items: ReferenceProject[] }) {
   if (!items.length) return null;
   return (
-    <section className="section-pad bg-bg-deep text-white">
+    <section className="section-pad petrol-band">
       <div className="container-wide">
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -239,7 +311,7 @@ export function FeaturedReferences({ items }: { items: ReferenceProject[] }) {
           </div>
           <Link
             href="/referanslar"
-            className="hidden text-sm font-medium text-white/70 underline-offset-4 hover:text-white hover:underline sm:inline"
+            className="hidden cursor-pointer text-sm font-medium text-white/70 underline-offset-4 hover:text-white hover:underline sm:inline"
           >
             Tüm referanslar
           </Link>
@@ -257,7 +329,7 @@ export function FeaturedReferences({ items }: { items: ReferenceProject[] }) {
                 />
               </div>
               <div className="p-5">
-                <p className="text-xs tracking-wide text-white/45 uppercase">
+                <p className="text-xs tracking-wide text-primary-soft/80 uppercase">
                   {CATEGORY_LABELS[item.category]} · {item.year}
                 </p>
                 <h3 className="mt-2 text-lg font-semibold">{item.title}</h3>
@@ -283,7 +355,7 @@ export function WhySection({ settings }: { settings: SiteSettings }) {
         </div>
         <div className="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {settings.aboutFeatures.map((item) => (
-            <article key={item.id} className="border-l-2 border-primary/80 pl-4">
+            <article key={item.id} className="border-l-2 border-primary pl-4">
               <h3 className="text-base font-semibold text-ink">{item.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-ink-muted">
                 {item.description}
@@ -298,15 +370,16 @@ export function WhySection({ settings }: { settings: SiteSettings }) {
 
 export function CtaBand() {
   return (
-    <section className="border-y border-border bg-bg-warm">
+    <section className="relative overflow-hidden border-y border-border bg-primary-soft">
+      <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rotate-12 border border-primary/15" />
       <div className="container-wide flex flex-col items-start justify-between gap-6 py-14 md:flex-row md:items-center">
         <div className="max-w-xl">
           <h2 className="font-display text-3xl font-semibold tracking-tight">
             Kariyerine bir adımla başla
           </h2>
           <p className="mt-3 text-ink-muted">
-            Oyuncu, model veya yetenek adayıysan başvurunu birkaç dakikada
-            tamamla. Ekibimiz başvurunu değerlendirir.
+            Oyuncu, model veya yetenek adayıysan kısa ön kayıt formunu doldur.
+            Uygun adaylarla telefon üzerinden iletişime geçilir.
           </p>
         </div>
         <Link href="/basvuru">
@@ -347,8 +420,9 @@ export function ContactTeaser({ settings }: { settings: SiteSettings }) {
             </Link>
           </div>
         </div>
-        <div className="min-h-64 border border-border bg-[linear-gradient(135deg,#efebe4,#e7e1d6)] p-8">
-          <p className="text-sm leading-relaxed text-ink-muted">
+        <div className="relative min-h-64 overflow-hidden bg-secondary p-8 text-white">
+          <div className="pointer-events-none absolute -right-6 -bottom-6 h-28 w-28 rotate-12 border border-white/15" />
+          <p className="relative text-sm leading-relaxed text-white/75">
             Yapım şirketleri, reklam ajansları ve profesyonel iş ortakları için
             casting ve menajerlik süreçlerinde hızlı iletişim kuruyoruz.
             Detaylı taleplerinizi iletişim formu üzerinden iletebilirsiniz.
@@ -358,7 +432,7 @@ export function ContactTeaser({ settings }: { settings: SiteSettings }) {
               href={settings.googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-flex text-sm font-medium text-ink underline-offset-4 hover:underline"
+              className="relative mt-6 inline-flex cursor-pointer text-sm font-medium text-white underline-offset-4 hover:underline"
             >
               Haritada aç
             </a>

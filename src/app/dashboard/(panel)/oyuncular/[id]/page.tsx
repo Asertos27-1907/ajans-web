@@ -68,7 +68,7 @@ export default function ActorEditPage() {
       />
 
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
-        <div className="relative aspect-[3/4] overflow-hidden rounded border border-border bg-bg-warm">
+        <div className="relative aspect-[3/4] overflow-hidden rounded border border-border bg-bg-muted">
           <Image src={actor.coverPhotoUrl} alt="" fill className="object-cover" sizes="240px" />
         </div>
         <div className="grid gap-4 rounded border border-border bg-surface p-5 sm:grid-cols-2">

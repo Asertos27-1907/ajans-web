@@ -37,7 +37,7 @@ export default async function ActorDetailPage({
     <div className="section-pad">
       <div className="container-wide grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
         <div>
-          <div className="relative aspect-[3/4] overflow-hidden bg-bg-warm">
+          <div className="relative aspect-[3/4] overflow-hidden bg-bg-muted">
             <Image
               src={actor.coverPhotoUrl}
               alt={fullName(actor.firstName, actor.lastName)}
@@ -50,7 +50,7 @@ export default async function ActorDetailPage({
           {actor.photos.length > 1 ? (
             <div className="mt-3 grid grid-cols-4 gap-2">
               {actor.photos.slice(0, 4).map((photo) => (
-                <div key={photo.id} className="relative aspect-square overflow-hidden bg-bg-warm">
+                <div key={photo.id} className="relative aspect-square overflow-hidden bg-bg-muted">
                   <Image
                     src={photo.thumbnailUrl}
                     alt={photo.alt}

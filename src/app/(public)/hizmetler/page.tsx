@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   Briefcase,
@@ -27,6 +28,15 @@ const icons = {
   Clapperboard,
 } as const;
 
+const FALLBACK_IMAGES = [
+  "/assets/services-edu.jpg",
+  "/assets/photos/p02.jpg",
+  "/assets/photos/p08.jpg",
+  "/assets/services-prod.jpg",
+  "/assets/photos/p12.jpg",
+  "/assets/services-cast.jpg",
+];
+
 export default async function ServicesPage() {
   const settings = await settingsRepository.get();
   const services = settings.services
@@ -35,14 +45,14 @@ export default async function ServicesPage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden border-b border-border bg-bg-warm/50">
-        <div className="pointer-events-none absolute top-10 right-[12%] h-16 w-16 rotate-6 border border-primary/20" />
+      <section className="relative overflow-hidden border-b border-border bg-secondary text-white">
+        <div className="pointer-events-none absolute top-10 right-[12%] h-20 w-20 rotate-6 border border-white/15" />
         <div className="container-wide py-14 md:py-20">
-          <p className="eyebrow">Hizmetler</p>
-          <h1 className="font-display title-accent mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
+          <p className="eyebrow text-white/50">Hizmetler</p>
+          <h1 className="font-display mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
             {settings.servicesSectionTitle}
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-ink-muted">
+          <p className="mt-4 max-w-2xl text-lg text-white/70">
             Profesyonel eğitim, geniş sektör ağı ve kariyer desteğiyle yetenekleri
             prodüksiyon dünyasıyla buluşturuyoruz.
           </p>
@@ -50,19 +60,37 @@ export default async function ServicesPage() {
       </section>
 
       <section className="section-pad">
-        <div className="container-wide grid gap-8 md:grid-cols-2">
-          {services.map((service) => {
+        <div className="container-wide space-y-10">
+          {services.map((service, idx) => {
             const Icon = icons[service.icon as keyof typeof icons] ?? Clapperboard;
+            const image =
+              service.imageUrl ?? FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length];
+            const reverse = idx % 2 === 1;
             return (
               <article
                 key={service.id}
-                className="border border-border bg-surface p-7 transition-shadow duration-200 hover:shadow-[var(--shadow-soft)] md:p-8"
+                className={`grid items-center gap-6 overflow-hidden border border-border bg-surface lg:grid-cols-2 ${
+                  reverse ? "lg:[&>*:first-child]:order-2" : ""
+                }`}
               >
-                <Icon className="text-primary" size={24} strokeWidth={1.6} />
-                <h2 className="mt-5 text-xl font-semibold">{service.title}</h2>
-                <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-                  {service.description}
-                </p>
+                <div className="relative aspect-[16/11] bg-bg-muted">
+                  <Image
+                    src={image}
+                    alt={service.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width:1024px) 100vw, 50vw"
+                  />
+                </div>
+                <div className="p-6 md:p-10">
+                  <Icon className="text-primary" size={26} strokeWidth={1.6} />
+                  <h2 className="mt-5 font-display text-2xl font-semibold tracking-tight md:text-3xl">
+                    {service.title}
+                  </h2>
+                  <p className="mt-4 text-base leading-relaxed text-ink-muted">
+                    {service.description}
+                  </p>
+                </div>
               </article>
             );
           })}

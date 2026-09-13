@@ -147,7 +147,9 @@ export const actorRepository = {
       items = items.filter(
         (a) =>
           a.firstName.toLocaleLowerCase("tr-TR").includes(q) ||
-          a.lastName.toLocaleLowerCase("tr-TR").includes(q),
+          a.lastName.toLocaleLowerCase("tr-TR").includes(q) ||
+          a.city.toLocaleLowerCase("tr-TR").includes(q) ||
+          `${a.firstName} ${a.lastName}`.toLocaleLowerCase("tr-TR").includes(q),
       );
     }
     if (city) items = items.filter((a) => a.city === city);

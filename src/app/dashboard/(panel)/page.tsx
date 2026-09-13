@@ -70,9 +70,9 @@ export default async function DashboardHomePage() {
               <li key={app.id}>
                 <Link
                   href={`/dashboard/basvurular/${app.id}`}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-bg-warm/60"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-bg-muted/60"
                 >
-                  <div className="relative h-10 w-10 overflow-hidden rounded bg-bg-warm">
+                  <div className="relative h-10 w-10 overflow-hidden rounded bg-bg-muted">
                     <Image
                       src={app.photos[0]?.thumbnailUrl ?? "/placeholders/actor-01.jpg"}
                       alt=""
@@ -132,9 +132,9 @@ export default async function DashboardHomePage() {
               <li key={actor.id}>
                 <Link
                   href={`/dashboard/oyuncular/${actor.id}`}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-bg-warm/60"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-bg-muted/60"
                 >
-                  <div className="relative h-10 w-10 overflow-hidden rounded bg-bg-warm">
+                  <div className="relative h-10 w-10 overflow-hidden rounded bg-bg-muted">
                     <Image
                       src={actor.coverPhotoUrl}
                       alt=""

@@ -124,7 +124,7 @@ export default function ApplicationDetailPage() {
         <StatusBadge status={app.status} />
         <div className="flex flex-wrap gap-1">
           {app.tags.map((t) => (
-            <span key={t} className="rounded bg-bg-warm px-2 py-0.5 text-xs">
+            <span key={t} className="rounded bg-bg-muted px-2 py-0.5 text-xs">
               {t}
             </span>
           ))}
@@ -209,7 +209,7 @@ export default function ApplicationDetailPage() {
             <h2 className="font-semibold">Fotoğraflar & medya</h2>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {app.photos.map((photo) => (
-                <div key={photo.id} className="relative aspect-[3/4] overflow-hidden rounded bg-bg-warm">
+                <div key={photo.id} className="relative aspect-[3/4] overflow-hidden rounded bg-bg-muted">
                   <Image src={photo.thumbnailUrl} alt={photo.alt} fill className="object-cover" sizes="160px" />
                 </div>
               ))}

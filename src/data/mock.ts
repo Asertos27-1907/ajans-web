@@ -417,7 +417,7 @@ export const mockSiteSettings: SiteSettings = {
   heroTitle: "Yeteneğini Geleceğinle Buluştur.",
   heroDescription:
     "Oyunculuk, casting, menajerlik ve profesyonel eğitim alanında yeni yetenekleri sektörle buluşturan güçlü bir yapı.",
-  heroImageUrl: "/placeholders/hero.jpg",
+  heroImageUrl: "/assets/hero-cinema.jpg",
   ctaText: "Oyuncu Başvurusu",
   ctaLink: "/basvuru",
   slides: [
@@ -426,7 +426,7 @@ export const mockSiteSettings: SiteSettings = {
       title: "Yeteneğini Geleceğinle Buluştur.",
       description:
         "Oyunculuk, casting, menajerlik ve profesyonel eğitim alanında yeni yetenekleri sektörle buluşturan güçlü bir yapı.",
-      imageUrl: "/placeholders/hero.jpg",
+      imageUrl: "/assets/hero-cinema.jpg",
       buttonText: "Oyuncu Başvurusu",
       buttonLink: "/basvuru",
       isActive: true,
@@ -441,6 +441,7 @@ export const mockSiteSettings: SiteSettings = {
       description:
         "Kamera önü, sahne ve karakter çalışmalarıyla profesyonel eğitim programları.",
       icon: "GraduationCap",
+      imageUrl: "/assets/services-edu.jpg",
       sortOrder: 1,
       isActive: true,
     },
@@ -450,6 +451,7 @@ export const mockSiteSettings: SiteSettings = {
       description:
         "Yeteneklerin doğru projelerle buluşması için ajans ve temsil süreçleri.",
       icon: "Drama",
+      imageUrl: "/assets/photos/p02.jpg",
       sortOrder: 2,
       isActive: true,
     },
@@ -459,6 +461,7 @@ export const mockSiteSettings: SiteSettings = {
       description:
         "Reklam, katalog ve moda çekimleri için model & manken koordinasyonu.",
       icon: "Sparkles",
+      imageUrl: "/assets/photos/p08.jpg",
       sortOrder: 3,
       isActive: true,
     },
@@ -468,6 +471,7 @@ export const mockSiteSettings: SiteSettings = {
       description:
         "Prodüksiyon ekipleriyle uyumlu casting ve yetenek yönetimi desteği.",
       icon: "Film",
+      imageUrl: "/assets/services-prod.jpg",
       sortOrder: 4,
       isActive: true,
     },
@@ -477,6 +481,7 @@ export const mockSiteSettings: SiteSettings = {
       description:
         "Kariyer planlama, görüşme süreçleri ve uzun soluklu profesyonel temsil.",
       icon: "Briefcase",
+      imageUrl: "/assets/photos/p12.jpg",
       sortOrder: 5,
       isActive: true,
     },
@@ -486,6 +491,7 @@ export const mockSiteSettings: SiteSettings = {
       description:
         "Yapım şirketleri ve ajanslar için hızlı, düzenli ve güvenilir cast çözümleri.",
       icon: "Clapperboard",
+      imageUrl: "/assets/services-cast.jpg",
       sortOrder: 6,
       isActive: true,
     },
@@ -528,7 +534,7 @@ export const mockSiteSettings: SiteSettings = {
       icon: "Briefcase",
     },
   ],
-  aboutImageUrl: "/placeholders/ref-05.jpg",
+  aboutImageUrl: "/assets/about-editorial.jpg",
   stats: [
     {
       id: "st-1",

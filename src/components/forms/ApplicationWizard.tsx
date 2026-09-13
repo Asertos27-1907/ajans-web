@@ -131,7 +131,7 @@ function FakeUpload({
     <div>
       <p className="mb-2 text-sm font-medium text-ink">{label}</p>
       <div
-        className="rounded-[var(--radius)] border border-dashed border-border-strong bg-bg-warm/40 p-4"
+        className="rounded-[var(--radius)] border border-dashed border-border-strong bg-bg-muted/40 p-4"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
           e.preventDefault();
@@ -379,7 +379,7 @@ export function ApplicationWizard() {
           </div>
           <p className="text-sm text-ink-muted">{Math.round(((step + 1) / STEPS.length) * 100)}%</p>
         </div>
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-bg-warm">
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-bg-muted">
           <div
             className="h-full bg-primary transition-all duration-300"
             style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
@@ -582,7 +582,7 @@ export function ApplicationWizard() {
 
         {step === 4 ? (
           <div className="space-y-6">
-            <div className="grid gap-3 rounded border border-border bg-bg-warm/40 p-4 text-sm sm:grid-cols-2">
+            <div className="grid gap-3 rounded border border-border bg-bg-muted/40 p-4 text-sm sm:grid-cols-2">
               <p><span className="text-ink-muted">Ad Soyad:</span> {form.firstName} {form.lastName}</p>
               <p><span className="text-ink-muted">Yaş:</span> {age ?? "-"}</p>
               <p><span className="text-ink-muted">Şehir:</span> {form.city}</p>

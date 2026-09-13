@@ -77,7 +77,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <div className="border-t border-border p-3">
             <Link
               href="/dashboard/login"
-              className="flex items-center gap-2 rounded px-3 py-2 text-sm text-ink-muted hover:bg-bg-warm"
+              className="flex items-center gap-2 rounded px-3 py-2 text-sm text-ink-muted hover:bg-bg-muted"
             >
               <LogOut size={16} /> Çıkış (mock)
             </Link>

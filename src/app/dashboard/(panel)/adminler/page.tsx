@@ -95,7 +95,7 @@ export default function AdminsPage() {
           </div>
         ) : (
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-border bg-bg-warm/50 text-xs text-ink-muted">
+            <thead className="border-b border-border bg-bg-muted/50 text-xs text-ink-muted">
               <tr>
                 <th className="px-3 py-3">Ad</th>
                 <th className="px-3 py-3">E-posta</th>
@@ -143,7 +143,7 @@ export default function AdminsPage() {
         )}
       </div>
 
-      <div className="mt-6 rounded border border-border bg-bg-warm/40 p-4 text-sm text-ink-muted">
+      <div className="mt-6 rounded border border-border bg-bg-muted/40 p-4 text-sm text-ink-muted">
         <p className="font-medium text-ink">Rol özeti (mock)</p>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>SUPER_ADMIN: her şey</li>
