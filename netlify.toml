@@ -1,8 +1,6 @@
-# Next.js App Router — Netlify OpenNext adapter (auto-detected).
-# Do not add SPA fallbacks or pin @netlify/plugin-nextjs.
 [build]
   command = "npm run build"
   publish = ".next"
 
-[build.environment]
-  NODE_VERSION = "22"
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
