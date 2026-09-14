@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { SITE_IMAGES } from "@/config/site-images";
 import { cn } from "@/lib/utils";
 
 export function BrandLogo({
@@ -17,7 +18,7 @@ export function BrandLogo({
     >
       <span className="relative block h-10 w-[148px] overflow-hidden bg-white sm:h-11 sm:w-[168px]">
         <Image
-          src="/brand/logo.jpeg"
+          src={SITE_IMAGES.brand.logo}
           alt="+Akademi Oyunculuk & Menajerlik"
           fill
           className="object-contain object-left"

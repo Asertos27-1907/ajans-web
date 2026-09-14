@@ -285,7 +285,7 @@ export const mockAdmins: AdminUser[] = [
 export const mockSiteSettings: SiteSettings = {
   companyName: "+Akademi Oyunculuk & Menajerlik",
   agencyName: "+Akademi",
-  logoUrl: "/brand/logo.jpeg",
+  logoUrl: "/brand/logo.jpeg", // +Akademi ana logo
   phone: undefined,
   whatsapp: undefined,
   email: undefined,
@@ -306,7 +306,7 @@ export const mockSiteSettings: SiteSettings = {
   heroTitle: "Yeteneğini Doğru Hikâyeyle Buluştur.",
   heroDescription:
     "+Akademi; oyunculuk eğitimi, cast, menajerlik ve prodüksiyon alanlarında yetenekleri sektörün ihtiyaçlarıyla buluşturan profesyonel bir yapıdır. Her adayın güçlü yönünü keşfetmeye, geliştirmeye ve doğru projelerle buluşturmaya odaklanıyoruz.",
-  heroImageUrl: "/images/hero/hero-main.jpg",
+  heroImageUrl: "/images/home/anasayfa.jpeg",
   ctaText: "Oyuncu Başvurusu",
   ctaLink: "/basvuru",
   slides: [
@@ -315,7 +315,7 @@ export const mockSiteSettings: SiteSettings = {
       title: "Yeteneğini Doğru Hikâyeyle Buluştur.",
       description:
         "+Akademi; oyunculuk eğitimi, cast, menajerlik ve prodüksiyon alanlarında yetenekleri sektörün ihtiyaçlarıyla buluşturan profesyonel bir yapıdır. Her adayın güçlü yönünü keşfetmeye, geliştirmeye ve doğru projelerle buluşturmaya odaklanıyoruz.",
-      imageUrl: "/images/hero/hero-main.jpg",
+      imageUrl: "/images/home/anasayfa.jpeg",
       buttonText: "Oyuncu Başvurusu",
       buttonLink: "/basvuru",
       isActive: true,
@@ -340,7 +340,7 @@ export const mockSiteSettings: SiteSettings = {
       description:
         "Yeni yetenekleri keşfediyor, profesyonel portföylerini güçlendiriyor ve uygun dizi, sinema, reklam ve dijital projelerle buluşmalarına destek oluyoruz.",
       icon: "Drama",
-      imageUrl: "/images/services/services-agency.jpg",
+      imageUrl: "/images/services/klaket.jpeg",
       sortOrder: 2,
       isActive: true,
     },
@@ -360,7 +360,7 @@ export const mockSiteSettings: SiteSettings = {
       description:
         "Fikir aşamasından çekim süreçlerine kadar prodüksiyon ekipleriyle koordineli çalışıyor, projelerin yaratıcı ve teknik ihtiyaçlarına çözüm üretiyoruz.",
       icon: "Film",
-      imageUrl: "/images/services/services-prod.jpg",
+      imageUrl: "/images/services/cekim.jpeg",
       sortOrder: 4,
       isActive: true,
     },
@@ -380,7 +380,7 @@ export const mockSiteSettings: SiteSettings = {
       description:
         "Yapım şirketleri ve markaların ihtiyaç duyduğu oyuncu profillerini doğru, hızlı ve düzenli bir casting süreciyle projelerle buluşturuyoruz.",
       icon: "Clapperboard",
-      imageUrl: "/images/services/services-cast.jpg",
+      imageUrl: "/images/services/kamera.jpeg",
       sortOrder: 6,
       isActive: true,
     },

@@ -3,19 +3,22 @@
  * hunting through components. Paths are relative to /public.
  */
 export const SITE_IMAGES = {
+  brand: {
+    logo: "/brand/logo.jpeg",
+  },
   hero: {
-    main: "/images/hero/hero-main.jpg",
+    main: "/images/home/anasayfa.jpeg",
   },
   about: {
     main: "/images/about/about-main.jpg",
   },
   services: {
     education: "/images/services/services-edu.jpg",
-    agency: "/images/services/services-agency.jpg",
+    agency: "/images/services/klaket.jpeg",
     model: "/images/services/services-model.jpg",
-    production: "/images/services/services-prod.jpg",
+    production: "/images/services/cekim.jpeg",
     management: "/images/services/services-management.jpg",
-    cast: "/images/services/services-cast.jpg",
+    cast: "/images/services/kamera.jpeg",
   },
 } as const;
 

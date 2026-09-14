@@ -9,7 +9,7 @@ export function createMetadata({
   title,
   description,
   path = "/",
-  image = "/images/hero/hero-main.jpg",
+  image = "/images/home/anasayfa.jpeg",
 }: {
   title?: string;
   description?: string;

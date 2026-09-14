@@ -49,16 +49,15 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
       <HeroImageMotion className="absolute inset-0">
         <Image
           src={imageUrl}
-          alt=""
+          alt="+Akademi stüdyo ve prodüksiyon atmosferi"
           fill
           priority
-          className="object-cover object-[center_20%] opacity-70"
+          className="object-cover object-[center_35%] md:object-center"
           sizes="100vw"
         />
       </HeroImageMotion>
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-secondary/50 to-secondary/25" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(122,31,43,0.32),transparent_55%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(24,60,70,0.35),transparent_45%)]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/30 to-black/15" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10" />
 
       <div className="pointer-events-none absolute inset-6 border border-white/10 md:inset-10" />
       <div className="pointer-events-none absolute top-10 left-10 hidden h-16 w-16 border-t border-l border-primary/50 md:block" />
@@ -205,12 +204,12 @@ export function ServicesSection({ settings }: { settings: SiteSettings }) {
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <Image
                     src={image}
-                    alt=""
+                    alt={service.title}
                     fill
-                    className="object-cover opacity-85 transition duration-300 group-hover:scale-[1.04]"
+                    className="object-cover object-center transition duration-300 group-hover:scale-[1.04]"
                     sizes="(max-width:768px) 100vw, 33vw"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 via-secondary/25 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-secondary/70 via-secondary/20 to-transparent" />
                 </div>
                 <div className="border-l-2 border-transparent p-6 transition duration-300 group-hover:border-primary">
                   <Icon className="text-primary" size={22} strokeWidth={1.6} />

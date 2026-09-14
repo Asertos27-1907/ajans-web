@@ -67,7 +67,7 @@ export function ServicesPageContent({ settings }: { settings: SiteSettings }) {
                       src={image}
                       alt={service.title}
                       fill
-                      className="object-cover transition duration-300 group-hover:scale-[1.03]"
+                      className="object-cover object-center transition duration-300 group-hover:scale-[1.03]"
                       sizes="(max-width:1024px) 100vw, 50vw"
                     />
                   </div>

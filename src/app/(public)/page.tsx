@@ -14,7 +14,7 @@ export const metadata = createMetadata({
   description:
     "+Akademi; oyunculuk eğitimi, cast, menajerlik ve prodüksiyon alanlarında yetenekleri sektörün ihtiyaçlarıyla buluşturan profesyonel yapı.",
   path: "/",
-  image: "/images/hero/hero-main.jpg",
+  image: "/images/home/anasayfa.jpeg",
 });
 
 export default async function HomePage() {
