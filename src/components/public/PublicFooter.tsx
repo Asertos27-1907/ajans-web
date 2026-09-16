@@ -13,10 +13,10 @@ export function PublicFooter({ settings }: { settings: SiteSettings }) {
 
   return (
     <footer className="border-t border-border bg-bg-deep text-[#f3efe8]">
-      <div className="container-wide grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr]">
-        <div>
-          <div className="inline-block rounded bg-white p-2">
-            <BrandLogo />
+      <div className="container-wide grid gap-8 py-12 sm:gap-10 sm:py-14 md:grid-cols-[1.4fr_1fr_1fr]">
+        <div className="min-w-0">
+          <div className="inline-flex rounded-sm bg-white/95 p-1.5 sm:p-2">
+            <BrandLogo variant="footer" />
           </div>
           <p className="mt-5 max-w-md text-sm leading-relaxed text-white/70">
             {settings.footerText}
@@ -30,7 +30,7 @@ export function PublicFooter({ settings }: { settings: SiteSettings }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded border border-white/15 text-white/80 transition hover:border-white/40 hover:text-white"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded border border-white/15 text-white/80 transition hover:border-white/40 hover:text-white"
                 >
                   <Icon size={18} />
                 </a>
@@ -43,51 +43,65 @@ export function PublicFooter({ settings }: { settings: SiteSettings }) {
           <p className="text-xs font-semibold tracking-[0.14em] text-white/45 uppercase">
             Menü
           </p>
-          <ul className="mt-4 space-y-2 text-sm">
+          <ul className="mt-4 space-y-1 text-sm">
             {NAV_LINKS.map((l) => (
               <li key={l.href}>
-                <Link href={l.href} className="text-white/75 hover:text-white">
+                <Link
+                  href={l.href}
+                  className="inline-flex min-h-11 items-center text-white/75 hover:text-white"
+                >
                   {l.label}
                 </Link>
               </li>
             ))}
             <li>
-              <Link href="/basvuru" className="text-white/75 hover:text-white">
+              <Link
+                href="/basvuru"
+                className="inline-flex min-h-11 items-center text-white/75 hover:text-white"
+              >
                 Oyuncu Başvurusu
               </Link>
             </li>
           </ul>
         </div>
 
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-semibold tracking-[0.14em] text-white/45 uppercase">
             İletişim
           </p>
           <address className="mt-4 space-y-1 text-sm not-italic text-white/75">
             {settings.addressLines.map((line) => (
-              <p key={line}>{line}</p>
+              <p key={line} className="break-words">
+                {line}
+              </p>
             ))}
           </address>
           <div className="mt-4 space-y-1 text-sm">
             {hasValue(settings.phone) ? (
-              <a href={`tel:${settings.phone}`} className="block text-white/75 hover:text-white">
+              <a
+                href={`tel:${settings.phone}`}
+                className="block break-all text-white/75 hover:text-white"
+              >
                 {settings.phone}
               </a>
             ) : null}
             {hasValue(settings.email) ? (
               <a
                 href={`mailto:${settings.email}`}
-                className="block text-white/75 hover:text-white"
+                className="block break-all text-white/75 hover:text-white"
               >
                 {settings.email}
               </a>
             ) : null}
           </div>
-          <div className="mt-6 flex gap-4 text-xs text-white/50">
-            <Link href="/kvkk" className="hover:text-white">
+          <div className="mt-6 flex flex-wrap gap-4 text-xs text-white/50">
+            <Link href="/kvkk" className="inline-flex min-h-11 items-center hover:text-white">
               KVKK
             </Link>
-            <Link href="/gizlilik" className="hover:text-white">
+            <Link
+              href="/gizlilik"
+              className="inline-flex min-h-11 items-center hover:text-white"
+            >
               Gizlilik
             </Link>
           </div>

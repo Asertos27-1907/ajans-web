@@ -53,7 +53,7 @@ export default function ContactForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-4 border border-border bg-surface p-6 shadow-[var(--shadow-soft)] md:p-8"
+      className="space-y-4 border border-border bg-surface p-4 shadow-[var(--shadow-soft)] sm:p-6 md:p-8"
     >
       <h2 className="text-lg font-semibold">Mesaj gönder</h2>
       <FormField label="Ad Soyad" required error={errors.name}>

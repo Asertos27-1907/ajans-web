@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { InputHTMLAttributes, TextareaHTMLAttributes, SelectHTMLAttributes, forwardRef } from "react";
 
 const fieldClass =
-  "w-full rounded-[var(--radius)] border border-border bg-surface px-3 py-2.5 text-sm text-ink outline-none transition duration-200 focus:border-primary/50 focus:ring-2 focus:ring-primary/10 placeholder:text-ink-soft";
+  "w-full min-h-11 rounded-[var(--radius)] border border-border bg-surface px-3 py-2.5 text-sm text-ink outline-none transition duration-200 focus:border-primary/50 focus:ring-2 focus:ring-primary/10 placeholder:text-ink-soft";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => (

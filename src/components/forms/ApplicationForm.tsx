@@ -113,23 +113,27 @@ export function ApplicationForm({
 
   if (done) {
     return (
-      <div className="border border-border bg-surface p-8 text-center md:p-12">
+      <div className="border border-border bg-surface p-5 text-center sm:p-8 md:p-12">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft text-primary">
           <Check size={28} />
         </div>
-        <h2 className="font-display mt-5 text-2xl font-semibold">
+        <h2 className="font-display mt-5 text-xl font-semibold sm:text-2xl">
           Başvurunuz alındı
         </h2>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-muted">
           Teşekkür ederiz. Uygun görülen adaylarla telefon üzerinden iletişime
           geçilecektir.
         </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href="/">
-            <Button variant="outline">Ana sayfa</Button>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
+          <Link href="/" className="w-full sm:w-auto">
+            <Button variant="outline" className="min-h-11 w-full sm:w-auto">
+              Ana sayfa
+            </Button>
           </Link>
-          <Link href="/hizmetler">
-            <Button>Hizmetlerimizi Keşfedin</Button>
+          <Link href="/hizmetler" className="w-full sm:w-auto">
+            <Button className="min-h-11 w-full sm:w-auto">
+              Hizmetlerimizi Keşfedin
+            </Button>
           </Link>
         </div>
       </div>
@@ -140,7 +144,7 @@ export function ApplicationForm({
     <div>
       <form
         onSubmit={onSubmit}
-        className="border border-border bg-surface p-5 shadow-[var(--shadow-soft)] md:p-8"
+        className="border border-border bg-surface p-4 shadow-[var(--shadow-soft)] sm:p-5 md:p-8"
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <FormField label="Ad" required error={errors.firstName}>
@@ -234,8 +238,8 @@ export function ApplicationForm({
                 <Upload size={18} className="mt-0.5 shrink-0 text-primary" />
                 <p>Sürükleyip bırakın veya dosya seçin</p>
               </div>
-              <label className="cursor-pointer">
-                <span className="inline-flex h-9 cursor-pointer items-center rounded border border-border-strong bg-surface px-3 text-sm font-medium hover:border-primary/40 hover:text-primary">
+              <label className="cursor-pointer self-stretch sm:self-auto">
+                <span className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded border border-border-strong bg-surface px-4 text-sm font-medium hover:border-primary/40 hover:text-primary sm:w-auto">
                   Fotoğraf seç
                 </span>
                 <input
@@ -266,7 +270,7 @@ export function ApplicationForm({
                     />
                     <button
                       type="button"
-                      className="absolute top-1 right-1 cursor-pointer rounded bg-black/70 p-1 text-white"
+                      className="absolute top-1 right-1 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded bg-black/70 text-white sm:h-8 sm:w-8"
                       aria-label="Fotoğrafı kaldır"
                       onClick={() =>
                         setPhotos((prev) => prev.filter((x) => x.id !== p.id))
@@ -284,14 +288,14 @@ export function ApplicationForm({
           ) : null}
         </div>
 
-        <label className="mt-6 flex cursor-pointer items-start gap-3 text-sm">
+        <label className="mt-6 flex min-h-11 cursor-pointer items-start gap-3 text-sm">
           <input
             type="checkbox"
-            className="mt-1 cursor-pointer"
+            className="mt-1 h-5 w-5 shrink-0 cursor-pointer"
             checked={kvkk}
             onChange={(e) => setKvkk(e.target.checked)}
           />
-          <span>
+          <span className="leading-relaxed">
             <Link
               href="/kvkk"
               className="underline underline-offset-2 hover:text-primary"
@@ -311,7 +315,7 @@ export function ApplicationForm({
           <Button
             type="submit"
             size="lg"
-            className="w-full sm:w-auto"
+            className="min-h-11 w-full sm:w-auto"
             disabled={submitting}
           >
             {submitting ? "Gönderiliyor..." : "BAŞVURU YAP"}

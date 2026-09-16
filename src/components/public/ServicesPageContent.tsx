@@ -33,13 +33,13 @@ export function ServicesPageContent({ settings }: { settings: SiteSettings }) {
     <div>
       <section className="relative overflow-hidden border-b border-border bg-secondary text-white">
         <div className="pointer-events-none absolute top-10 right-[12%] h-20 w-20 rotate-6 border border-white/15" />
-        <div className="container-wide py-14 md:py-20">
-          <Reveal direction="up">
+        <div className="container-wide py-10 sm:py-14 md:py-20">
+          <Reveal direction="up" className="min-w-0">
             <p className="eyebrow text-white/50">Hizmetler</p>
-            <h1 className="font-display mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
+            <h1 className="font-display mt-3 max-w-3xl text-[clamp(1.75rem,6.5vw,3rem)] font-semibold tracking-tight">
               {settings.servicesSectionTitle}
             </h1>
-            <p className="mt-4 max-w-2xl text-lg text-white/70">
+            <p className="mt-4 max-w-2xl text-base text-white/70 sm:text-lg">
               Eğitimden casting süreçlerine, menajerlikten prodüksiyon
               desteğine kadar profesyonel yetenek yönetimi.
             </p>
@@ -71,12 +71,12 @@ export function ServicesPageContent({ settings }: { settings: SiteSettings }) {
                       sizes="(max-width:1024px) 100vw, 50vw"
                     />
                   </div>
-                  <div className="border-l-2 border-transparent p-6 transition duration-300 group-hover:border-primary md:p-10">
+                  <div className="border-l-2 border-transparent p-5 transition duration-300 group-hover:border-primary sm:p-6 md:p-10">
                     <Icon className="text-primary" size={26} strokeWidth={1.6} />
-                    <h2 className="mt-5 font-display text-2xl font-semibold tracking-tight md:text-3xl">
+                    <h2 className="mt-5 font-display text-[clamp(1.25rem,4.5vw,1.875rem)] font-semibold tracking-tight">
                       {service.title}
                     </h2>
-                    <p className="mt-4 text-base leading-relaxed text-ink-muted">
+                    <p className="mt-4 text-sm leading-relaxed text-ink-muted sm:text-base">
                       {service.description}
                     </p>
                   </div>
@@ -86,8 +86,10 @@ export function ServicesPageContent({ settings }: { settings: SiteSettings }) {
           })}
         </div>
         <div className="container-wide mt-12">
-          <Link href="/basvuru" className="inline-flex cursor-pointer">
-            <Button size="lg">Oyuncu Başvurusu</Button>
+          <Link href="/basvuru" className="inline-flex w-full cursor-pointer sm:w-auto">
+            <Button size="lg" className="w-full sm:w-auto">
+              Oyuncu Başvurusu
+            </Button>
           </Link>
         </div>
       </section>

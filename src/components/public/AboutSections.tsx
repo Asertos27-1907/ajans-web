@@ -34,7 +34,7 @@ export function AboutSections({ aboutImageUrl }: { aboutImageUrl: string }) {
         <div className="container-wide grid items-start gap-10 lg:grid-cols-12 lg:gap-16">
           <Reveal
             direction="left"
-            className="frame-corner relative aspect-[4/5] overflow-hidden bg-bg-muted lg:col-span-5"
+            className="frame-corner relative aspect-[5/4] overflow-hidden bg-bg-muted sm:aspect-[4/5] lg:col-span-5"
           >
             <Image
               src={aboutImageUrl || SITE_IMAGES.about.main}
@@ -48,7 +48,7 @@ export function AboutSections({ aboutImageUrl }: { aboutImageUrl: string }) {
           <div className="lg:col-span-7">
             <Reveal direction="up">
               <p className="eyebrow">Biz Kimiz</p>
-              <h2 className="font-display title-accent mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+              <h2 className="font-display title-accent mt-3 text-[clamp(1.5rem,5.5vw,2.25rem)] font-semibold tracking-tight">
                 {SECTIONS[0].title}
               </h2>
               <p className="mt-6 text-base leading-relaxed text-ink-muted md:text-lg">

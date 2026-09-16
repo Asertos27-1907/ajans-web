@@ -20,7 +20,7 @@ export const metadata: Metadata = createMetadata();
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="tr" className={`${display.variable} ${body.variable} h-full`}>
-      <body className="min-h-full antialiased">{children}</body>
+      <body className="flex min-h-full flex-col antialiased">{children}</body>
     </html>
   );
 }
