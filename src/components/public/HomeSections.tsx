@@ -71,7 +71,7 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
             direction="none"
             className="mb-5 inline-flex sm:mb-6"
           >
-            <span className="drop-shadow-[0_6px_28px_rgba(0,0,0,0.55)] [filter:drop-shadow(0_1px_0_rgba(255,255,255,0.35))]">
+            <span className="[filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.65))_drop-shadow(0_8px_24px_rgba(0,0,0,0.35))]">
               <BrandLogo variant="hero" href={null} priority />
             </span>
           </HeroMotion>
