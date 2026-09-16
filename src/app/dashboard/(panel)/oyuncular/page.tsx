@@ -300,7 +300,7 @@ export default function ActorsAdminPage() {
           <div
             role="dialog"
             aria-modal="true"
-            className="flex max-h-[95vh] w-full max-w-2xl flex-col overflow-hidden bg-surface shadow-[var(--shadow-soft)] sm:rounded"
+            className="flex max-h-[100dvh] w-full max-w-2xl flex-col overflow-hidden bg-surface shadow-[var(--shadow-soft)] max-sm:h-[100dvh] max-sm:max-h-none sm:max-h-[95vh] sm:rounded"
           >
             <div className="flex items-center justify-between border-b border-border bg-secondary px-4 py-3 text-white">
               <h2 className="font-display text-lg font-semibold">

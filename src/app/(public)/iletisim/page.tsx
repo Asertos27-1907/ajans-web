@@ -28,7 +28,7 @@ export default async function ContactPage() {
       <section className="border-b border-border bg-bg-muted/50">
         <div className="container-wide py-14 md:py-16">
           <p className="eyebrow">İletişim</p>
-          <h1 className="font-display title-accent mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+          <h1 className="font-display title-accent mt-3 text-[clamp(1.85rem,6vw,3rem)] font-semibold tracking-tight break-words">
             Bize ulaşın
           </h1>
           <p className="mt-4 max-w-2xl text-ink-muted">

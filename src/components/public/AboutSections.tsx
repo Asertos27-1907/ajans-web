@@ -34,24 +34,24 @@ export function AboutSections({ aboutImageUrl }: { aboutImageUrl: string }) {
         <div className="container-wide grid items-start gap-10 lg:grid-cols-12 lg:gap-16">
           <Reveal
             direction="left"
-            className="frame-corner relative aspect-[4/5] overflow-hidden bg-bg-muted lg:col-span-5"
+            className="frame-corner relative aspect-[4/3] overflow-hidden bg-bg-muted sm:aspect-[5/4] lg:col-span-5 lg:aspect-[4/5]"
           >
             <Image
               src={aboutImageUrl || SITE_IMAGES.about.main}
               alt="+Akademi ofis ve prodüksiyon atmosferi"
               fill
-              className="object-cover"
+              className="object-cover object-center"
               sizes="(max-width:1024px) 100vw, 42vw"
               priority
             />
           </Reveal>
-          <div className="lg:col-span-7">
+          <div className="min-w-0 lg:col-span-7">
             <Reveal direction="up">
               <p className="eyebrow">Biz Kimiz</p>
-              <h2 className="font-display title-accent mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+              <h2 className="font-display title-accent mt-3 text-[clamp(1.6rem,4.5vw,2.5rem)] font-semibold tracking-tight break-words">
                 {SECTIONS[0].title}
               </h2>
-              <p className="mt-6 text-base leading-relaxed text-ink-muted md:text-lg">
+              <p className="mt-6 text-sm leading-relaxed text-ink-muted md:text-lg">
                 {SECTIONS[0].text}
               </p>
             </Reveal>
@@ -61,10 +61,10 @@ export function AboutSections({ aboutImageUrl }: { aboutImageUrl: string }) {
 
       <section className="section-pad bg-bg-muted decor-geo">
         <div className="container-wide">
-          <Stagger className="grid gap-10 md:grid-cols-3">
+          <Stagger className="grid grid-cols-1 gap-8 sm:gap-10 md:grid-cols-3">
             {SECTIONS.slice(1).map((section) => (
-              <article key={section.id} className="border-l-2 border-primary pl-5">
-                <h2 className="font-display text-xl font-semibold tracking-tight md:text-2xl">
+              <article key={section.id} className="min-w-0 border-l-2 border-primary pl-5">
+                <h2 className="font-display text-xl font-semibold tracking-tight break-words md:text-2xl">
                   {section.title}
                 </h2>
                 <p className="mt-4 text-sm leading-relaxed text-ink-muted md:text-base">

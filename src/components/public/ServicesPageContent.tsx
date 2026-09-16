@@ -36,7 +36,7 @@ export function ServicesPageContent({ settings }: { settings: SiteSettings }) {
         <div className="container-wide py-14 md:py-20">
           <Reveal direction="up">
             <p className="eyebrow text-white/50">Hizmetler</p>
-            <h1 className="font-display mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
+            <h1 className="font-display mt-3 max-w-3xl text-[clamp(1.85rem,6vw,3rem)] font-semibold tracking-tight break-words">
               {settings.servicesSectionTitle}
             </h1>
             <p className="mt-4 max-w-2xl text-lg text-white/70">
@@ -67,7 +67,7 @@ export function ServicesPageContent({ settings }: { settings: SiteSettings }) {
                       src={image}
                       alt={service.title}
                       fill
-                      className="object-cover object-center transition duration-300 group-hover:scale-[1.03]"
+                    className="object-cover object-[center_30%] transition duration-300 group-hover:scale-[1.03] sm:object-center"
                       sizes="(max-width:1024px) 100vw, 50vw"
                     />
                   </div>

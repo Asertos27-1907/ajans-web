@@ -13,10 +13,10 @@ export function PublicFooter({ settings }: { settings: SiteSettings }) {
 
   return (
     <footer className="border-t border-border bg-bg-deep text-[#f3efe8]">
-      <div className="container-wide grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div className="container-wide grid gap-8 py-10 sm:gap-10 sm:py-14 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <div className="inline-block rounded bg-white p-2">
-            <BrandLogo />
+          <div className="inline-block rounded bg-white/95 p-2">
+            <BrandLogo size="footer" />
           </div>
           <p className="mt-5 max-w-md text-sm leading-relaxed text-white/70">
             {settings.footerText}

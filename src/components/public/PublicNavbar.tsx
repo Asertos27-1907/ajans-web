@@ -21,17 +21,21 @@ export function PublicNavbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   return (
     <header
       className={cn(
         "sticky top-0 z-50 border-b transition-colors",
         scrolled
           ? "border-border bg-[color-mix(in_oklab,var(--bg)_92%,white)] backdrop-blur-md"
-          : "border-transparent bg-bg/80 backdrop-blur-sm",
+          : "border-transparent bg-bg/85 backdrop-blur-sm",
       )}
     >
-      <div className="container-wide flex h-16 items-center justify-between gap-4 md:h-[4.25rem]">
-        <BrandLogo priority />
+      <div className="container-wide flex h-[4.25rem] items-center justify-between gap-3 sm:h-[4.75rem] md:h-[5.25rem] md:gap-4">
+        <BrandLogo priority size="nav" />
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Ana menü">
           {NAV_LINKS.map((link) => {
@@ -43,7 +47,6 @@ export function PublicNavbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => setOpen(false)}
                 className={cn(
                   "cursor-pointer rounded px-3 py-2 text-sm font-medium transition-colors duration-200",
                   active
@@ -57,13 +60,14 @@ export function PublicNavbar() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Link href="/basvuru" className="hidden sm:block">
             <Button size="sm">Oyuncu Başvurusu</Button>
           </Link>
           <button
             type="button"
-            className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded border border-border bg-surface lg:hidden"
+            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded border border-border bg-surface lg:hidden"
+            aria-expanded={open}
             aria-label={open ? "Menüyü kapat" : "Menüyü aç"}
             onClick={() => setOpen((v) => !v)}
           >
@@ -80,7 +84,7 @@ export function PublicNavbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="px-1 py-3 text-sm font-medium text-ink"
+                className="min-h-11 px-1 py-3 text-sm font-medium text-ink"
               >
                 {link.label}
               </Link>

@@ -14,7 +14,7 @@ import {
   X,
   LogOut,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DASHBOARD_NAV } from "@/config/constants";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/public/BrandLogo";
@@ -33,6 +33,19 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   const nav = (
     <nav className="space-y-1 p-3">
       {DASHBOARD_NAV.map((item) => {
@@ -47,7 +60,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             href={item.href}
             onClick={() => setOpen(false)}
             className={cn(
-              "flex items-center gap-3 rounded px-3 py-2.5 text-sm font-medium transition-colors",
+              "flex min-h-11 items-center gap-3 rounded px-3 py-2.5 text-sm font-medium transition-colors",
               active
                 ? "bg-primary text-white"
                 : "cursor-pointer text-ink-muted hover:bg-primary-soft hover:text-primary",
@@ -62,22 +75,22 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-bg-muted text-ink">
+    <div className="min-h-screen overflow-x-clip bg-bg-muted text-ink">
       <div className="flex min-h-screen">
         <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">
           <div className="border-b border-border p-4">
-            <div className="rounded bg-white p-1">
-              <BrandLogo />
+            <div className="rounded bg-white p-1.5">
+              <BrandLogo size="footer" />
             </div>
             <p className="mt-3 text-xs tracking-wide text-ink-soft uppercase">
               Yönetim Paneli
             </p>
           </div>
-          <div className="flex-1">{nav}</div>
+          <div className="flex-1 overflow-y-auto">{nav}</div>
           <div className="border-t border-border p-3">
             <Link
               href="/dashboard/login"
-              className="flex items-center gap-2 rounded px-3 py-2 text-sm text-ink-muted hover:bg-bg-muted"
+              className="flex min-h-11 items-center gap-2 rounded px-3 py-2 text-sm text-ink-muted hover:bg-bg-muted"
             >
               <LogOut size={16} /> Çıkış (mock)
             </Link>
@@ -85,23 +98,28 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-surface/95 px-4 backdrop-blur lg:px-6">
+          <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-3 border-b border-border bg-surface/95 px-3 backdrop-blur sm:px-4 lg:px-6">
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded border border-border lg:hidden"
+              className="inline-flex h-11 w-11 items-center justify-center rounded border border-border lg:hidden"
               onClick={() => setOpen(true)}
               aria-label="Menü"
             >
               <Menu size={18} />
             </button>
-            <p className="text-sm font-medium text-ink-muted">
+            <p className="truncate text-sm font-medium text-ink-muted">
               +Akademi Dashboard
             </p>
-            <Link href="/" className="text-sm text-ink-muted hover:text-ink">
+            <Link
+              href="/"
+              className="shrink-0 text-sm text-ink-muted hover:text-ink"
+            >
               Siteyi gör
             </Link>
           </header>
-          <div className="flex-1 p-4 md:p-6">{children}</div>
+          <div className="min-w-0 flex-1 overflow-x-clip p-3 sm:p-4 md:p-6">
+            {children}
+          </div>
         </div>
       </div>
 
@@ -109,18 +127,25 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/45"
             aria-label="Kapat"
             onClick={() => setOpen(false)}
           />
-          <aside className="absolute top-0 left-0 flex h-full w-72 flex-col bg-surface shadow-xl">
-            <div className="flex items-center justify-between border-b border-border p-4">
-              <BrandLogo />
-              <button type="button" onClick={() => setOpen(false)} aria-label="Kapat">
+          <aside className="absolute top-0 left-0 flex h-full w-[min(20rem,88vw)] flex-col bg-surface shadow-xl">
+            <div className="flex items-center justify-between gap-3 border-b border-border p-4">
+              <div className="min-w-0 rounded bg-white p-1">
+                <BrandLogo size="footer" />
+              </div>
+              <button
+                type="button"
+                className="inline-flex h-11 w-11 items-center justify-center rounded border border-border"
+                onClick={() => setOpen(false)}
+                aria-label="Kapat"
+              >
                 <X size={18} />
               </button>
             </div>
-            {nav}
+            <div className="flex-1 overflow-y-auto">{nav}</div>
           </aside>
         </div>
       ) : null}
