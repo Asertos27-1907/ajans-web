@@ -55,6 +55,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
@@ -62,6 +63,7 @@ body {
   color: var(--ink);
   font-family: var(--font-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
 }
 
 h1,
@@ -102,17 +104,27 @@ select,
 }
 
 .container-site {
-  width: min(1120px, calc(100% - 2rem));
+  width: min(1120px, calc(100% - 1.5rem));
   margin-inline: auto;
 }
 
 .container-wide {
-  width: min(1280px, calc(100% - 2rem));
+  width: min(1280px, calc(100% - 1.5rem));
   margin-inline: auto;
 }
 
+@media (min-width: 480px) {
+  .container-site {
+    width: min(1120px, calc(100% - 2rem));
+  }
+
+  .container-wide {
+    width: min(1280px, calc(100% - 2rem));
+  }
+}
+
 .section-pad {
-  padding-block: clamp(3.75rem, 8vw, 6.5rem);
+  padding-block: clamp(2.75rem, 7vw, 6.5rem);
 }
 
 .eyebrow {
@@ -183,8 +195,8 @@ select,
   position: absolute;
   top: -48px;
   right: -36px;
-  width: 160px;
-  height: 160px;
+  width: min(160px, 36vw);
+  height: min(160px, 36vw);
   border: 1px solid color-mix(in oklab, var(--secondary) 28%, transparent);
   transform: rotate(14deg);
   pointer-events: none;
@@ -196,8 +208,8 @@ select,
   position: absolute;
   bottom: 12%;
   left: -20px;
-  width: 96px;
-  height: 96px;
+  width: min(96px, 28vw);
+  height: min(96px, 28vw);
   border: 1px solid color-mix(in oklab, var(--primary) 18%, transparent);
   opacity: 0.55;
   pointer-events: none;

@@ -4,7 +4,8 @@
  */
 export const SITE_IMAGES = {
   brand: {
-    logo: "/brand/logo.jpeg",
+    logo: "/brand/logo.png",
+    logoSolid: "/brand/logo.jpeg",
   },
   hero: {
     main: "/images/home/anasayfa.jpeg",

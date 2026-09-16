@@ -26,12 +26,12 @@ export default async function ContactPage() {
   return (
     <div>
       <section className="border-b border-border bg-bg-muted/50">
-        <div className="container-wide py-14 md:py-16">
+        <div className="container-wide py-10 sm:py-14 md:py-16">
           <p className="eyebrow">İletişim</p>
-          <h1 className="font-display title-accent mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+          <h1 className="font-display title-accent mt-3 text-[clamp(1.75rem,6.5vw,3rem)] font-semibold tracking-tight">
             Bize ulaşın
           </h1>
-          <p className="mt-4 max-w-2xl text-ink-muted">
+          <p className="mt-4 max-w-2xl text-sm text-ink-muted sm:text-base">
             Casting talepleri, iş ortaklığı ve genel sorularınız için formu
             kullanabilir veya ofisimizi ziyaret edebilirsiniz.
           </p>
@@ -39,12 +39,14 @@ export default async function ContactPage() {
       </section>
 
       <section className="section-pad">
-        <div className="container-wide grid gap-10 lg:grid-cols-2 lg:gap-12">
-          <div>
+        <div className="container-wide grid gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
+          <div className="min-w-0">
             <h2 className="text-xl font-semibold">Ofis</h2>
-            <address className="mt-4 space-y-1 text-base not-italic text-ink-muted">
+            <address className="mt-4 space-y-1 text-sm not-italic text-ink-muted sm:text-base">
               {settings.addressLines.map((line) => (
-                <p key={line}>{line}</p>
+                <p key={line} className="break-words">
+                  {line}
+                </p>
               ))}
             </address>
 
@@ -111,18 +113,18 @@ export default async function ContactPage() {
             </div>
           </div>
 
-          <div className="min-h-[320px] overflow-hidden border border-border bg-bg-muted lg:min-h-[520px]">
+          <div className="min-h-[280px] overflow-hidden border border-border bg-bg-muted sm:min-h-[320px] lg:min-h-[520px]">
             {hasValue(settings.googleMapsEmbedUrl) ? (
               <iframe
                 title="+Akademi konum haritası"
                 src={settings.googleMapsEmbedUrl}
-                className="h-full min-h-[320px] w-full border-0 lg:min-h-[520px]"
+                className="h-full min-h-[280px] w-full border-0 sm:min-h-[320px] lg:min-h-[520px]"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 allowFullScreen
               />
             ) : (
-              <div className="flex h-full min-h-[320px] items-center justify-center p-8 text-center text-sm text-ink-muted">
+              <div className="flex h-full min-h-[280px] items-center justify-center p-6 text-center text-sm text-ink-muted sm:min-h-[320px] sm:p-8">
                 Harita bağlantısı henüz eklenmedi. Dashboard → Firma Bilgileri
                 alanından Google Maps Embed URL girilebilir.
               </div>

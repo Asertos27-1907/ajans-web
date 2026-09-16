@@ -21,6 +21,10 @@ export function PublicNavbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   return (
     <header
       className={cn(
@@ -30,10 +34,10 @@ export function PublicNavbar() {
           : "border-transparent bg-bg/80 backdrop-blur-sm",
       )}
     >
-      <div className="container-wide flex h-16 items-center justify-between gap-4 md:h-[4.25rem]">
-        <BrandLogo priority />
+      <div className="container-wide flex h-[4.75rem] items-center justify-between gap-3 sm:h-[5.25rem] md:h-[5.75rem] md:gap-4">
+        <BrandLogo priority variant="nav" />
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Ana menü">
+        <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Ana menü">
           {NAV_LINKS.map((link) => {
             const active =
               link.href === "/"
@@ -43,9 +47,8 @@ export function PublicNavbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => setOpen(false)}
                 className={cn(
-                  "cursor-pointer rounded px-3 py-2 text-sm font-medium transition-colors duration-200",
+                  "cursor-pointer rounded px-3 py-2.5 text-sm font-medium transition-colors duration-200",
                   active
                     ? "text-primary"
                     : "text-ink-muted hover:text-primary",
@@ -57,14 +60,17 @@ export function PublicNavbar() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Link href="/basvuru" className="hidden sm:block">
-            <Button size="sm">Oyuncu Başvurusu</Button>
+            <Button size="sm" className="min-h-11">
+              Oyuncu Başvurusu
+            </Button>
           </Link>
           <button
             type="button"
-            className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded border border-border bg-surface lg:hidden"
+            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded border border-border bg-surface lg:hidden"
             aria-label={open ? "Menüyü kapat" : "Menüyü aç"}
+            aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
           >
             {open ? <X size={18} /> : <Menu size={18} />}
@@ -74,19 +80,26 @@ export function PublicNavbar() {
 
       {open ? (
         <div className="border-t border-border bg-surface lg:hidden">
-          <nav className="container-wide flex flex-col py-3" aria-label="Mobil menü">
+          <nav
+            className="container-wide flex flex-col py-2"
+            aria-label="Mobil menü"
+          >
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="px-1 py-3 text-sm font-medium text-ink"
+                className="flex min-h-11 items-center px-1 py-3 text-sm font-medium text-ink"
               >
                 {link.label}
               </Link>
             ))}
-            <Link href="/basvuru" className="mt-2" onClick={() => setOpen(false)}>
-              <Button className="w-full">Oyuncu Başvurusu</Button>
+            <Link
+              href="/basvuru"
+              className="mt-2 mb-2"
+              onClick={() => setOpen(false)}
+            >
+              <Button className="min-h-11 w-full">Oyuncu Başvurusu</Button>
             </Link>
           </nav>
         </div>
