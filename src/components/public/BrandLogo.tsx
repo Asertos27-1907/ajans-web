@@ -9,19 +9,19 @@ const LOGO_ASPECT = "aspect-[1399/653]";
 const sizeClass = {
   nav: cn(
     LOGO_ASPECT,
-    "h-[48px] w-auto",
-    "sm:h-[54px]",
-    "md:h-[62px]",
-    "lg:h-[70px]",
+    "h-[52px] w-auto",
+    "sm:h-[58px]",
+    "md:h-[66px]",
+    "lg:h-[72px]",
   ),
   hero: cn(
     LOGO_ASPECT,
-    "h-auto w-[min(158px,78vw)]",
-    "sm:w-[180px]",
-    "md:w-[228px]",
-    "lg:w-[252px]",
+    "h-auto w-[min(162px,78vw)]",
+    "sm:w-[186px]",
+    "md:w-[232px]",
+    "lg:w-[256px]",
   ),
-  footer: cn(LOGO_ASPECT, "h-[50px] w-auto sm:h-[58px]"),
+  footer: cn(LOGO_ASPECT, "h-[52px] w-auto sm:h-[60px]"),
 } as const;
 
 export type BrandLogoVariant = keyof typeof sizeClass;

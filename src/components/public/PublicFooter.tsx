@@ -15,7 +15,7 @@ export function PublicFooter({ settings }: { settings: SiteSettings }) {
     <footer className="border-t border-border bg-bg-deep text-[#f3efe8]">
       <div className="container-wide grid gap-8 py-12 sm:gap-10 sm:py-14 md:grid-cols-[1.4fr_1fr_1fr]">
         <div className="min-w-0">
-          <div className="inline-flex rounded-sm bg-white/95 p-1.5 sm:p-2">
+          <div className="inline-flex rounded-sm bg-white/90 p-2 sm:p-2.5">
             <BrandLogo variant="footer" />
           </div>
           <p className="mt-5 max-w-md text-sm leading-relaxed text-white/70">

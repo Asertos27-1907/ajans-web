@@ -69,9 +69,11 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
           <HeroMotion
             delay={0.05}
             direction="none"
-            className="mb-5 inline-flex rounded-sm bg-white/75 p-1 shadow-[0_10px_36px_rgba(0,0,0,0.22)] backdrop-blur-[8px] sm:mb-6 sm:p-1.5"
+            className="mb-5 inline-flex sm:mb-6"
           >
-            <BrandLogo variant="hero" href={null} priority />
+            <span className="rounded-sm bg-white/55 p-2 shadow-[0_10px_36px_rgba(0,0,0,0.28)] backdrop-blur-[10px] sm:p-2.5 md:p-3">
+              <BrandLogo variant="hero" href={null} priority />
+            </span>
           </HeroMotion>
           <HeroMotion delay={0.12} direction="left">
             <p className="eyebrow text-white/60">
