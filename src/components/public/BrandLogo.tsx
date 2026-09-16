@@ -3,29 +3,25 @@ import Link from "next/link";
 import { SITE_IMAGES } from "@/config/site-images";
 import { cn } from "@/lib/utils";
 
-/**
- * Logo JPEG is 1536×1024 with large vertical padding.
- * Visible mark is ~1362×608 (≈2.24:1). Containers use that
- * aspect with object-cover so the mark fills the box.
- */
-const LOGO_ASPECT = "aspect-[1362/608]";
+/** Cropped logo mark ≈ 1399×653 (≈2.14:1). */
+const LOGO_ASPECT = "aspect-[1399/653]";
 
 const sizeClass = {
   nav: cn(
     LOGO_ASPECT,
-    "h-[46px] w-auto",
-    "sm:h-[52px]",
-    "md:h-[60px]",
-    "lg:h-[68px]",
+    "h-[48px] w-auto",
+    "sm:h-[54px]",
+    "md:h-[62px]",
+    "lg:h-[70px]",
   ),
   hero: cn(
     LOGO_ASPECT,
-    "h-auto w-[min(148px,72vw)]",
-    "sm:w-[168px]",
-    "md:w-[220px]",
-    "lg:w-[248px]",
+    "h-auto w-[min(158px,78vw)]",
+    "sm:w-[180px]",
+    "md:w-[228px]",
+    "lg:w-[252px]",
   ),
-  footer: cn(LOGO_ASPECT, "h-[48px] w-auto sm:h-[56px]"),
+  footer: cn(LOGO_ASPECT, "h-[50px] w-auto sm:h-[58px]"),
 } as const;
 
 export type BrandLogoVariant = keyof typeof sizeClass;
@@ -47,13 +43,13 @@ export function BrandLogo({
         src={SITE_IMAGES.brand.logo}
         alt="+Akademi Oyunculuk & Menajerlik"
         fill
-        className="object-cover object-center"
+        className="object-contain object-center"
         sizes={
           variant === "hero"
-            ? "(max-width:640px) 148px, (max-width:1024px) 220px, 248px"
+            ? "(max-width:640px) 158px, (max-width:1024px) 228px, 252px"
             : variant === "footer"
-              ? "160px"
-              : "(max-width:640px) 120px, (max-width:1024px) 150px, 190px"
+              ? "170px"
+              : "(max-width:640px) 140px, (max-width:1024px) 170px, 200px"
         }
         priority={priority}
       />

@@ -34,7 +34,7 @@ export function PublicNavbar() {
           : "border-transparent bg-bg/80 backdrop-blur-sm",
       )}
     >
-      <div className="container-wide flex h-[4.25rem] items-center justify-between gap-3 sm:h-[4.75rem] md:h-[5.25rem] md:gap-4">
+      <div className="container-wide flex h-[4.5rem] items-center justify-between gap-3 sm:h-[5rem] md:h-[5.5rem] md:gap-4">
         <BrandLogo priority variant="nav" />
 
         <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Ana menü">
