@@ -28,19 +28,23 @@ export default function ReferencesAdminPage() {
   }, []);
 
   async function createNew() {
-    const item = await referenceRepository.create({
-      title: "Yeni Referans",
-      category: "diger",
-      year: new Date().getFullYear(),
-      description: "",
-      coverImageUrl: "/placeholders/ref-01.jpg",
-      actorIds: [],
-      isFeatured: false,
-      isActive: true,
-      sortOrder: items.length + 1,
-    });
-    setEditing(item);
-    load();
+    try {
+      const item = await referenceRepository.create({
+        title: "Yeni Referans",
+        category: "diger",
+        year: new Date().getFullYear(),
+        description: "",
+        coverImageUrl: "",
+        actorIds: [],
+        isFeatured: false,
+        isActive: true,
+        sortOrder: items.length + 1,
+      });
+      setEditing(item);
+      load();
+    } catch {
+      // ignore — empty UI remains
+    }
   }
 
   async function save() {

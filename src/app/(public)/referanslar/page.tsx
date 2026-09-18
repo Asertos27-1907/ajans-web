@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { referenceRepository } from "@/lib/repositories";
+import { listReferences } from "@/lib/references/service";
 import { createMetadata } from "@/lib/seo";
 import { CATEGORY_LABELS } from "@/config/constants";
 import { EmptyState } from "@/components/ui/StatusBadge";
@@ -11,7 +11,9 @@ export const metadata = createMetadata({
 });
 
 export default async function ReferencesPage() {
-  const items = await referenceRepository.list({ activeOnly: true });
+  const items = await listReferences()
+    .then((rows) => rows.filter((r) => r.isActive))
+    .catch(() => []);
 
   return (
     <div>

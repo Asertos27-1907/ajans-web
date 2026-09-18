@@ -6,7 +6,7 @@ import {
   ServicesSection,
   WhySection,
 } from "@/components/public/HomeSections";
-import { settingsRepository } from "@/lib/repositories";
+import { getMergedSiteSettings } from "@/lib/settings/service";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata = createMetadata({
@@ -18,7 +18,7 @@ export const metadata = createMetadata({
 });
 
 export default async function HomePage() {
-  const settings = await settingsRepository.get();
+  const settings = await getMergedSiteSettings();
 
   return (
     <>

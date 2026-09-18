@@ -47,6 +47,7 @@ export default function SiteSettingsPage() {
   const [tab, setTab] = useState<TabId>("firma");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
   const [, startTransition] = useTransition();
 
@@ -60,11 +61,17 @@ export default function SiteSettingsPage() {
     const payload = next ?? settings;
     if (!payload) return;
     setSaving(true);
-    const updated = await settingsRepository.update(payload);
-    setSettings(updated);
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1800);
+    setSaveError("");
+    try {
+      const updated = await settingsRepository.update(payload);
+      setSettings(updated);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1800);
+    } catch {
+      setSaveError("Ayarlar kaydedilemedi.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (!settings) {
@@ -96,6 +103,7 @@ export default function SiteSettingsPage() {
         }
       />
 
+      {saveError ? <p className="mb-3 text-sm text-danger">{saveError}</p> : null}
       <div className="container-settings mx-auto">
         <div className="mb-5 flex gap-1 overflow-x-auto border-b border-border pb-px">
           {TABS.map((t) => (

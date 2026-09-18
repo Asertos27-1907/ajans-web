@@ -1,5 +1,5 @@
 import { ApplicationForm } from "@/components/forms/ApplicationForm";
-import { settingsRepository } from "@/lib/repositories";
+import { getMergedSiteSettings } from "@/lib/settings/service";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata = createMetadata({
@@ -10,7 +10,7 @@ export const metadata = createMetadata({
 });
 
 export default async function ApplicationPage() {
-  const settings = await settingsRepository.get();
+  const settings = await getMergedSiteSettings();
 
   return (
     <div>

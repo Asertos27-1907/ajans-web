@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Clapperboard,
   FileText,
@@ -18,6 +18,9 @@ import { useState } from "react";
 import { DASHBOARD_NAV } from "@/config/constants";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/public/BrandLogo";
+import { createClient } from "@/lib/supabase/client";
+import type { ProfileRole } from "@/lib/auth/types";
+import { canManageAdmins } from "@/lib/auth/types";
 
 const iconMap = {
   LayoutDashboard,
@@ -29,13 +32,35 @@ const iconMap = {
   Shield,
 } as const;
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({
+  children,
+  role,
+}: {
+  children: React.ReactNode;
+  role: ProfileRole;
+}) {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.replace("/dashboard/login");
+    router.refresh();
+  }
+
+  const items = DASHBOARD_NAV.filter(
+    (item) =>
+      item.href !== "/dashboard/adminler" || canManageAdmins(role),
+  );
 
   const nav = (
     <nav className="space-y-1 p-3">
-      {DASHBOARD_NAV.map((item) => {
+      {items.map((item) => {
         const Icon = iconMap[item.icon as keyof typeof iconMap] ?? LayoutDashboard;
         const active =
           item.href === "/dashboard"
@@ -75,12 +100,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex-1">{nav}</div>
           <div className="border-t border-border p-3">
-            <Link
-              href="/dashboard/login"
-              className="flex items-center gap-2 rounded px-3 py-2 text-sm text-ink-muted hover:bg-bg-muted"
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-ink-muted hover:bg-bg-muted disabled:opacity-60"
             >
-              <LogOut size={16} /> Çıkış (mock)
-            </Link>
+              <LogOut size={16} /> {loggingOut ? "Çıkış yapılıyor..." : "Çıkış"}
+            </button>
           </div>
         </aside>
 

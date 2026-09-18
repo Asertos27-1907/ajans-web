@@ -62,6 +62,7 @@ export default function ActorDetailPage() {
             className="object-cover"
             sizes="280px"
             priority
+            unoptimized
           />
         </div>
         <div className="space-y-6">
@@ -107,6 +108,7 @@ export default function ActorDetailPage() {
                       fill
                       className="object-cover"
                       sizes="160px"
+                      unoptimized
                     />
                   </div>
                 ))}

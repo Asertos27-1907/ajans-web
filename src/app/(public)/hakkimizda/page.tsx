@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { settingsRepository } from "@/lib/repositories";
+import { getMergedSiteSettings } from "@/lib/settings/service";
 import { createMetadata } from "@/lib/seo";
 import { Button } from "@/components/ui/Button";
 import { SITE_IMAGES } from "@/config/site-images";
@@ -15,7 +15,7 @@ export const metadata = createMetadata({
 });
 
 export default async function AboutPage() {
-  const settings = await settingsRepository.get();
+  const settings = await getMergedSiteSettings();
 
   return (
     <div>

@@ -1,32 +1,44 @@
 export type ApplicationStatus =
-  | "yeni"
-  | "inceleniyor"
-  | "gorusme"
-  | "kabul"
-  | "red"
-  | "arsiv";
+  | "new"
+  | "reviewing"
+  | "interview"
+  | "accepted"
+  | "rejected"
+  | "archived";
 
 export type Gender = "kadin" | "erkek" | "diger" | "belirtmek_istemiyor";
 
-export type AdminRole =
-  | "SUPER_ADMIN"
-  | "EDITOR"
-  | "CASTING_MANAGER"
-  | "VIEWER";
+export type AdminRole = "owner" | "admin";
 
-export type ReferenceCategory =
-  | "dizi"
-  | "sinema"
-  | "reklam"
-  | "klip"
-  | "produksiyon"
-  | "diger";
+export type ContactStatus = "new" | "read" | "resolved" | "archived";
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  status: ContactStatus;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: AdminRole;
+  isActive: boolean;
+  createdAt: string;
+}
 
 export interface ActorPhoto {
   id: string;
   actorId: string;
   url: string;
   thumbnailUrl: string;
+  storagePath: string;
   alt: string;
   isCover: boolean;
   sortOrder: number;
@@ -37,7 +49,9 @@ export interface ApplicationPhoto {
   applicationId: string;
   url: string;
   thumbnailUrl: string;
-  type: "portre" | "tam_boy" | "ek";
+  storagePath: string;
+  sortOrder: number;
+  type?: "portre" | "tam_boy" | "ek";
   alt: string;
 }
 
@@ -85,6 +99,14 @@ export interface Actor {
   updatedAt: string;
 }
 
+export type ReferenceCategory =
+  | "dizi"
+  | "sinema"
+  | "reklam"
+  | "klip"
+  | "produksiyon"
+  | "diger";
+
 export interface ReferenceProject {
   id: string;
   title: string;
@@ -92,22 +114,12 @@ export interface ReferenceProject {
   year: number;
   description: string;
   coverImageUrl: string;
+  imagePath?: string | null;
   logoUrl?: string;
   actorIds: string[];
   isFeatured: boolean;
   isActive: boolean;
   sortOrder: number;
-  createdAt: string;
-}
-
-export interface ContactMessage {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  subject: string;
-  message: string;
-  isRead: boolean;
   createdAt: string;
 }
 
@@ -184,15 +196,6 @@ export interface SiteSettings {
   aboutImageUrl: string;
   stats: SiteStat[];
   footerText: string;
-}
-
-export interface AdminUser {
-  id: string;
-  name: string;
-  email: string;
-  role: AdminRole;
-  isActive: boolean;
-  createdAt: string;
 }
 
 export interface PaginatedResult<T> {

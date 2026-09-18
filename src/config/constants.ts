@@ -1,10 +1,10 @@
 export const STATUS_LABELS: Record<string, string> = {
-  yeni: "Yeni",
-  inceleniyor: "İnceleniyor",
-  gorusme: "Görüşme",
-  kabul: "Kabul",
-  red: "Reddedildi",
-  arsiv: "Arşiv",
+  new: "Yeni",
+  reviewing: "İnceleniyor",
+  interview: "Görüşme",
+  accepted: "Kabul",
+  rejected: "Reddedildi",
+  archived: "Arşiv",
 };
 
 export const GENDER_LABELS: Record<string, string> = {
@@ -24,10 +24,15 @@ export const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export const ROLE_LABELS: Record<string, string> = {
-  SUPER_ADMIN: "Süper Admin",
-  EDITOR: "Editör",
-  CASTING_MANAGER: "Casting Yöneticisi",
-  VIEWER: "Görüntüleyici",
+  owner: "Owner",
+  admin: "Admin",
+};
+
+export const CONTACT_STATUS_LABELS: Record<string, string> = {
+  new: "Yeni",
+  read: "Okundu",
+  resolved: "Çözüldü",
+  archived: "Arşiv",
 };
 
 /** Public navbar/footer links. Oyuncular & Referanslar hidden until content is ready. */

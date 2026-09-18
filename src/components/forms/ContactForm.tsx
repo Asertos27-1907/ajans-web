@@ -11,12 +11,15 @@ export default function ContactForm() {
   const [phone, setPhone] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [website, setWebsite] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setFormError("");
     const eMap: Record<string, string> = {};
     if (!name.trim()) eMap.name = "Ad gerekli";
     if (!email.trim()) eMap.email = "E-posta gerekli";
@@ -32,8 +35,13 @@ export default function ContactForm() {
         phone: phone.trim() || undefined,
         subject: subject.trim(),
         message: message.trim(),
+        website,
       });
       setSent(true);
+    } catch (err) {
+      setFormError(
+        err instanceof Error ? err.message : "Mesaj gönderilemedi.",
+      );
     } finally {
       setLoading(false);
     }
@@ -53,8 +61,22 @@ export default function ContactForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-4 border border-border bg-surface p-6 shadow-[var(--shadow-soft)] md:p-8"
+      className="relative space-y-4 border border-border bg-surface p-6 shadow-[var(--shadow-soft)] md:p-8"
     >
+      <div
+        aria-hidden="true"
+        className="absolute -left-[9999px] h-0 w-0 overflow-hidden opacity-0"
+      >
+        <label>
+          Website
+          <input
+            tabIndex={-1}
+            autoComplete="off"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+          />
+        </label>
+      </div>
       <h2 className="text-lg font-semibold">Mesaj gönder</h2>
       <FormField label="Ad Soyad" required error={errors.name}>
         <Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -78,6 +100,7 @@ export default function ContactForm() {
           onChange={(e) => setMessage(e.target.value)}
         />
       </FormField>
+      {formError ? <p className="text-sm text-danger">{formError}</p> : null}
       <Button type="submit" disabled={loading} className="w-full sm:w-auto">
         {loading ? "Gönderiliyor..." : "Gönder"}
       </Button>

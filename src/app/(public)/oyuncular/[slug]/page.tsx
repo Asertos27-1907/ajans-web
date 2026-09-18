@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { actorRepository } from "@/lib/repositories";
+import { getActorBySlug } from "@/lib/actors/service";
 import { createMetadata } from "@/lib/seo";
 import { fullName } from "@/lib/utils";
 import { GENDER_LABELS } from "@/config/constants";
@@ -13,14 +13,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const actor = await actorRepository.getBySlug(slug);
+  const actor = await getActorBySlug(slug).catch(() => null);
   if (!actor) return createMetadata({ title: "Oyuncu", path: `/oyuncular/${slug}` });
   const name = fullName(actor.firstName, actor.lastName);
   return createMetadata({
     title: name,
     description: `${name} — ${actor.city}, ${actor.age} yaş`,
     path: `/oyuncular/${slug}`,
-    image: actor.coverPhotoUrl,
+    image: actor.coverPhotoUrl || undefined,
   });
 }
 
@@ -30,7 +30,7 @@ export default async function ActorDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const actor = await actorRepository.getBySlug(slug);
+  const actor = await getActorBySlug(slug).catch(() => null);
   if (!actor) notFound();
 
   const rows: [string, string][] = [

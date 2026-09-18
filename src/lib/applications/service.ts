@@ -1,0 +1,510 @@
+import "server-only";
+
+import { randomUUID } from "crypto";
+import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  APPLICATION_PHOTOS_BUCKET,
+  ALLOWED_PHOTO_MIME,
+  MAX_PHOTO_BYTES,
+  MAX_PHOTOS,
+  MIN_PHOTOS,
+  SIGNED_URL_TTL_SECONDS,
+  applicationFieldsSchema,
+  applicationUpdateSchema,
+  type ApplicationFieldsInput,
+} from "@/lib/applications/schema";
+import {
+  mapApplication,
+  mapPhoto,
+  type DbApplicationPhotoRow,
+  type DbApplicationRow,
+} from "@/lib/applications/map";
+import type {
+  Application,
+  ApplicationFilters,
+  ApplicationStatus,
+  PaginatedResult,
+} from "@/types";
+
+function extensionForMime(mime: string): string {
+  if (mime === "image/png") return "png";
+  if (mime === "image/webp") return "webp";
+  return "jpg";
+}
+
+function resolvePhotoMime(file: File): string | null {
+  if ((ALLOWED_PHOTO_MIME as readonly string[]).includes(file.type)) {
+    return file.type;
+  }
+  // Some browsers leave File.type empty; fall back to extension.
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".png")) return "image/png";
+  if (name.endsWith(".webp")) return "image/webp";
+  if (name.endsWith(".jpg") || name.endsWith(".jpeg")) return "image/jpeg";
+  return null;
+}
+
+function validatePhotoFiles(files: File[]): string | null {
+  if (files.length < MIN_PHOTOS) {
+    return "En az 1 fotoğraf gerekli";
+  }
+  if (files.length > MAX_PHOTOS) {
+    return "En fazla 5 fotoğraf yükleyebilirsiniz";
+  }
+
+  for (const file of files) {
+    if (!resolvePhotoMime(file)) {
+      return "Sadece JPG, PNG veya WEBP fotoğraf yükleyebilirsiniz";
+    }
+    if (file.size <= 0 || file.size > MAX_PHOTO_BYTES) {
+      return "Her fotoğraf en fazla 10 MB olabilir";
+    }
+  }
+
+  return null;
+}
+
+function logApplicationError(
+  stage: string,
+  error: {
+    message?: string;
+    code?: string;
+    details?: string;
+    hint?: string;
+    statusCode?: string | number;
+    name?: string;
+  } | null,
+) {
+  if (process.env.NODE_ENV !== "development" || !error) return;
+  console.warn(`[applications/${stage}]`, {
+    message: error.message ?? null,
+    code: error.code ?? null,
+    details: error.details ?? null,
+    hint: error.hint ?? null,
+    statusCode: error.statusCode ?? null,
+    name: error.name ?? null,
+  });
+}
+
+function mapDbPermissionMessage(error: {
+  message?: string;
+  code?: string;
+  hint?: string;
+} | null): string | null {
+  if (!error) return null;
+  const blob = `${error.message ?? ""} ${error.hint ?? ""} ${error.code ?? ""}`.toLowerCase();
+  if (
+    error.code === "42501" ||
+    blob.includes("permission denied") ||
+    blob.includes("grant ")
+  ) {
+    return "Başvuru veritabanı erişim izni eksik. Supabase SQL Editor'da src/lib/applications/fix-applications-access.sql dosyasını çalıştırın.";
+  }
+  return null;
+}
+
+async function cleanupApplication(
+  applicationId: string,
+  storagePaths: string[],
+) {
+  const admin = createAdminClient();
+
+  if (storagePaths.length) {
+    await admin.storage.from(APPLICATION_PHOTOS_BUCKET).remove(storagePaths);
+  }
+
+  await admin.from("application_photos").delete().eq("application_id", applicationId);
+  await admin.from("applications").delete().eq("id", applicationId);
+}
+
+async function signPaths(
+  paths: string[],
+): Promise<Map<string, string>> {
+  const admin = createAdminClient();
+  const map = new Map<string, string>();
+  if (!paths.length) return map;
+
+  const { data, error } = await admin.storage
+    .from(APPLICATION_PHOTOS_BUCKET)
+    .createSignedUrls(paths, SIGNED_URL_TTL_SECONDS);
+
+  if (error || !data) {
+    return map;
+  }
+
+  data.forEach((item, index) => {
+    const path = paths[index];
+    if (path && item.signedUrl) {
+      map.set(path, item.signedUrl);
+    }
+  });
+
+  return map;
+}
+
+async function attachSignedPhotos(
+  rows: DbApplicationRow[],
+): Promise<Application[]> {
+  if (!rows.length) return [];
+
+  const admin = createAdminClient();
+  const ids = rows.map((r) => r.id);
+  const { data: photoRows } = await admin
+    .from("application_photos")
+    .select("id, application_id, storage_path, sort_order")
+    .in("application_id", ids)
+    .order("sort_order", { ascending: true });
+
+  const photos = (photoRows ?? []) as DbApplicationPhotoRow[];
+  const signed = await signPaths(photos.map((p) => p.storage_path));
+
+  return rows.map((row) => {
+    const appPhotos = photos
+      .filter((p) => p.application_id === row.id)
+      .map((p) => mapPhoto(p, signed.get(p.storage_path) ?? null));
+    return mapApplication(row, appPhotos);
+  });
+}
+
+export async function createPublicApplication(input: {
+  fields: Record<string, FormDataEntryValue | null>;
+  photos: File[];
+  honeypot?: string;
+}): Promise<{ ok: true; id: string } | { ok: false; message: string }> {
+  if (input.honeypot && input.honeypot.trim()) {
+    return { ok: false, message: "Başvuru gönderilemedi." };
+  }
+
+  const parsed = applicationFieldsSchema.safeParse({
+    first_name: input.fields.first_name,
+    last_name: input.fields.last_name,
+    phone: input.fields.phone,
+    birth_date: input.fields.birth_date,
+    gender: input.fields.gender,
+    city: input.fields.city,
+    height_cm: input.fields.height_cm,
+    weight_kg: input.fields.weight_kg,
+    experience: input.fields.experience,
+    kvkk: input.fields.kvkk,
+  });
+
+  if (!parsed.success) {
+    const first = parsed.error.issues[0]?.message ?? "Form bilgileri geçersiz";
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[applications/validation]", {
+        issues: parsed.error.issues.map((issue) => ({
+          path: issue.path.join("."),
+          message: issue.message,
+        })),
+      });
+    }
+    return { ok: false, message: first };
+  }
+
+  const photoError = validatePhotoFiles(input.photos);
+  if (photoError) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[applications/photos-validation]", {
+        message: photoError,
+        count: input.photos.length,
+        types: input.photos.map((f) => f.type || "(empty)"),
+      });
+    }
+    return { ok: false, message: photoError };
+  }
+
+  const data = parsed.data as ApplicationFieldsInput;
+  let admin;
+  try {
+    admin = createAdminClient();
+  } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[applications/admin-init]", {
+        message: err instanceof Error ? err.message : "unknown",
+      });
+    }
+    return {
+      ok: false,
+      message: "Sunucu yapılandırması eksik. Lütfen daha sonra tekrar deneyin.",
+    };
+  }
+
+  const { data: inserted, error: insertError } = await admin
+    .from("applications")
+    .insert({
+      first_name: data.first_name,
+      last_name: data.last_name,
+      phone: data.phone,
+      birth_date: data.birth_date,
+      gender: data.gender,
+      city: data.city,
+      height_cm: data.height_cm ?? null,
+      weight_kg: data.weight_kg ?? null,
+      experience: data.experience || null,
+      status: "new",
+    })
+    .select("id")
+    .single();
+
+  if (insertError || !inserted?.id) {
+    logApplicationError("applications-insert", insertError);
+    return {
+      ok: false,
+      message:
+        mapDbPermissionMessage(insertError) ??
+        "Başvuru kaydedilemedi. Lütfen daha sonra tekrar deneyin.",
+    };
+  }
+
+  const applicationId = inserted.id as string;
+  const uploadedPaths: string[] = [];
+
+  try {
+    for (let i = 0; i < input.photos.length; i++) {
+      const file = input.photos[i];
+      const mime = resolvePhotoMime(file) ?? "image/jpeg";
+      const ext = extensionForMime(mime);
+      const storagePath = `applications/${applicationId}/${randomUUID()}.${ext}`;
+      const buffer = Buffer.from(await file.arrayBuffer());
+
+      const { error: uploadError } = await admin.storage
+        .from(APPLICATION_PHOTOS_BUCKET)
+        .upload(storagePath, buffer, {
+          contentType: mime,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        logApplicationError("storage-upload", uploadError);
+        throw Object.assign(new Error("upload_failed"), { cause: uploadError });
+      }
+
+      uploadedPaths.push(storagePath);
+
+      const { error: photoRowError } = await admin
+        .from("application_photos")
+        .insert({
+          application_id: applicationId,
+          storage_path: storagePath,
+          sort_order: i,
+        });
+
+      if (photoRowError) {
+        logApplicationError("application-photos-insert", photoRowError);
+        throw Object.assign(new Error("photo_row_failed"), {
+          cause: photoRowError,
+        });
+      }
+    }
+
+    return { ok: true, id: applicationId };
+  } catch (err) {
+    await cleanupApplication(applicationId, uploadedPaths);
+
+    const cause =
+      err && typeof err === "object" && "cause" in err
+        ? (err.cause as {
+            message?: string;
+            code?: string;
+            details?: string;
+            hint?: string;
+          } | null)
+        : null;
+
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[applications/photos-pipeline]", {
+        stage:
+          err instanceof Error ? err.message : "unknown",
+        cause: cause
+          ? {
+              message: cause.message ?? null,
+              code: cause.code ?? null,
+              details: cause.details ?? null,
+              hint: cause.hint ?? null,
+            }
+          : null,
+      });
+    }
+
+    return {
+      ok: false,
+      message:
+        mapDbPermissionMessage(cause) ??
+        "Fotoğraflar yüklenirken bir sorun oluştu. Lütfen tekrar deneyin.",
+    };
+  }
+}
+
+export async function listApplications(
+  filters: ApplicationFilters = {},
+): Promise<PaginatedResult<Application>> {
+  const admin = createAdminClient();
+  const {
+    search,
+    city,
+    gender,
+    status,
+    ageMin,
+    ageMax,
+    page = 1,
+    pageSize = 20,
+  } = filters;
+
+  let query = admin
+    .from("applications")
+    .select(
+      "id, first_name, last_name, phone, birth_date, gender, city, height_cm, weight_kg, experience, status, admin_note, tags, created_at, updated_at",
+      { count: "exact" },
+    )
+    .order("created_at", { ascending: false });
+
+  if (city) query = query.eq("city", city);
+  if (gender) query = query.eq("gender", gender);
+  if (status) query = query.eq("status", status);
+
+  if (search?.trim()) {
+    const q = search.trim().replace(/[%_,]/g, "");
+    query = query.or(
+      `first_name.ilike.%${q}%,last_name.ilike.%${q}%,phone.ilike.%${q}%`,
+    );
+  }
+
+  // Age filters need birth_date math; fetch a larger window then paginate in memory when used.
+  const needsAgeFilter = ageMin != null || ageMax != null;
+
+  if (!needsAgeFilter) {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    query = query.range(from, to);
+  }
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    throw new Error("list_failed");
+  }
+
+  const rows = (data ?? []) as DbApplicationRow[];
+  let mapped = await attachSignedPhotos(rows);
+
+  if (needsAgeFilter) {
+    mapped = mapped.filter((app) => {
+      if (ageMin != null && app.age < ageMin) return false;
+      if (ageMax != null && app.age > ageMax) return false;
+      return true;
+    });
+    const total = mapped.length;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const safePage = Math.min(Math.max(page, 1), totalPages);
+    const start = (safePage - 1) * pageSize;
+    return {
+      data: mapped.slice(start, start + pageSize),
+      total,
+      page: safePage,
+      pageSize,
+      totalPages,
+    };
+  }
+
+  const total = count ?? mapped.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  return {
+    data: mapped,
+    total,
+    page,
+    pageSize,
+    totalPages,
+  };
+}
+
+export async function getApplicationById(
+  id: string,
+): Promise<Application | null> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("applications")
+    .select(
+      "id, first_name, last_name, phone, birth_date, gender, city, height_cm, weight_kg, experience, status, admin_note, tags, created_at, updated_at",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  const [mapped] = await attachSignedPhotos([data as DbApplicationRow]);
+  return mapped ?? null;
+}
+
+export async function updateApplication(
+  id: string,
+  patch: {
+    status?: ApplicationStatus;
+    adminNotes?: string;
+    tags?: string[];
+  },
+): Promise<Application | null> {
+  const parsed = applicationUpdateSchema.safeParse({
+    status: patch.status,
+    admin_note: patch.adminNotes,
+    tags: patch.tags,
+  });
+
+  if (!parsed.success) {
+    throw new Error("validation_failed");
+  }
+
+  const updatePayload: Record<string, unknown> = {};
+  if (parsed.data.status !== undefined) updatePayload.status = parsed.data.status;
+  if (parsed.data.admin_note !== undefined) {
+    updatePayload.admin_note = parsed.data.admin_note;
+  }
+  if (parsed.data.tags !== undefined) updatePayload.tags = parsed.data.tags;
+
+  if (!Object.keys(updatePayload).length) {
+    return getApplicationById(id);
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("applications")
+    .update(updatePayload)
+    .eq("id", id);
+
+  if (error) {
+    throw new Error("update_failed");
+  }
+
+  return getApplicationById(id);
+}
+
+export async function archiveApplication(id: string) {
+  return updateApplication(id, { status: "archived" });
+}
+
+export async function getApplicationStats() {
+  const admin = createAdminClient();
+
+  const [totalRes, newRes, reviewingRes] = await Promise.all([
+    admin.from("applications").select("id", { count: "exact", head: true }),
+    admin
+      .from("applications")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "new"),
+    admin
+      .from("applications")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "reviewing"),
+  ]);
+
+  return {
+    total: totalRes.count ?? 0,
+    new: newRes.count ?? 0,
+    reviewing: reviewingRes.count ?? 0,
+  };
+}
+
+export async function listAllApplicationsRaw(): Promise<Application[]> {
+  const result = await listApplications({ page: 1, pageSize: 1000 });
+  return result.data;
+}

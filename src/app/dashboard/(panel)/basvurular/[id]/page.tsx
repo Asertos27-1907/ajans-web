@@ -19,77 +19,138 @@ export default function ApplicationDetailPage() {
   const [loading, setLoading] = useState(true);
   const [note, setNote] = useState("");
   const [tag, setTag] = useState("");
-  const [status, setStatus] = useState<ApplicationStatus>("yeni");
+  const [status, setStatus] = useState<ApplicationStatus>("new");
   const [saving, setSaving] = useState(false);
+  const [actionError, setActionError] = useState("");
   const [, startTransition] = useTransition();
 
   useEffect(() => {
     startTransition(async () => {
-      const data = await applicationRepository.getById(params.id);
-      setApp(data);
-      if (data) {
-        setNote(data.adminNotes);
-        setStatus(data.status);
+      try {
+        const data = await applicationRepository.getById(params.id);
+        setApp(data);
+        if (data) {
+          setNote(data.adminNotes);
+          setStatus(data.status);
+        }
+      } catch {
+        setApp(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
   }, [params.id]);
 
   async function saveStatus() {
     if (!app) return;
     setSaving(true);
-    const updated = await applicationRepository.updateStatus(app.id, status);
-    setApp(updated);
-    setSaving(false);
+    setActionError("");
+    try {
+      const updated = await applicationRepository.updateStatus(app.id, status);
+      setApp(updated);
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "Durum güncellenemedi.",
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function saveNote() {
     if (!app) return;
     setSaving(true);
-    const updated = await applicationRepository.update(app.id, {
-      adminNotes: note,
-    });
-    setApp(updated);
-    setSaving(false);
+    setActionError("");
+    try {
+      const updated = await applicationRepository.update(app.id, {
+        adminNotes: note,
+      });
+      setApp(updated);
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "Not kaydedilemedi.",
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function addTag() {
     if (!app || !tag.trim()) return;
-    const tags = Array.from(new Set([...app.tags, tag.trim()]));
-    const updated = await applicationRepository.update(app.id, { tags });
-    setApp(updated);
-    setTag("");
+    setActionError("");
+    try {
+      const tags = Array.from(new Set([...app.tags, tag.trim()]));
+      const updated = await applicationRepository.update(app.id, { tags });
+      setApp(updated);
+      setTag("");
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "Etiket eklenemedi.",
+      );
+    }
   }
 
-  async function toggleFavorite() {
+  async function removeTag(value: string) {
     if (!app) return;
-    const updated = await applicationRepository.update(app.id, {
-      isFavorite: !app.isFavorite,
-    });
-    setApp(updated);
+    setActionError("");
+    try {
+      const tags = app.tags.filter((t) => t !== value);
+      const updated = await applicationRepository.update(app.id, { tags });
+      setApp(updated);
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "Etiket kaldırılamadı.",
+      );
+    }
   }
 
   async function archive() {
     if (!app) return;
-    const updated = await applicationRepository.updateStatus(app.id, "arsiv");
-    setApp(updated);
-    setStatus("arsiv");
+    if (!confirm("Başvuru arşivlensin mi?")) return;
+    setSaving(true);
+    setActionError("");
+    try {
+      const updated = await applicationRepository.archive(app.id);
+      setApp(updated);
+      setStatus("archived");
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "Arşivleme başarısız.",
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function remove() {
     if (!app) return;
-    if (!confirm("Başvuru silinsin mi?")) return;
-    await applicationRepository.remove(app.id);
-    router.push("/dashboard/basvurular");
+    if (!confirm("Başvuru arşivlenecek. Devam edilsin mi?")) return;
+    setSaving(true);
+    setActionError("");
+    try {
+      await applicationRepository.remove(app.id);
+      router.push("/dashboard/basvurular");
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "İşlem başarısız.",
+      );
+      setSaving(false);
+    }
   }
 
   async function convertToActor() {
     if (!app) return;
     setSaving(true);
-    await actorRepository.fromApplication(app);
-    await applicationRepository.updateStatus(app.id, "kabul");
-    setSaving(false);
-    router.push("/dashboard/oyuncular");
+    setActionError("");
+    try {
+      await actorRepository.fromApplication(app);
+      router.push("/dashboard/oyuncular");
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "Aktarım başarısız.",
+      );
+      setSaving(false);
+    }
   }
 
   if (loading) return <div className="skeleton h-64 rounded" />;
@@ -113,32 +174,36 @@ export default function ApplicationDetailPage() {
         description={`Başvuru · ${formatDateTR(app.createdAt)}`}
         actions={
           <>
-            <Button variant="outline" size="sm" onClick={toggleFavorite}>
-              {app.isFavorite ? "Favoriden çıkar" : "Favorile"}
-            </Button>
-            <Button variant="outline" size="sm" onClick={archive}>
+            <Button variant="outline" size="sm" onClick={archive} disabled={saving}>
               Arşivle
             </Button>
-            <Button variant="danger" size="sm" onClick={remove}>
+            <Button variant="danger" size="sm" onClick={remove} disabled={saving}>
               Sil
             </Button>
             <Button size="sm" onClick={convertToActor} disabled={saving}>
-              Oyuncu havuzuna aktar
+              Oyuncuya Dönüştür
             </Button>
           </>
         }
       />
 
+      {actionError ? (
+        <p className="mb-4 text-sm text-danger">{actionError}</p>
+      ) : null}
+
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <StatusBadge status={app.status} />
         <div className="flex flex-wrap gap-1">
           {app.tags.map((t) => (
-            <span
+            <button
               key={t}
-              className="rounded bg-secondary-soft px-2 py-0.5 text-xs text-secondary"
+              type="button"
+              className="rounded bg-secondary-soft px-2 py-0.5 text-xs text-secondary hover:opacity-80"
+              onClick={() => removeTag(t)}
+              title="Etiketi kaldır"
             >
-              {t}
-            </span>
+              {t} ×
+            </button>
           ))}
         </div>
       </div>
@@ -182,15 +247,23 @@ export default function ApplicationDetailPage() {
                   key={photo.id}
                   className="relative aspect-[3/4] overflow-hidden bg-bg-muted"
                 >
-                  <Image
-                    src={photo.thumbnailUrl || photo.url}
-                    alt={photo.alt}
-                    fill
-                    className="object-cover"
-                    sizes="160px"
-                  />
+                  {photo.thumbnailUrl || photo.url ? (
+                    <Image
+                      src={photo.thumbnailUrl || photo.url}
+                      alt={photo.alt}
+                      fill
+                      className="object-cover"
+                      sizes="160px"
+                      unoptimized
+                    />
+                  ) : null}
                 </div>
               ))}
+              {!app.photos.length ? (
+                <p className="col-span-full text-sm text-ink-muted">
+                  Fotoğraf yok.
+                </p>
+              ) : null}
             </div>
           </section>
         </div>

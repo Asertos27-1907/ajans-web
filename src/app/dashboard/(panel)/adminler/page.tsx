@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { adminRepository } from "@/lib/repositories";
-import type { AdminRole, AdminUser } from "@/types";
+import type { AdminUser } from "@/types";
 import { Button } from "@/components/ui/Button";
-import { FormField, Input, Select } from "@/components/ui/Field";
+import { FormField, Input } from "@/components/ui/Field";
 import { EmptyState, PageHeader } from "@/components/ui/StatusBadge";
 import { ROLE_LABELS } from "@/config/constants";
 import { formatDateShort } from "@/lib/utils";
@@ -14,14 +14,21 @@ export default function AdminsPage() {
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<AdminRole>("VIEWER");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [, startTransition] = useTransition();
 
   function load() {
     setLoading(true);
     startTransition(async () => {
-      setItems(await adminRepository.list());
-      setLoading(false);
+      try {
+        setItems(await adminRepository.list());
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Liste yüklenemedi.");
+      } finally {
+        setLoading(false);
+      }
     });
   }
 
@@ -29,58 +36,71 @@ export default function AdminsPage() {
     load();
   }, []);
 
-  async function createAdmin() {
-    if (!name.trim() || !email.trim()) return;
-    await adminRepository.create({
-      name: name.trim(),
-      email: email.trim(),
-      role,
-      isActive: true,
-    });
-    setName("");
-    setEmail("");
-    setRole("VIEWER");
-    load();
+  async function inviteAdmin() {
+    if (!name.trim() || !email.trim()) {
+      setError("Ad ve e-posta gerekli.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    setSuccess("");
+    try {
+      await adminRepository.invite({
+        name: name.trim(),
+        email: email.trim(),
+      });
+      setName("");
+      setEmail("");
+      setSuccess("Davet gönderildi.");
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Davet gönderilemedi.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function toggleActive(admin: AdminUser) {
-    await adminRepository.update(admin.id, { isActive: !admin.isActive });
-    load();
-  }
-
-  async function changeRole(admin: AdminUser, next: AdminRole) {
-    await adminRepository.update(admin.id, { role: next });
-    load();
+    if (admin.role === "owner") {
+      setError("Owner hesabı pasifleştirilemez.");
+      return;
+    }
+    setError("");
+    try {
+      await adminRepository.setActive(admin.id, !admin.isActive);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Güncelleme başarısız.");
+    }
   }
 
   return (
     <div>
       <PageHeader
         title="Adminler"
-        description="Mock rol yönetimi — gerçek auth sonra bağlanacak"
+        description="Yalnızca owner yöneticileri davet edebilir ve yönetebilir"
       />
 
-      <div className="mb-6 grid gap-3 rounded border border-border bg-surface p-4 sm:grid-cols-4">
-        <FormField label="Ad">
+      <div className="mb-6 grid gap-3 rounded border border-border bg-surface p-4 sm:grid-cols-3">
+        <FormField label="Ad Soyad">
           <Input value={name} onChange={(e) => setName(e.target.value)} />
         </FormField>
         <FormField label="E-posta">
-          <Input value={email} onChange={(e) => setEmail(e.target.value)} />
-        </FormField>
-        <FormField label="Rol">
-          <Select
-            value={role}
-            onChange={(e) => setRole(e.target.value as AdminRole)}
-          >
-            {Object.entries(ROLE_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>{v}</option>
-            ))}
-          </Select>
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </FormField>
         <div className="flex items-end">
-          <Button onClick={createAdmin}>Ekle</Button>
+          <Button onClick={inviteAdmin} disabled={saving}>
+            {saving ? "Gönderiliyor..." : "Yeni Yönetici Davet Et"}
+          </Button>
         </div>
       </div>
+
+      {error ? <p className="mb-3 text-sm text-danger">{error}</p> : null}
+      {success ? <p className="mb-3 text-sm text-success">{success}</p> : null}
 
       <div className="overflow-x-auto rounded border border-border bg-surface">
         {loading ? (
@@ -111,30 +131,24 @@ export default function AdminsPage() {
                   <td className="px-3 py-3 font-medium">{admin.name}</td>
                   <td className="px-3 py-3">{admin.email}</td>
                   <td className="px-3 py-3">
-                    <Select
-                      value={admin.role}
-                      onChange={(e) =>
-                        changeRole(admin, e.target.value as AdminRole)
-                      }
-                      className="max-w-[180px]"
-                    >
-                      {Object.entries(ROLE_LABELS).map(([k, v]) => (
-                        <option key={k} value={k}>{v}</option>
-                      ))}
-                    </Select>
+                    {ROLE_LABELS[admin.role] || admin.role}
                   </td>
                   <td className="px-3 py-3">
                     {admin.isActive ? "Aktif" : "Pasif"}
                   </td>
                   <td className="px-3 py-3">{formatDateShort(admin.createdAt)}</td>
                   <td className="px-3 py-3">
-                    <button
-                      type="button"
-                      className="underline"
-                      onClick={() => toggleActive(admin)}
-                    >
-                      {admin.isActive ? "Pasifleştir" : "Aktifleştir"}
-                    </button>
+                    {admin.role === "owner" ? (
+                      <span className="text-ink-soft">—</span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="underline"
+                        onClick={() => toggleActive(admin)}
+                      >
+                        {admin.isActive ? "Pasifleştir" : "Aktifleştir"}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -144,12 +158,10 @@ export default function AdminsPage() {
       </div>
 
       <div className="mt-6 rounded border border-border bg-bg-muted/40 p-4 text-sm text-ink-muted">
-        <p className="font-medium text-ink">Rol özeti (mock)</p>
+        <p className="font-medium text-ink">Rol özeti</p>
         <ul className="mt-2 list-disc space-y-1 pl-5">
-          <li>SUPER_ADMIN: her şey</li>
-          <li>EDITOR: site içerikleri ve referanslar</li>
-          <li>CASTING_MANAGER: başvurular ve oyuncular</li>
-          <li>VIEWER: sadece görüntüleme</li>
+          <li>owner: tüm dashboard + admin yönetimi</li>
+          <li>admin: normal dashboard erişimi (admin yönetimi yok)</li>
         </ul>
       </div>
     </div>

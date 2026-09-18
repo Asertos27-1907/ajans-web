@@ -1,4 +1,4 @@
-import { settingsRepository } from "@/lib/repositories";
+import { getMergedSiteSettings } from "@/lib/settings/service";
 import { createMetadata } from "@/lib/seo";
 import { ServicesPageContent } from "@/components/public/ServicesPageContent";
 
@@ -10,6 +10,6 @@ export const metadata = createMetadata({
 });
 
 export default async function ServicesPage() {
-  const settings = await settingsRepository.get();
+  const settings = await getMergedSiteSettings();
   return <ServicesPageContent settings={settings} />;
 }

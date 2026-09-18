@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Download, Eye, Star } from "lucide-react";
+import { Download, Eye } from "lucide-react";
 import { applicationRepository } from "@/lib/repositories";
 import type { Application, ApplicationStatus, Gender } from "@/types";
 import { Button } from "@/components/ui/Button";
@@ -35,21 +35,28 @@ export default function ApplicationsAdminPage() {
   function load(p = page) {
     setLoading(true);
     startTransition(async () => {
-      const result = await applicationRepository.list({
-        search: search || undefined,
-        city: city || undefined,
-        gender: (gender as Gender) || undefined,
-        status: (status as ApplicationStatus) || undefined,
-        ageMin: ageMin ? Number(ageMin) : undefined,
-        ageMax: ageMax ? Number(ageMax) : undefined,
-        page: p,
-        pageSize: 20,
-      });
-      setItems(result.data);
-      setTotal(result.total);
-      setPage(result.page);
-      setTotalPages(result.totalPages);
-      setLoading(false);
+      try {
+        const result = await applicationRepository.list({
+          search: search || undefined,
+          city: city || undefined,
+          gender: (gender as Gender) || undefined,
+          status: (status as ApplicationStatus) || undefined,
+          ageMin: ageMin ? Number(ageMin) : undefined,
+          ageMax: ageMax ? Number(ageMax) : undefined,
+          page: p,
+          pageSize: 20,
+        });
+        setItems(result.data);
+        setTotal(result.total);
+        setPage(result.page);
+        setTotalPages(result.totalPages);
+      } catch {
+        setItems([]);
+        setTotal(0);
+        setTotalPages(1);
+      } finally {
+        setLoading(false);
+      }
     });
   }
 
@@ -248,21 +255,21 @@ export default function ApplicationsAdminPage() {
                   </td>
                   <td className="px-3 py-3">
                     <div className="relative h-12 w-12 overflow-hidden bg-bg-muted">
-                      <Image
-                        src={app.photos[0]?.thumbnailUrl ?? "/placeholders/actor-01.jpg"}
-                        alt=""
-                        fill
-                        className="object-cover"
-                        sizes="48px"
-                      />
+                      {app.photos[0]?.thumbnailUrl ? (
+                        <Image
+                          src={app.photos[0].thumbnailUrl}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          sizes="48px"
+                          unoptimized
+                        />
+                      ) : null}
                     </div>
                   </td>
                   <td className="px-3 py-3 font-medium">
                     <span className="inline-flex items-center gap-1">
                       {fullName(app.firstName, app.lastName)}
-                      {app.isFavorite ? (
-                        <Star size={12} className="fill-primary text-primary" />
-                      ) : null}
                     </span>
                   </td>
                   <td className="px-3 py-3">{app.phone}</td>

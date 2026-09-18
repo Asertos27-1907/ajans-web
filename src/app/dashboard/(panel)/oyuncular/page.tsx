@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, Pencil, Plus, RotateCcw, X } from "lucide-react";
+import { Eye, Pencil, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { actorRepository } from "@/lib/repositories";
 import type { Actor, Gender } from "@/types";
 import { Button } from "@/components/ui/Button";
@@ -23,7 +23,6 @@ const emptyForm = {
   weightKg: "",
   experience: "",
   isActive: true,
-  coverPhotoUrl: "/assets/actor-01.jpg",
 };
 
 export default function ActorsAdminPage() {
@@ -36,22 +35,30 @@ export default function ActorsAdminPage() {
   const [editing, setEditing] = useState<Actor | null>(null);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [newPhotos, setNewPhotos] = useState<File[]>([]);
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [, startTransition] = useTransition();
 
   function load() {
     setLoading(true);
     startTransition(async () => {
-      const result = await actorRepository.list({
-        search: search || undefined,
-        gender: (gender as Gender) || undefined,
-        isActive: status === "" ? undefined : status === "1",
-        page: 1,
-        pageSize: 60,
-      });
-      setItems(result.data);
-      setTotal(result.total);
-      setLoading(false);
+      try {
+        const result = await actorRepository.list({
+          search: search || undefined,
+          gender: (gender as Gender) || undefined,
+          isActive: status === "" ? undefined : status === "1",
+          page: 1,
+          pageSize: 60,
+        });
+        setItems(result.data);
+        setTotal(result.total);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Oyuncular yüklenemedi.");
+      } finally {
+        setLoading(false);
+      }
     });
   }
 
@@ -64,6 +71,9 @@ export default function ActorsAdminPage() {
     setCreating(true);
     setEditing(null);
     setForm(emptyForm);
+    setNewPhotos([]);
+    setPhotoPreviews([]);
+    setError("");
   }
 
   function openEdit(actor: Actor) {
@@ -80,87 +90,132 @@ export default function ActorsAdminPage() {
       weightKg: actor.weightKg ? String(actor.weightKg) : "",
       experience: actor.experience || "",
       isActive: actor.isActive,
-      coverPhotoUrl: actor.coverPhotoUrl,
     });
+    setNewPhotos([]);
+    setPhotoPreviews([]);
+    setError("");
   }
 
   function closeModal() {
     setEditing(null);
     setCreating(false);
+    photoPreviews.forEach((url) => URL.revokeObjectURL(url));
+    setNewPhotos([]);
+    setPhotoPreviews([]);
+  }
+
+  function onPickPhotos(files: FileList | null) {
+    if (!files) return;
+    const list = Array.from(files).slice(0, 5);
+    setNewPhotos(list);
+    setPhotoPreviews(list.map((f) => URL.createObjectURL(f)));
   }
 
   async function save() {
     setSaving(true);
-    const age = form.birthDate ? calcAge(form.birthDate) : 0;
-    const payload = {
-      firstName: form.firstName.trim() || "Yeni",
-      lastName: form.lastName.trim() || "Oyuncu",
-      phone: form.phone.trim() || undefined,
-      birthDate: form.birthDate || "2000-01-01",
-      age,
-      gender: form.gender,
-      city: form.city.trim() || "İzmir",
-      heightCm: Number(form.heightCm) || undefined,
-      weightKg: Number(form.weightKg) || undefined,
-      experience: form.experience.trim(),
-      isActive: form.isActive,
-      coverPhotoUrl: form.coverPhotoUrl,
-    };
+    setError("");
+    try {
+      const age = form.birthDate ? calcAge(form.birthDate) : 0;
+      void age;
+      const payload = {
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        phone: form.phone.trim() || undefined,
+        birthDate: form.birthDate,
+        gender: form.gender,
+        city: form.city.trim(),
+        heightCm: Number(form.heightCm) || undefined,
+        weightKg: Number(form.weightKg) || undefined,
+        experience: form.experience.trim(),
+        isActive: form.isActive,
+      };
 
-    if (editing) {
+      if (!payload.firstName || !payload.lastName || !payload.city || !payload.birthDate) {
+        setError("Ad, soyad, şehir ve doğum tarihi zorunlu.");
+        return;
+      }
+
+      if (editing) {
+        let updated = await actorRepository.update(editing.id, payload);
+        if (newPhotos.length) {
+          updated = await actorRepository.update(editing.id, {
+            newPhotos,
+          });
+        }
+        if (updated) {
+          setItems((prev) => prev.map((a) => (a.id === updated!.id ? updated! : a)));
+        }
+      } else {
+        const actor = await actorRepository.create({
+          ...payload,
+          photos: newPhotos,
+        });
+        setItems((prev) => [actor, ...prev]);
+        setTotal((t) => t + 1);
+      }
+      closeModal();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Kayıt başarısız.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removePhoto(photoId: string) {
+    if (!editing) return;
+    setSaving(true);
+    setError("");
+    try {
       const updated = await actorRepository.update(editing.id, {
-        ...payload,
-        photos: editing.photos.length
-          ? editing.photos.map((p, i) =>
-              i === 0 ? { ...p, url: form.coverPhotoUrl, thumbnailUrl: form.coverPhotoUrl } : p,
-            )
-          : [
-              {
-                id: `${editing.id}-1`,
-                actorId: editing.id,
-                url: form.coverPhotoUrl,
-                thumbnailUrl: form.coverPhotoUrl,
-                alt: fullName(payload.firstName, payload.lastName),
-                isCover: true,
-                sortOrder: 1,
-              },
-            ],
+        deletePhotoId: photoId,
       });
       if (updated) {
+        setEditing(updated);
         setItems((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
       }
-    } else {
-      const actor = await actorRepository.create({
-        ...payload,
-        photos: [
-          {
-            id: `new-1`,
-            actorId: "",
-            url: form.coverPhotoUrl,
-            thumbnailUrl: form.coverPhotoUrl,
-            alt: fullName(payload.firstName, payload.lastName),
-            isCover: true,
-            sortOrder: 1,
-          },
-        ],
-        showOnWebsite: false,
-        isFeatured: false,
-      });
-      setItems((prev) => [actor, ...prev]);
-      setTotal((t) => t + 1);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Fotoğraf silinemedi.");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    closeModal();
   }
 
   async function toggleActive(actor: Actor, e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    const updated = await actorRepository.update(actor.id, {
-      isActive: !actor.isActive,
-    });
-    if (updated) {
-      setItems((prev) => prev.map((a) => (a.id === actor.id ? updated : a)));
+    const prev = actor.isActive;
+    setItems((items) =>
+      items.map((a) => (a.id === actor.id ? { ...a, isActive: !prev } : a)),
+    );
+    try {
+      const updated = await actorRepository.update(actor.id, {
+        isActive: !prev,
+      });
+      if (updated) {
+        setItems((items) =>
+          items.map((a) => (a.id === updated.id ? updated : a)),
+        );
+      }
+    } catch {
+      setItems((items) =>
+        items.map((a) => (a.id === actor.id ? { ...a, isActive: prev } : a)),
+      );
+      setError("Durum güncellenemedi.");
+    }
+  }
+
+  async function removeActor(actor: Actor) {
+    if (!confirm(`${fullName(actor.firstName, actor.lastName)} silinsin mi?`)) {
+      return;
+    }
+    setError("");
+    try {
+      await actorRepository.remove(actor.id);
+      setItems((prev) => prev.filter((a) => a.id !== actor.id));
+      setTotal((t) => Math.max(0, t - 1));
+      if (editing?.id === actor.id) closeModal();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Silme başarısız.");
     }
   }
 
@@ -184,6 +239,8 @@ export default function ActorsAdminPage() {
           </Button>
         }
       />
+
+      {error ? <p className="mb-3 text-sm text-danger">{error}</p> : null}
 
       <div className="mb-5 grid gap-3 rounded border border-border bg-surface p-4 md:grid-cols-4">
         <FormField label="Arama">
@@ -240,13 +297,16 @@ export default function ActorsAdminPage() {
                   className="absolute inset-0 cursor-pointer"
                   aria-label={`${fullName(actor.firstName, actor.lastName)} detay`}
                 >
-                  <Image
-                    src={actor.coverPhotoUrl}
-                    alt={fullName(actor.firstName, actor.lastName)}
-                    fill
-                    className="object-cover transition duration-500 group-hover:scale-[1.02]"
-                    sizes="(max-width:768px) 50vw, 25vw"
-                  />
+                  {actor.coverPhotoUrl ? (
+                    <Image
+                      src={actor.coverPhotoUrl}
+                      alt={fullName(actor.firstName, actor.lastName)}
+                      fill
+                      className="object-cover transition duration-500 group-hover:scale-[1.02]"
+                      sizes="(max-width:768px) 50vw, 25vw"
+                      unoptimized
+                    />
+                  ) : null}
                 </Link>
                 <button
                   type="button"
@@ -275,6 +335,14 @@ export default function ActorsAdminPage() {
                     aria-label="Düzenle"
                   >
                     <Pencil size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeActor(actor)}
+                    className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded bg-black/65 text-white hover:bg-danger"
+                    aria-label="Sil"
+                  >
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
@@ -382,12 +450,12 @@ export default function ActorsAdminPage() {
                     rows={3}
                   />
                 </FormField>
-                <FormField label="Kapak fotoğrafı URL" className="sm:col-span-2">
+                <FormField label="Fotoğraf ekle" className="sm:col-span-2">
                   <Input
-                    value={form.coverPhotoUrl}
-                    onChange={(e) =>
-                      setForm({ ...form, coverPhotoUrl: e.target.value })
-                    }
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    onChange={(e) => onPickPhotos(e.target.files)}
                   />
                 </FormField>
                 <label className="flex cursor-pointer items-center gap-2 text-sm sm:col-span-2">
@@ -401,15 +469,42 @@ export default function ActorsAdminPage() {
                   />
                   Aktif
                 </label>
-                {form.coverPhotoUrl ? (
-                  <div className="relative aspect-[3/4] max-w-[160px] overflow-hidden border border-border sm:col-span-2">
-                    <Image
-                      src={form.coverPhotoUrl}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="160px"
-                    />
+
+                {editing?.photos?.length ? (
+                  <div className="grid grid-cols-3 gap-2 sm:col-span-2">
+                    {editing.photos.map((photo) => (
+                      <div key={photo.id} className="relative aspect-[3/4] overflow-hidden border border-border">
+                        {photo.url ? (
+                          <Image
+                            src={photo.url}
+                            alt=""
+                            fill
+                            className="object-cover"
+                            sizes="120px"
+                            unoptimized
+                          />
+                        ) : null}
+                        <button
+                          type="button"
+                          className="absolute top-1 right-1 rounded bg-black/70 p-1 text-white"
+                          onClick={() => removePhoto(photo.id)}
+                          aria-label="Fotoğrafı sil"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                {photoPreviews.length ? (
+                  <div className="grid grid-cols-3 gap-2 sm:col-span-2">
+                    {photoPreviews.map((src) => (
+                      <div key={src} className="relative aspect-[3/4] overflow-hidden border border-border">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={src} alt="" className="h-full w-full object-cover" />
+                      </div>
+                    ))}
                   </div>
                 ) : null}
               </div>

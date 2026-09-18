@@ -1,11 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  applicationRepository,
-  actorRepository,
-  referenceRepository,
-  contactRepository,
-} from "@/lib/repositories";
+  getApplicationStats,
+  listApplications,
+} from "@/lib/applications/service";
+import { getActorStats, listActors } from "@/lib/actors/service";
+import { getContactStats, listContacts } from "@/lib/contacts/service";
+import { getReferenceStats } from "@/lib/references/service";
 import { PageHeader, StatusBadge } from "@/components/ui/StatusBadge";
 import { formatDateShort, fullName } from "@/lib/utils";
 import { createMetadata } from "@/lib/seo";
@@ -15,22 +16,36 @@ export const metadata = createMetadata({
   path: "/dashboard",
 });
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardHomePage() {
   const [appStats, actorStats, refStats, contactStats, apps, messages, actors] =
     await Promise.all([
-      applicationRepository.stats(),
-      actorRepository.stats(),
-      referenceRepository.stats(),
-      contactRepository.stats(),
-      applicationRepository.list({ page: 1, pageSize: 5 }),
-      contactRepository.list(),
-      actorRepository.list({ page: 1, pageSize: 5 }),
+      getApplicationStats().catch(() => ({ total: 0, new: 0, reviewing: 0 })),
+      getActorStats().catch(() => ({ total: 0, active: 0 })),
+      getReferenceStats().catch(() => ({ total: 0 })),
+      getContactStats().catch(() => ({ unread: 0, new: 0 })),
+      listApplications({ page: 1, pageSize: 5 }).catch(() => ({
+        data: [],
+        total: 0,
+        page: 1,
+        pageSize: 5,
+        totalPages: 1,
+      })),
+      listContacts().catch(() => []),
+      listActors({ page: 1, pageSize: 5 }).catch(() => ({
+        data: [],
+        total: 0,
+        page: 1,
+        pageSize: 5,
+        totalPages: 1,
+      })),
     ]);
 
   const cards = [
     { label: "Toplam Başvuru", value: appStats.total },
-    { label: "Yeni Başvuru", value: appStats.yeni },
-    { label: "İnceleniyor", value: appStats.inceleniyor },
+    { label: "Yeni Başvuru", value: appStats.new },
+    { label: "İnceleniyor", value: appStats.reviewing },
     { label: "Aktif Oyuncu", value: actorStats.active },
     { label: "Referans", value: refStats.total },
     { label: "İletişim Talebi", value: contactStats.unread },
@@ -73,13 +88,16 @@ export default async function DashboardHomePage() {
                   className="flex items-center gap-3 px-4 py-3 hover:bg-bg-muted/60"
                 >
                   <div className="relative h-10 w-10 overflow-hidden rounded bg-bg-muted">
-                    <Image
-                      src={app.photos[0]?.thumbnailUrl ?? "/placeholders/actor-01.jpg"}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="40px"
-                    />
+                    {app.photos[0]?.thumbnailUrl ? (
+                      <Image
+                        src={app.photos[0].thumbnailUrl}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="40px"
+                        unoptimized
+                      />
+                    ) : null}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">
@@ -93,6 +111,9 @@ export default async function DashboardHomePage() {
                 </Link>
               </li>
             ))}
+            {!apps.data.length ? (
+              <li className="px-4 py-6 text-sm text-ink-muted">Henüz başvuru yok.</li>
+            ) : null}
           </ul>
         </section>
 
@@ -108,7 +129,7 @@ export default async function DashboardHomePage() {
               <li key={msg.id} className="px-4 py-3">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-medium">{msg.name}</p>
-                  {!msg.isRead ? (
+                  {msg.status === "new" ? (
                     <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
                       Yeni
                     </span>
@@ -117,6 +138,9 @@ export default async function DashboardHomePage() {
                 <p className="mt-1 truncate text-xs text-ink-muted">{msg.subject}</p>
               </li>
             ))}
+            {!messages.length ? (
+              <li className="px-4 py-6 text-sm text-ink-muted">Mesaj yok.</li>
+            ) : null}
           </ul>
         </section>
 
@@ -135,13 +159,16 @@ export default async function DashboardHomePage() {
                   className="flex items-center gap-3 px-4 py-3 hover:bg-bg-muted/60"
                 >
                   <div className="relative h-10 w-10 overflow-hidden rounded bg-bg-muted">
-                    <Image
-                      src={actor.coverPhotoUrl}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="40px"
-                    />
+                    {actor.coverPhotoUrl ? (
+                      <Image
+                        src={actor.coverPhotoUrl}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="40px"
+                        unoptimized
+                      />
+                    ) : null}
                   </div>
                   <div>
                     <p className="text-sm font-medium">
@@ -152,6 +179,9 @@ export default async function DashboardHomePage() {
                 </Link>
               </li>
             ))}
+            {!actors.data.length ? (
+              <li className="px-4 py-6 text-sm text-ink-muted">Oyuncu yok.</li>
+            ) : null}
           </ul>
         </section>
       </div>

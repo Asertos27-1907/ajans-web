@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { actorRepository } from "@/lib/repositories";
+import { listPublicActors } from "@/lib/actors/service";
 import { createMetadata } from "@/lib/seo";
 import { fullName } from "@/lib/utils";
 import { GENDER_LABELS } from "@/config/constants";
@@ -19,7 +19,13 @@ export default async function ActorsPage({
 }) {
   const sp = await searchParams;
   const page = Number(sp.page || 1) || 1;
-  const result = await actorRepository.listPublic(page, 24);
+  const result = await listPublicActors(page, 24).catch(() => ({
+    data: [],
+    total: 0,
+    page: 1,
+    pageSize: 24,
+    totalPages: 1,
+  }));
 
   return (
     <div>

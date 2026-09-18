@@ -1,6 +1,6 @@
 import { PublicFooter } from "@/components/public/PublicFooter";
 import { PublicNavbar } from "@/components/public/PublicNavbar";
-import { settingsRepository } from "@/lib/repositories";
+import { getMergedSiteSettings } from "@/lib/settings/service";
 import { JsonLd } from "@/components/public/JsonLd";
 
 export default async function PublicLayout({
@@ -8,7 +8,7 @@ export default async function PublicLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await settingsRepository.get();
+  const settings = await getMergedSiteSettings();
 
   return (
     <>

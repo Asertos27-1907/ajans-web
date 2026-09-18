@@ -1,4 +1,4 @@
-import { settingsRepository } from "@/lib/repositories";
+import { getMergedSiteSettings } from "@/lib/settings/service";
 import { createMetadata } from "@/lib/seo";
 import { hasValue } from "@/lib/utils";
 import ContactForm from "@/components/forms/ContactForm";
@@ -13,7 +13,7 @@ export const metadata = createMetadata({
 });
 
 export default async function ContactPage() {
-  const settings = await settingsRepository.get();
+  const settings = await getMergedSiteSettings();
 
   const socials = [
     { href: settings.instagram, label: "Instagram", Icon: Instagram },

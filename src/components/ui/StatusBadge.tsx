@@ -3,12 +3,12 @@ import { STATUS_LABELS } from "@/config/constants";
 import type { ApplicationStatus } from "@/types";
 
 const colors: Record<ApplicationStatus, string> = {
-  yeni: "bg-[#eef2ff] text-[#3730a3]",
-  inceleniyor: "bg-[#fff7ed] text-[#9a3412]",
-  gorusme: "bg-[#ecfeff] text-[#0e7490]",
-  kabul: "bg-[#ecfdf3] text-[#027a48]",
-  red: "bg-[#fef3f2] text-[#b42318]",
-  arsiv: "bg-[#f5f5f4] text-[#57534e]",
+  new: "bg-[#eef2ff] text-[#3730a3]",
+  reviewing: "bg-[#fff7ed] text-[#9a3412]",
+  interview: "bg-[#ecfeff] text-[#0e7490]",
+  accepted: "bg-[#ecfdf3] text-[#027a48]",
+  rejected: "bg-[#fef3f2] text-[#b42318]",
+  archived: "bg-[#f5f5f4] text-[#57534e]",
 };
 
 export function StatusBadge({ status }: { status: ApplicationStatus }) {

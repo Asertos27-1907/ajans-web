@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -13,11 +13,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FormField, Input, Select, Textarea } from "@/components/ui/Field";
-import { calcAge, cn } from "@/lib/utils";
-import { applicationRepository } from "@/lib/repositories";
+import { cn } from "@/lib/utils";
 import type { Gender, SiteSettings } from "@/types";
 
-type PhotoFile = { id: string; name: string; preview: string };
+type PhotoFile = { id: string; name: string; preview: string; file: File };
 
 export function ApplicationForm({
   settings,
@@ -34,10 +33,34 @@ export function ApplicationForm({
   const [weightKg, setWeightKg] = useState("");
   const [experience, setExperience] = useState("");
   const [kvkk, setKvkk] = useState(false);
+  const [website, setWebsite] = useState("");
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const submittingRef = useRef(false);
+
+  function resetForm() {
+    setFirstName("");
+    setLastName("");
+    setPhone("");
+    setBirthDate("");
+    setGender("");
+    setCity("");
+    setHeightCm("");
+    setWeightKg("");
+    setExperience("");
+    setKvkk(false);
+    setWebsite("");
+    setPhotos((prev) => {
+      prev.forEach((p) => URL.revokeObjectURL(p.preview));
+      return [];
+    });
+    setErrors({});
+    setFormError("");
+  }
 
   function addPhotos(fileList: FileList | null) {
     if (!fileList) return;
@@ -46,16 +69,15 @@ export function ApplicationForm({
     Array.from(fileList)
       .slice(0, remaining)
       .forEach((file) => {
-        if (
-          !/^image\/(jpeg|jpg|png)$/i.test(file.type) &&
-          !/\.(jpe?g|png)$/i.test(file.name)
-        ) {
-          return;
-        }
+        const okMime = /^(image\/(jpeg|jpg|png|webp))$/i.test(file.type);
+        const okExt = /\.(jpe?g|png|webp)$/i.test(file.name);
+        if (!okMime && !okExt) return;
+        if (file.size > 10 * 1024 * 1024) return;
         next.push({
-          id: `${Date.now()}-${file.name}`,
+          id: `${Date.now()}-${file.name}-${Math.random().toString(36).slice(2)}`,
           name: file.name,
           preview: URL.createObjectURL(file),
+          file,
         });
       });
     setPhotos((prev) => [...prev, ...next].slice(0, 5));
@@ -63,12 +85,12 @@ export function ApplicationForm({
 
   function validate() {
     const e: Record<string, string> = {};
-    if (!firstName.trim()) e.firstName = "Ad gerekli";
-    if (!lastName.trim()) e.lastName = "Soyad gerekli";
+    if (firstName.trim().length < 2) e.firstName = "Ad en az 2 karakter olmalı";
+    if (lastName.trim().length < 2) e.lastName = "Soyad en az 2 karakter olmalı";
     if (!phone.trim()) e.phone = "Telefon gerekli";
     if (!birthDate) e.birthDate = "Doğum tarihi gerekli";
     if (!gender) e.gender = "Cinsiyet gerekli";
-    if (!city.trim()) e.city = "Şehir gerekli";
+    if (city.trim().length < 2) e.city = "Şehir gerekli";
     if (photos.length < 1) e.photos = "En az 1 fotoğraf gerekli";
     if (!kvkk) e.kvkk = "KVKK onayı gerekli";
     setErrors(e);
@@ -77,36 +99,50 @@ export function ApplicationForm({
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setFormError("");
+    if (submittingRef.current) return;
     if (!validate()) return;
+
+    submittingRef.current = true;
     setSubmitting(true);
+
     try {
-      const age = calcAge(birthDate);
-      await applicationRepository.create({
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        birthDate,
-        age,
-        gender: gender as Gender,
-        city: city.trim(),
-        phone: phone.trim(),
-        heightCm: Number(heightCm) || undefined,
-        weightKg: Number(weightKg) || undefined,
-        experience: experience.trim(),
-        photos: photos.map((p, i) => ({
-          id: `new-${i}`,
-          applicationId: "new",
-          url: p.preview,
-          thumbnailUrl: p.preview,
-          type: i === 0 ? "portre" : "ek",
-          alt: p.name,
-        })),
-        status: "yeni",
-        tags: ["web-basvuru"],
-        adminNotes: "",
-        isFavorite: false,
+      const formData = new FormData();
+      formData.set("first_name", firstName.trim());
+      formData.set("last_name", lastName.trim());
+      formData.set("phone", phone.trim());
+      formData.set("birth_date", birthDate);
+      formData.set("gender", gender);
+      formData.set("city", city.trim());
+      if (heightCm.trim()) formData.set("height_cm", heightCm.trim());
+      if (weightKg.trim()) formData.set("weight_kg", weightKg.trim());
+      formData.set("experience", experience.trim());
+      formData.set("kvkk", kvkk ? "true" : "false");
+      formData.set("website", website);
+      photos.forEach((p) => formData.append("photos", p.file, p.file.name));
+
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        body: formData,
       });
+
+      const data = (await res.json()) as { error?: string; message?: string };
+
+      if (!res.ok) {
+        setFormError(data.error || "Başvuru gönderilemedi.");
+        return;
+      }
+
+      resetForm();
+      setSuccessMessage(
+        data.message ||
+          "Başvurunuz başarıyla alındı. Uygun adaylarla iletişime geçilecektir.",
+      );
       setDone(true);
+    } catch {
+      setFormError("Başvuru gönderilemedi. Lütfen daha sonra tekrar deneyin.");
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   }
@@ -121,8 +157,8 @@ export function ApplicationForm({
           Başvurunuz alındı
         </h2>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-muted">
-          Teşekkür ederiz. Uygun görülen adaylarla telefon üzerinden iletişime
-          geçilecektir.
+          {successMessage ||
+            "Başvurunuz başarıyla alındı. Uygun adaylarla iletişime geçilecektir."}
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link href="/">
@@ -140,8 +176,24 @@ export function ApplicationForm({
     <div>
       <form
         onSubmit={onSubmit}
-        className="border border-border bg-surface p-5 shadow-[var(--shadow-soft)] md:p-8"
+        className="relative border border-border bg-surface p-5 shadow-[var(--shadow-soft)] md:p-8"
       >
+        {/* Honeypot — gizle, botlar doldurursa reddedilir */}
+        <div
+          aria-hidden="true"
+          className="absolute -left-[9999px] h-0 w-0 overflow-hidden opacity-0"
+        >
+          <label>
+            Website
+            <input
+              tabIndex={-1}
+              autoComplete="off"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+            />
+          </label>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <FormField label="Ad" required error={errors.firstName}>
             <Input
@@ -215,7 +267,7 @@ export function ApplicationForm({
           <p className="mb-2 text-sm font-medium text-ink">
             Fotoğraflar <span className="text-primary">*</span>
             <span className="ml-2 font-normal text-ink-soft">
-              Min 1 · Maks 5 · JPG/PNG
+              Min 1 · Maks 5 · JPG/PNG/WEBP
             </span>
           </p>
           <div
@@ -240,10 +292,10 @@ export function ApplicationForm({
                 </span>
                 <input
                   type="file"
-                  accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+                  accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
                   multiple
                   className="hidden"
-                  disabled={photos.length >= 5}
+                  disabled={photos.length >= 5 || submitting}
                   onChange={(e) => {
                     addPhotos(e.target.files);
                     e.target.value = "";
@@ -268,8 +320,13 @@ export function ApplicationForm({
                       type="button"
                       className="absolute top-1 right-1 cursor-pointer rounded bg-black/70 p-1 text-white"
                       aria-label="Fotoğrafı kaldır"
+                      disabled={submitting}
                       onClick={() =>
-                        setPhotos((prev) => prev.filter((x) => x.id !== p.id))
+                        setPhotos((prev) => {
+                          const target = prev.find((x) => x.id === p.id);
+                          if (target) URL.revokeObjectURL(target.preview);
+                          return prev.filter((x) => x.id !== p.id);
+                        })
                       }
                     >
                       <X size={14} />
@@ -290,6 +347,7 @@ export function ApplicationForm({
             className="mt-1 cursor-pointer"
             checked={kvkk}
             onChange={(e) => setKvkk(e.target.checked)}
+            disabled={submitting}
           />
           <span>
             <Link
@@ -305,6 +363,10 @@ export function ApplicationForm({
         </label>
         {errors.kvkk ? (
           <p className="mt-1 text-xs text-danger">{errors.kvkk}</p>
+        ) : null}
+
+        {formError ? (
+          <p className="mt-4 text-sm text-danger">{formError}</p>
         ) : null}
 
         <div className="mt-8">
