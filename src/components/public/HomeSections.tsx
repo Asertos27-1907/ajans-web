@@ -63,21 +63,9 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
       <div className="pointer-events-none absolute top-10 left-10 hidden h-16 w-16 border-t border-l border-primary/50 md:block" />
       <div className="pointer-events-none absolute right-10 bottom-10 hidden h-16 w-16 border-r border-b border-white/25 md:block" />
 
-      <div className="container-wide relative flex min-h-[88vh] flex-col justify-end pb-16 pt-28 md:justify-center md:pb-24 md:pt-32">
+      <div className="container-wide relative flex min-h-[88vh] flex-col justify-end pb-16 pt-24 md:justify-center md:pb-24 md:pt-28">
         <div className="max-w-3xl">
-          <HeroMotion delay={0.05} direction="none" className="mb-6 inline-flex rounded bg-white/95 p-2 shadow-[var(--shadow-soft)]">
-            <span className="relative block h-11 w-[160px] sm:h-12 sm:w-[180px]">
-              <Image
-                src={settings.logoUrl || "/brand/logo.jpeg"}
-                alt={settings.companyName}
-                fill
-                className="object-contain object-left"
-                sizes="180px"
-                priority
-              />
-            </span>
-          </HeroMotion>
-          <HeroMotion delay={0.12} direction="left">
+          <HeroMotion delay={0.08} direction="left">
             <p className="eyebrow text-white/60">
               {settings.agencyName || settings.companyName}
             </p>
@@ -85,12 +73,12 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
               {title}
             </h1>
           </HeroMotion>
-          <HeroMotion delay={0.26} direction="up">
+          <HeroMotion delay={0.22} direction="up">
             <p className="mt-5 max-w-xl text-base leading-relaxed text-white/78 md:text-lg">
               {description}
             </p>
           </HeroMotion>
-          <HeroMotion delay={0.38} direction="up" className="mt-9 flex flex-wrap gap-3">
+          <HeroMotion delay={0.34} direction="up" className="mt-9 flex flex-wrap gap-3">
             <Link href={ctaLink}>
               <Button size="lg">{ctaText}</Button>
             </Link>

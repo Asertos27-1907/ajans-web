@@ -27,6 +27,45 @@ export const ACTOR_PHOTOS_BUCKET = "actor-photos";
 const ACTOR_SELECT =
   "id, first_name, last_name, phone, birth_date, gender, city, height_cm, weight_kg, experience, active, application_id, created_at, updated_at";
 
+function logActorError(
+  stage: string,
+  error: {
+    message?: string;
+    code?: string;
+    details?: string;
+    hint?: string;
+    statusCode?: string | number;
+    name?: string;
+  } | null,
+) {
+  if (process.env.NODE_ENV !== "development" || !error) return;
+  console.warn(`[actors/${stage}]`, {
+    message: error.message ?? null,
+    code: error.code ?? null,
+    details: error.details ?? null,
+    hint: error.hint ?? null,
+    statusCode: error.statusCode ?? null,
+    name: error.name ?? null,
+  });
+}
+
+function mapDbPermissionMessage(error: {
+  message?: string;
+  code?: string;
+  hint?: string;
+} | null): string | null {
+  if (!error) return null;
+  const blob = `${error.message ?? ""} ${error.hint ?? ""} ${error.code ?? ""}`.toLowerCase();
+  if (
+    error.code === "42501" ||
+    blob.includes("permission denied") ||
+    blob.includes("grant ")
+  ) {
+    return "permission_denied";
+  }
+  return null;
+}
+
 async function attachPhotos(rows: DbActorRow[]): Promise<Actor[]> {
   if (!rows.length) return [];
   const admin = createAdminClient();
@@ -341,11 +380,19 @@ export async function convertApplicationToActor(
 ): Promise<Actor> {
   const admin = createAdminClient();
 
-  const { data: existing } = await admin
+  const { data: existing, error: existingErr } = await admin
     .from("actors")
     .select("id")
     .eq("application_id", applicationId)
     .maybeSingle();
+
+  if (existingErr) {
+    logActorError("convert-existing-check", existingErr);
+    if (mapDbPermissionMessage(existingErr)) {
+      throw new Error("permission_denied");
+    }
+    throw new Error("create_failed");
+  }
 
   if (existing) {
     throw new Error("already_converted");
@@ -359,13 +406,27 @@ export async function convertApplicationToActor(
     .eq("id", applicationId)
     .maybeSingle();
 
-  if (appErr || !app) throw new Error("application_not_found");
+  if (appErr) {
+    logActorError("convert-application-read", appErr);
+    if (mapDbPermissionMessage(appErr)) {
+      throw new Error("permission_denied");
+    }
+    throw new Error("application_not_found");
+  }
+  if (!app) throw new Error("application_not_found");
 
-  const { data: appPhotos } = await admin
+  const { data: appPhotos, error: photosErr } = await admin
     .from("application_photos")
     .select("storage_path, sort_order")
     .eq("application_id", applicationId)
     .order("sort_order", { ascending: true });
+
+  if (photosErr) {
+    logActorError("convert-application-photos-read", photosErr);
+    if (mapDbPermissionMessage(photosErr)) {
+      throw new Error("permission_denied");
+    }
+  }
 
   const { data: actorRow, error: insertErr } = await admin
     .from("actors")
@@ -386,12 +447,15 @@ export async function convertApplicationToActor(
     .single();
 
   if (insertErr || !actorRow) {
-    // Concurrent convert / unique(application_id) race
+    logActorError("convert-actors-insert", insertErr);
     if (
       insertErr?.code === "23505" ||
       /duplicate|unique/i.test(insertErr?.message ?? "")
     ) {
       throw new Error("already_converted");
+    }
+    if (mapDbPermissionMessage(insertErr)) {
+      throw new Error("permission_denied");
     }
     throw new Error("create_failed");
   }
@@ -408,7 +472,10 @@ export async function convertApplicationToActor(
       const { data: blob, error: dlErr } = await admin.storage
         .from(APPLICATION_PHOTOS_BUCKET)
         .download(sourcePath);
-      if (dlErr || !blob) throw new Error("copy_failed");
+      if (dlErr || !blob) {
+        logActorError("convert-storage-download", dlErr);
+        throw new Error("copy_failed");
+      }
 
       const buffer = Buffer.from(await blob.arrayBuffer());
       const contentType =
@@ -421,7 +488,10 @@ export async function convertApplicationToActor(
       const { error: upErr } = await admin.storage
         .from(ACTOR_PHOTOS_BUCKET)
         .upload(destPath, buffer, { contentType, upsert: false });
-      if (upErr) throw new Error("copy_failed");
+      if (upErr) {
+        logActorError("convert-storage-upload", upErr);
+        throw new Error("copy_failed");
+      }
       uploaded.push(destPath);
 
       const { error: rowErr } = await admin.from("actor_photos").insert({
@@ -429,13 +499,24 @@ export async function convertApplicationToActor(
         storage_path: destPath,
         sort_order: photo.sort_order ?? uploaded.length - 1,
       });
-      if (rowErr) throw new Error("copy_failed");
+      if (rowErr) {
+        logActorError("convert-actor-photos-insert", rowErr);
+        if (mapDbPermissionMessage(rowErr)) {
+          throw new Error("permission_denied");
+        }
+        throw new Error("copy_failed");
+      }
     }
 
-    await admin
+    const { error: statusErr } = await admin
       .from("applications")
       .update({ status: "accepted" })
       .eq("id", applicationId);
+
+    if (statusErr) {
+      logActorError("convert-application-status", statusErr);
+      // Actor already created; do not roll back solely for status update failure.
+    }
   } catch (e) {
     if (uploaded.length) {
       await admin.storage.from(ACTOR_PHOTOS_BUCKET).remove(uploaded);

@@ -31,7 +31,7 @@ export function PublicNavbar() {
       )}
     >
       <div className="container-wide flex h-16 items-center justify-between gap-4 md:h-[4.25rem]">
-        <BrandLogo priority />
+        <BrandLogo priority size="nav" />
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Ana menü">
           {NAV_LINKS.map((link) => {
