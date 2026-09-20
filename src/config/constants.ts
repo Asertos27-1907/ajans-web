@@ -35,6 +35,31 @@ export const CONTACT_STATUS_LABELS: Record<string, string> = {
   archived: "Arşiv",
 };
 
+export const CALL_STATUS_LABELS: Record<string, string> = {
+  not_called: "Aranmadı",
+  unreachable: "Ulaşılamadı",
+  call_again: "Tekrar Aranacak",
+  interested: "İlgileniyor",
+  meeting_done: "Görüşme Yapıldı",
+  face_to_face_planned: "Yüz Yüze Görüşme Planlandı",
+  positive: "Olumlu",
+  negative: "Olumsuz",
+  archived: "Arşiv",
+};
+
+export const CALL_EXPORT_COLUMNS = [
+  { key: "fullName", label: "Ad Soyad" },
+  { key: "phone", label: "Telefon" },
+  { key: "city", label: "Şehir" },
+  { key: "district", label: "İlçe" },
+  { key: "source", label: "Kaynak" },
+  { key: "status", label: "Durum" },
+  { key: "lastCalledAt", label: "Son Arama" },
+  { key: "nextActionAt", label: "Sonraki Aksiyon" },
+  { key: "personnelName", label: "Personel" },
+  { key: "note", label: "Not" },
+] as const;
+
 /** Public navbar/footer links. Oyuncular & Referanslar hidden until content is ready. */
 export const NAV_LINKS = [
   { href: "/", label: "Ana Sayfa" },
@@ -48,6 +73,7 @@ export const DASHBOARD_NAV = [
   { href: "/dashboard/basvurular", label: "Başvurular", icon: "FileText" },
   { href: "/dashboard/oyuncular", label: "Oyuncular", icon: "Users" },
   { href: "/dashboard/referanslar", label: "Referanslar", icon: "Clapperboard" },
+  { href: "/dashboard/aramalar", label: "Aramalar", icon: "PhoneCall" },
   { href: "/dashboard/iletisim", label: "İletişim", icon: "Mail" },
   { href: "/dashboard/site-ayarlari", label: "Site Ayarları", icon: "Settings" },
   { href: "/dashboard/adminler", label: "Adminler", icon: "Shield" },

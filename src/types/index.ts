@@ -198,6 +198,66 @@ export interface SiteSettings {
   footerText: string;
 }
 
+export type CallStatus =
+  | "not_called"
+  | "unreachable"
+  | "call_again"
+  | "interested"
+  | "meeting_done"
+  | "face_to_face_planned"
+  | "positive"
+  | "negative"
+  | "archived";
+
+export interface CallRecord {
+  id: string;
+  fullName: string;
+  phone: string;
+  phoneNormalized: string;
+  city: string;
+  district: string;
+  source: string;
+  status: CallStatus;
+  note: string;
+  personnelName: string;
+  lastCalledAt: string | null;
+  nextActionAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CallHistoryEntry {
+  id: string;
+  callRecordId: string;
+  adminId: string | null;
+  adminName: string | null;
+  status: CallStatus;
+  note: string;
+  calledAt: string;
+  nextActionAt: string | null;
+  createdAt: string;
+}
+
+export interface CallFilters {
+  search?: string;
+  status?: CallStatus;
+  personnelName?: string;
+  city?: string;
+  quickFilter?:
+    | "all"
+    | "today"
+    | "follow_up"
+    | "not_called"
+    | "interested"
+    | "face_to_face_planned"
+    | "positive"
+    | "negative";
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  pageSize?: number;
+}
+
 export interface PaginatedResult<T> {
   data: T[];
   total: number;
