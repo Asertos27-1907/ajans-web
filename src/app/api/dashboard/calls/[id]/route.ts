@@ -84,7 +84,14 @@ export async function DELETE(
     const { id } = await context.params;
     await deleteCallRecord(id);
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (err) {
+    const code = err instanceof Error ? err.message : "";
+    if (code === "invalid_id") {
+      return badRequest("Geçersiz kayıt kimliği.");
+    }
+    if (code === "not_found") {
+      return NextResponse.json({ error: "Kayıt bulunamadı." }, { status: 404 });
+    }
     return serverError("Kayıt silinemedi.");
   }
 }

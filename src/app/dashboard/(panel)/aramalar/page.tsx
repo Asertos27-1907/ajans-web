@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Download, Phone, Plus, Upload, X } from "lucide-react";
+import { Download, Phone, Plus, Trash2, Upload, X } from "lucide-react";
 import { callRepository } from "@/lib/repositories";
 import type { CallFilters, CallHistoryEntry, CallRecord, CallStatus } from "@/types";
 import { Button } from "@/components/ui/Button";
@@ -85,8 +85,19 @@ export default function CallsAdminPage() {
   const [createForm, setCreateForm] = useState(emptyForm);
   const [exportOpen, setExportOpen] = useState(false);
   const [exportRows, setExportRows] = useState<Record<string, unknown>[]>([]);
+  const [checkedIds, setCheckedIds] = useState<string[]>([]);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    mode: "single" | "bulk";
+    ids: string[];
+  } | null>(null);
 
   const [, startTransition] = useTransition();
+
+  const allChecked =
+    items.length > 0 && items.every((i) => checkedIds.includes(i.id));
+  const someChecked = checkedIds.length > 0;
 
   function buildFilters(
     overrides: Partial<CallFilters> = {},
@@ -116,6 +127,9 @@ export default function CallsAdminPage() {
         setTotal(result.total);
         setPage(result.page);
         setTotalPages(result.totalPages);
+        setCheckedIds((prev) =>
+          prev.filter((id) => result.data.some((r) => r.id === id)),
+        );
         if (selected) {
           const fresh = result.data.find((r) => r.id === selected.id);
           if (fresh) {
@@ -175,6 +189,61 @@ export default function CallsAdminPage() {
   function closeDrawer() {
     setSelected(null);
     setHistory([]);
+  }
+
+  function toggleCheck(id: string) {
+    setCheckedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  }
+
+  function toggleCheckAll() {
+    if (allChecked) setCheckedIds([]);
+    else setCheckedIds(items.map((i) => i.id));
+  }
+
+  function askDeleteSingle(id: string) {
+    setDeleteConfirm({ mode: "single", ids: [id] });
+  }
+
+  function askDeleteBulk() {
+    if (!checkedIds.length) return;
+    setDeleteConfirm({ mode: "bulk", ids: [...checkedIds] });
+  }
+
+  async function confirmDelete() {
+    if (!deleteConfirm?.ids.length) return;
+    setDeleting(true);
+    setError("");
+    setSuccessMsg("");
+    try {
+      if (deleteConfirm.mode === "single") {
+        await callRepository.remove(deleteConfirm.ids[0]);
+        setSuccessMsg("Kayıt silindi.");
+      } else {
+        await callRepository.bulkRemove(deleteConfirm.ids);
+        setSuccessMsg(
+          deleteConfirm.ids.length === 1
+            ? "Kayıt silindi."
+            : `${deleteConfirm.ids.length} kayıt silindi.`,
+        );
+      }
+      const removed = new Set(deleteConfirm.ids);
+      setItems((prev) => prev.filter((r) => !removed.has(r.id)));
+      setTotal((t) => Math.max(0, t - deleteConfirm.ids.length));
+      setCheckedIds((prev) => prev.filter((id) => !removed.has(id)));
+      if (selected && removed.has(selected.id)) {
+        closeDrawer();
+      }
+      setDeleteConfirm(null);
+      refreshPersonnelOptions();
+      load({ page });
+    } catch {
+      setError("Kayıt silinemedi.");
+      setDeleteConfirm(null);
+    } finally {
+      setDeleting(false);
+    }
   }
 
   async function saveRecord() {
@@ -332,6 +401,9 @@ export default function CallsAdminPage() {
       />
 
       {error ? <p className="mb-3 text-sm text-danger">{error}</p> : null}
+      {successMsg ? (
+        <p className="mb-3 text-sm text-[#027a48]">{successMsg}</p>
+      ) : null}
 
       <div className="mb-4 flex flex-wrap gap-2">
         {QUICK_FILTERS.map((f) => (
@@ -453,12 +525,38 @@ export default function CallsAdminPage() {
         />
       ) : (
         <>
+          {items.length ? (
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              {someChecked ? (
+                <p className="text-sm text-ink-muted">
+                  {checkedIds.length} kayıt seçildi
+                </p>
+              ) : null}
+              <Button
+                size="sm"
+                variant="danger"
+                onClick={askDeleteBulk}
+                disabled={!someChecked || deleting}
+              >
+                <Trash2 size={14} /> Seçilenleri Sil
+              </Button>
+            </div>
+          ) : null}
+
           {/* Desktop table */}
           <div className="hidden overflow-hidden rounded border border-border bg-surface md:block">
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
                 <thead className="border-b border-border bg-bg-muted/50 text-xs text-ink-muted">
                   <tr>
+                    <th className="w-10 px-3 py-2">
+                      <input
+                        type="checkbox"
+                        checked={allChecked}
+                        onChange={toggleCheckAll}
+                        aria-label="Tümünü seç"
+                      />
+                    </th>
                     <th className="px-3 py-2 font-medium">Ad Soyad</th>
                     <th className="px-3 py-2 font-medium">Telefon</th>
                     <th className="px-3 py-2 font-medium">Şehir</th>
@@ -468,6 +566,7 @@ export default function CallsAdminPage() {
                     <th className="px-3 py-2 font-medium">Sonraki Aksiyon</th>
                     <th className="px-3 py-2 font-medium">Personel</th>
                     <th className="px-3 py-2 font-medium">Güncellendi</th>
+                    <th className="px-3 py-2 font-medium">Aksiyon</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -477,6 +576,17 @@ export default function CallsAdminPage() {
                       onClick={() => openRecord(row)}
                       className="cursor-pointer border-b border-border/70 hover:bg-bg-muted/40"
                     >
+                      <td
+                        className="px-3 py-2.5"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checkedIds.includes(row.id)}
+                          onChange={() => toggleCheck(row.id)}
+                          aria-label="Seç"
+                        />
+                      </td>
                       <td className="px-3 py-2.5 font-medium">
                         {row.fullName || "—"}
                       </td>
@@ -510,6 +620,19 @@ export default function CallsAdminPage() {
                       <td className="px-3 py-2.5 text-ink-muted">
                         {formatDateShort(row.updatedAt)}
                       </td>
+                      <td
+                        className="px-3 py-2.5"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="danger"
+                          onClick={() => askDeleteSingle(row.id)}
+                        >
+                          Sil
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -520,30 +643,53 @@ export default function CallsAdminPage() {
           {/* Mobile cards */}
           <div className="space-y-3 md:hidden">
             {items.map((row) => (
-              <button
+              <div
                 key={row.id}
-                type="button"
-                onClick={() => openRecord(row)}
-                className="w-full rounded border border-border bg-surface p-4 text-left"
+                className="rounded border border-border bg-surface p-4"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-medium">{row.fullName || "—"}</p>
-                    <p className="mt-0.5 text-sm text-primary">{row.phone}</p>
-                  </div>
-                  <CallStatusBadge status={row.status} />
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={checkedIds.includes(row.id)}
+                    onChange={() => toggleCheck(row.id)}
+                    aria-label="Seç"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => openRecord(row)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="font-medium">{row.fullName || "—"}</p>
+                        <p className="mt-0.5 text-sm text-primary">{row.phone}</p>
+                      </div>
+                      <CallStatusBadge status={row.status} />
+                    </div>
+                    <p className="mt-2 text-xs text-ink-muted">
+                      {row.city || "—"}
+                      {row.source ? ` · ${row.source}` : ""}
+                      {row.personnelName ? ` · ${row.personnelName}` : ""}
+                    </p>
+                    {row.nextActionAt ? (
+                      <p className="mt-1 text-xs text-ink-soft">
+                        Takip: {formatDateShort(row.nextActionAt)}
+                      </p>
+                    ) : null}
+                  </button>
                 </div>
-                <p className="mt-2 text-xs text-ink-muted">
-                  {row.city || "—"}
-                  {row.source ? ` · ${row.source}` : ""}
-                  {row.personnelName ? ` · ${row.personnelName}` : ""}
-                </p>
-                {row.nextActionAt ? (
-                  <p className="mt-1 text-xs text-ink-soft">
-                    Takip: {formatDateShort(row.nextActionAt)}
-                  </p>
-                ) : null}
-              </button>
+                <div className="mt-3 flex justify-end">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="danger"
+                    onClick={() => askDeleteSingle(row.id)}
+                  >
+                    Sil
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
 
@@ -722,9 +868,19 @@ export default function CallsAdminPage() {
                 </span>
               </div>
 
-              <Button size="sm" onClick={saveRecord} disabled={saving}>
-                Kaydet
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" onClick={saveRecord} disabled={saving || deleting}>
+                  Kaydet
+                </Button>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  disabled={saving || deleting}
+                  onClick={() => askDeleteSingle(selected.id)}
+                >
+                  <Trash2 size={14} /> Kaydı Sil
+                </Button>
+              </div>
 
               <div className="rounded border border-border p-3">
                 <p className="mb-2 text-sm font-medium">Hızlı Aksiyon</p>
@@ -937,6 +1093,39 @@ export default function CallsAdminPage() {
         rows={exportRows}
         filename="aramalar"
       />
+
+      {deleteConfirm ? (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-4 sm:items-center">
+          <div className="w-full max-w-md rounded border border-border bg-surface p-5 shadow-xl">
+            <h2 className="text-lg font-semibold">
+              {deleteConfirm.mode === "bulk" && deleteConfirm.ids.length > 1
+                ? "Seçili kayıtları silmek istediğinize emin misiniz?"
+                : "Kaydı silmek istediğinize emin misiniz?"}
+            </h2>
+            <p className="mt-2 text-sm text-ink-muted">
+              {deleteConfirm.mode === "bulk" && deleteConfirm.ids.length > 1
+                ? `Seçili ${deleteConfirm.ids.length} kayıt kalıcı olarak silinecek.`
+                : "Bu kayıt ve bağlı görüşme geçmişi kalıcı olarak silinecek. Bu işlem geri alınamaz."}
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <Button
+                variant="outline"
+                disabled={deleting}
+                onClick={() => setDeleteConfirm(null)}
+              >
+                Vazgeç
+              </Button>
+              <Button
+                variant="danger"
+                disabled={deleting}
+                onClick={confirmDelete}
+              >
+                {deleting ? "Siliniyor..." : "Kalıcı Olarak Sil"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

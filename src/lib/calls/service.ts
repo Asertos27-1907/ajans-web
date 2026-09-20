@@ -335,9 +335,38 @@ export async function updateCallRecord(
 }
 
 export async function deleteCallRecord(id: string) {
+  if (!isUuid(id)) throw new Error("invalid_id");
   const admin = createAdminClient();
-  const { error } = await admin.from("call_records").delete().eq("id", id);
+  const { data, error } = await admin
+    .from("call_records")
+    .delete()
+    .eq("id", id)
+    .select("id")
+    .maybeSingle();
   if (error) throw new Error("delete_failed");
+  if (!data) throw new Error("not_found");
+}
+
+export async function bulkDeleteCallRecords(ids: string[]) {
+  const unique = [...new Set(ids.filter(isUuid))];
+  if (!unique.length) throw new Error("invalid_id");
+  if (unique.length > 500) throw new Error("too_many");
+
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("call_records")
+    .delete()
+    .in("id", unique)
+    .select("id");
+
+  if (error) throw new Error("delete_failed");
+  return { deleted: (data ?? []).length };
+}
+
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
 }
 
 export async function listCallHistory(

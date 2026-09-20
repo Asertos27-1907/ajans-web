@@ -102,6 +102,16 @@ export const callRepository = {
     await parseJson(res);
   },
 
+  async bulkRemove(ids: string[]) {
+    const res = await fetch("/api/dashboard/calls/bulk-delete", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
+    return parseJson<{ ok: boolean; deleted: number }>(res);
+  },
+
   async history(id: string): Promise<CallHistoryEntry[]> {
     const res = await fetch(`/api/dashboard/calls/${id}/history`, {
       credentials: "same-origin",
