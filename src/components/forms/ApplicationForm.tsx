@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { FormField, Input, Select, Textarea } from "@/components/ui/Field";
 import { cn } from "@/lib/utils";
+import { trackApplicationConversion } from "@/lib/analytics/google-ads";
 import type { Gender, SiteSettings } from "@/types";
 
 type PhotoFile = { id: string; name: string; preview: string; file: File };
@@ -41,6 +42,7 @@ export function ApplicationForm({
   const [done, setDone] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const submittingRef = useRef(false);
+  const conversionTrackedRef = useRef(false);
 
   function resetForm() {
     setFirstName("");
@@ -133,6 +135,11 @@ export function ApplicationForm({
         return;
       }
 
+      if (!conversionTrackedRef.current) {
+        conversionTrackedRef.current = true;
+        trackApplicationConversion();
+      }
+
       resetForm();
       setSuccessMessage(
         data.message ||
@@ -142,7 +149,9 @@ export function ApplicationForm({
     } catch {
       setFormError("Başvuru gönderilemedi. Lütfen daha sonra tekrar deneyin.");
     } finally {
-      submittingRef.current = false;
+      if (!conversionTrackedRef.current) {
+        submittingRef.current = false;
+      }
       setSubmitting(false);
     }
   }

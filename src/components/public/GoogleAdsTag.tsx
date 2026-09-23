@@ -1,6 +1,5 @@
 import Script from "next/script";
-
-const GOOGLE_ADS_ID = "AW-11032333324";
+import { GOOGLE_ADS_ID } from "@/lib/analytics/google-ads";
 
 /**
  * Google Ads gtag — load once on public pages only.
