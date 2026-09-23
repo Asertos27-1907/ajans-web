@@ -105,6 +105,5 @@ export const ACTOR_EXPORT_COLUMNS = [
   { key: "showOnWebsite", label: "Web'de Göster" },
 ] as const;
 
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  "https://artiakademioyunculukmenajerlik.com";
+/** Canonical production URL for SEO (metadata, sitemap, robots, JSON-LD). */
+export const SITE_URL = "https://artiakademioyunculukmenajerlik.com";
