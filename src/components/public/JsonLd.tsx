@@ -18,7 +18,8 @@ export function JsonLd({ settings }: { settings: SiteSettings }) {
 
   const sameAs = [...new Set([...fromSettings, ...VERIFIED_SAME_AS])];
 
-  const logoPath = settings.logoUrl?.startsWith("http")
+  const logoPath = `${SITE_URL}/brand/icon-512.png`;
+  const wideLogoPath = settings.logoUrl?.startsWith("http")
     ? settings.logoUrl
     : `${SITE_URL}${settings.logoUrl || "/brand/logo.jpeg"}`;
 
@@ -26,9 +27,15 @@ export function JsonLd({ settings }: { settings: SiteSettings }) {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "+Akademi Oyunculuk & Menajerlik",
-    alternateName: settings.agencyName || "+Akademi",
+    alternateName: "+Akademi",
     url: SITE_URL,
-    logo: logoPath,
+    logo: {
+      "@type": "ImageObject",
+      url: logoPath,
+      width: 512,
+      height: 512,
+    },
+    image: wideLogoPath,
     description:
       "+Akademi Oyunculuk & Menajerlik; İzmir'de oyunculuk, cast ve menajerlik hizmetleri sunan profesyonel ajans.",
     address: {
@@ -45,10 +52,24 @@ export function JsonLd({ settings }: { settings: SiteSettings }) {
     sameAs,
   };
 
+  const website = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "+Akademi",
+    alternateName: "+Akademi Oyunculuk & Menajerlik",
+    url: `${SITE_URL}/`,
+  };
+
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }}
+      />
+    </>
   );
 }
