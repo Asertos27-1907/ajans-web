@@ -3,9 +3,9 @@ import { createMetadata } from "@/lib/seo";
 import { ServicesPageContent } from "@/components/public/ServicesPageContent";
 
 export const metadata = createMetadata({
-  title: "Hizmetler",
+  title: "Hizmetlerimiz",
   description:
-    "Oyunculuk eğitimi, ajans, model, prodüksiyon, menajerlik ve cast hizmetleri.",
+    "Oyunculuk eğitimi, cast, menajerlik, model ajansı ve prodüksiyon hizmetlerimizi inceleyin.",
   path: "/hizmetler",
 });
 

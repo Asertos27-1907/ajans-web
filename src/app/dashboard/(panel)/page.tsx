@@ -14,6 +14,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata = createMetadata({
   title: "Dashboard",
   path: "/dashboard",
+  noIndex: true,
 });
 
 export const dynamic = "force-dynamic";

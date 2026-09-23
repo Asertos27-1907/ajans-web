@@ -8,7 +8,8 @@ import { EmptyState } from "@/components/ui/StatusBadge";
 
 export const metadata = createMetadata({
   title: "Oyuncular",
-  description: "+Akademi oyuncu ve yetenek portföyü.",
+  description:
+    "+Akademi oyuncu ve yetenek portföyünü inceleyin. Cast ve menajerlik için profesyonel oyuncu kadromuz.",
   path: "/oyuncular",
 });
 

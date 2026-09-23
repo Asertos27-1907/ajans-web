@@ -1,8 +1,9 @@
 import { createMetadata } from "@/lib/seo";
 
 export const metadata = createMetadata({
-  title: "Gizlilik",
-  description: "+Akademi gizlilik politikası.",
+  title: "Gizlilik Politikası",
+  description:
+    "+Akademi web sitesi gizlilik politikası. Kişisel verilerinizin nasıl korunduğunu öğrenin.",
   path: "/gizlilik",
 });
 

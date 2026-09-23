@@ -14,11 +14,17 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   const actor = await getActorBySlug(slug).catch(() => null);
-  if (!actor) return createMetadata({ title: "Oyuncu", path: `/oyuncular/${slug}` });
+  if (!actor) {
+    return createMetadata({
+      title: "Oyuncu",
+      path: `/oyuncular/${slug}`,
+      noIndex: true,
+    });
+  }
   const name = fullName(actor.firstName, actor.lastName);
   return createMetadata({
     title: name,
-    description: `${name} — ${actor.city}, ${actor.age} yaş`,
+    description: `${name} — ${actor.city} · +Akademi oyuncu portföyü`,
     path: `/oyuncular/${slug}`,
     image: actor.coverPhotoUrl || undefined,
   });

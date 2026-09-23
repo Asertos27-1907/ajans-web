@@ -6,7 +6,8 @@ import { EmptyState } from "@/components/ui/StatusBadge";
 
 export const metadata = createMetadata({
   title: "Referanslar",
-  description: "+Akademi referans proje ve prodüksiyon çalışmaları.",
+  description:
+    "+Akademi'nin dizi, sinema, reklam ve prodüksiyon referans çalışmalarını keşfedin.",
   path: "/referanslar",
 });
 

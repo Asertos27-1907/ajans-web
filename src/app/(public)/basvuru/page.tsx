@@ -5,7 +5,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata = createMetadata({
   title: "Oyuncu Başvurusu",
   description:
-    "+Akademi kısa oyuncu ön kayıt formu. Temel bilgilerinizi ve fotoğraflarınızı gönderin.",
+    "+Akademi oyuncu başvuru formunu doldurun, bilgilerinizi ve fotoğraflarınızı iletin.",
   path: "/basvuru",
 });
 

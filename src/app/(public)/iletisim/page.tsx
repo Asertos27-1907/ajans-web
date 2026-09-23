@@ -8,7 +8,7 @@ import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
 export const metadata = createMetadata({
   title: "İletişim",
   description:
-    "+Akademi iletişim bilgileri ve konum. İzmir Alsancak ofisimiz.",
+    "+Akademi Oyunculuk & Menajerlik ile iletişime geçin. Adres, sosyal medya ve iletişim bilgilerine ulaşın.",
   path: "/iletisim",
 });
 

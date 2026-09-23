@@ -9,7 +9,7 @@ import { AboutSections } from "@/components/public/AboutSections";
 export const metadata = createMetadata({
   title: "Hakkımızda",
   description:
-    "+Akademi; oyunculuk eğitimi, cast, menajerlik ve prodüksiyon alanlarını aynı çatı altında buluşturan profesyonel oluşum.",
+    "+Akademi'nin oyunculuk, cast, menajerlik ve prodüksiyon alanındaki yaklaşımını ve hizmet anlayışını keşfedin.",
   path: "/hakkimizda",
   image: SITE_IMAGES.about.main,
 });

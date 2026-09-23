@@ -106,4 +106,5 @@ export const ACTOR_EXPORT_COLUMNS = [
 ] as const;
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://artiakademi.com";
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  "https://artiakademioyunculukmenajerlik.com";

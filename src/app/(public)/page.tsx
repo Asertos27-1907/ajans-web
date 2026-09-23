@@ -10,11 +10,12 @@ import { getMergedSiteSettings } from "@/lib/settings/service";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata = createMetadata({
-  title: "Ana Sayfa",
+  title: "+Akademi | Oyunculuk, Cast ve Menajerlik Ajansı",
   description:
-    "+Akademi; oyunculuk eğitimi, cast, menajerlik ve prodüksiyon alanlarında yetenekleri sektörün ihtiyaçlarıyla buluşturan profesyonel yapı.",
+    "+Akademi; oyunculuk eğitimi, cast, menajerlik, model ajansı ve prodüksiyon hizmetleri sunar. Oyuncu başvurusu ve iletişim için bizi keşfedin.",
   path: "/",
   image: "/images/home/anasayfa.jpeg",
+  absolute: true,
 });
 
 export default async function HomePage() {

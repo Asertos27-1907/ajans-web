@@ -1,6 +1,6 @@
 import { Syne, Source_Sans_3 } from "next/font/google";
 import type { Metadata } from "next";
-import { createMetadata } from "@/lib/seo";
+import { createRootMetadata } from "@/lib/seo";
 import "./globals.css";
 
 const display = Syne({
@@ -15,7 +15,7 @@ const body = Source_Sans_3({
   weight: ["400", "500", "600", "700"],
 });
 
-export const metadata: Metadata = createMetadata();
+export const metadata: Metadata = createRootMetadata();
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

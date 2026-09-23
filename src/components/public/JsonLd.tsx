@@ -2,8 +2,13 @@ import { SITE_URL } from "@/config/constants";
 import { hasValue } from "@/lib/utils";
 import type { SiteSettings } from "@/types";
 
+const VERIFIED_SAME_AS = [
+  "https://www.instagram.com/artiakademioyunculukmenajerlik",
+  "https://www.facebook.com/share/1LmC9CvhLf/",
+] as const;
+
 export function JsonLd({ settings }: { settings: SiteSettings }) {
-  const sameAs = [
+  const fromSettings = [
     settings.instagram,
     settings.facebook,
     settings.youtube,
@@ -11,43 +16,37 @@ export function JsonLd({ settings }: { settings: SiteSettings }) {
     settings.linkedin,
   ].filter(hasValue);
 
+  const sameAs = [...new Set([...fromSettings, ...VERIFIED_SAME_AS])];
+
+  const logoPath = settings.logoUrl?.startsWith("http")
+    ? settings.logoUrl
+    : `${SITE_URL}${settings.logoUrl || "/brand/logo.jpeg"}`;
+
   const organization = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: settings.companyName,
-    alternateName: settings.agencyName,
+    name: "+Akademi Oyunculuk & Menajerlik",
+    alternateName: settings.agencyName || "+Akademi",
     url: SITE_URL,
-    logo: `${SITE_URL}${settings.logoUrl}`,
+    logo: logoPath,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "1471 Sokak No:9 İç Kapı No:12, Alsancak Mahallesi",
+      streetAddress: "1471 sokak no:9 iç kapı no:12",
       addressLocality: "Konak",
       addressRegion: "İzmir",
       addressCountry: "TR",
     },
-    ...(sameAs.length ? { sameAs } : {}),
-  };
-
-  const service = {
-    "@context": "https://schema.org",
-    "@type": "ProfessionalService",
-    name: settings.companyName,
-    description: settings.heroDescription,
-    url: SITE_URL,
-    areaServed: "TR",
-    address: organization.address,
+    areaServed: {
+      "@type": "AdministrativeArea",
+      name: "Türkiye",
+    },
+    sameAs,
   };
 
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(service) }}
-      />
-    </>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }}
+    />
   );
 }

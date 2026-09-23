@@ -1,8 +1,9 @@
 import { createMetadata } from "@/lib/seo";
 
 export const metadata = createMetadata({
-  title: "KVKK",
-  description: "+Akademi Kişisel Verilerin Korunması Aydınlatma Metni.",
+  title: "KVKK Aydınlatma Metni",
+  description:
+    "+Akademi Kişisel Verilerin Korunması Kanunu (KVKK) aydınlatma metni.",
   path: "/kvkk",
 });
 
