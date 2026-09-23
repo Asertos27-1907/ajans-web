@@ -1,42 +1,46 @@
-import { Suspense } from "react";
-import Script from "next/script";
-import { META_PIXEL_ID } from "@/lib/analytics/meta-pixel";
-import { MetaPixelPageView } from "@/components/public/MetaPixelPageView";
+"use client";
+
+import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import {
+  META_PIXEL_ID,
+  ensureMetaPixel,
+  trackMetaPageView,
+} from "@/lib/analytics/meta-pixel";
 
 /**
- * Meta Pixel — load once on public pages only.
- * Init runs in the base script; PageView is handled by MetaPixelPageView
- * so App Router navigations are covered without duplicate init.
+ * Meta Pixel — public pages only (mounted from (public)/layout).
+ * Bootstraps window.fbq in the browser (Chrome/Edge/Opera safe),
+ * loads fbevents.js once, inits once, and tracks PageView per pathname.
  */
 export function MetaPixelTag() {
+  const pathname = usePathname();
+  const lastPageViewPath = useRef<string | null>(null);
+
+  useEffect(() => {
+    ensureMetaPixel();
+  }, []);
+
+  useEffect(() => {
+    if (!pathname) return;
+    if (lastPageViewPath.current === pathname) return;
+
+    ensureMetaPixel();
+    if (trackMetaPageView()) {
+      lastPageViewPath.current = pathname;
+    }
+  }, [pathname]);
+
   return (
-    <>
-      <Script id="meta-pixel" strategy="afterInteractive">
-        {`
-          !function(f,b,e,v,n,t,s)
-          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-          n.queue=[];t=b.createElement(e);t.async=!0;
-          t.src=v;s=b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t,s)}(window, document,'script',
-          'https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', '${META_PIXEL_ID}');
-        `}
-      </Script>
-      <noscript>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          height="1"
-          width="1"
-          style={{ display: "none" }}
-          src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
-          alt=""
-        />
-      </noscript>
-      <Suspense fallback={null}>
-        <MetaPixelPageView />
-      </Suspense>
-    </>
+    <noscript>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        height="1"
+        width="1"
+        style={{ display: "none" }}
+        src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+        alt=""
+      />
+    </noscript>
   );
 }
