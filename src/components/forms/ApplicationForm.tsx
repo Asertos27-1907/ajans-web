@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { FormField, Input, Select, Textarea } from "@/components/ui/Field";
 import { cn } from "@/lib/utils";
 import { trackApplicationConversion } from "@/lib/analytics/google-ads";
+import { trackApplicationLead } from "@/lib/analytics/meta-pixel";
 import type { Gender, SiteSettings } from "@/types";
 
 type PhotoFile = { id: string; name: string; preview: string; file: File };
@@ -138,6 +139,7 @@ export function ApplicationForm({
       if (!conversionTrackedRef.current) {
         conversionTrackedRef.current = true;
         trackApplicationConversion();
+        trackApplicationLead();
       }
 
       resetForm();
