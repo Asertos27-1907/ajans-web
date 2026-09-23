@@ -5,7 +5,7 @@ import { ServicesPageContent } from "@/components/public/ServicesPageContent";
 export const metadata = createMetadata({
   title: "Hizmetlerimiz",
   description:
-    "Oyunculuk eğitimi, cast, menajerlik, model ajansı ve prodüksiyon hizmetlerimizi inceleyin.",
+    "+Akademi oyunculuk ajansı, cast ajansı ve menajerlik ajansı hizmetlerini inceleyin. Eğitim, casting, temsil ve prodüksiyon desteği.",
   path: "/hizmetler",
 });
 

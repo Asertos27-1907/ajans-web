@@ -9,7 +9,7 @@ import { AboutSections } from "@/components/public/AboutSections";
 export const metadata = createMetadata({
   title: "Hakkımızda",
   description:
-    "+Akademi'nin oyunculuk, cast, menajerlik ve prodüksiyon alanındaki yaklaşımını ve hizmet anlayışını keşfedin.",
+    "+Akademi Oyunculuk & Menajerlik; İzmir'de oyunculuk, cast ve menajerlik alanındaki yaklaşımını ve hizmet anlayışını keşfedin.",
   path: "/hakkimizda",
   image: SITE_IMAGES.about.main,
 });
@@ -35,7 +35,8 @@ export default async function AboutPage() {
             Hakkımızda
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-white/75">
-            {settings.companyName}
+            +Akademi Oyunculuk & Menajerlik — İzmir&apos;de oyunculuk, cast ve
+            menajerlik
           </p>
         </div>
       </section>
@@ -50,7 +51,11 @@ export default async function AboutPage() {
             </h2>
             <p className="mt-2 text-ink-muted">
               Kısa ön kayıt formunu doldur; uygun adaylarla telefon üzerinden
-              iletişime geçilir.
+              iletişime geçilir. Sorularınız için{" "}
+              <Link href="/iletisim" className="font-medium text-ink underline-offset-4 hover:underline">
+                İletişim
+              </Link>{" "}
+              sayfamızı ziyaret edebilirsiniz.
             </p>
           </div>
           <Link href="/basvuru" className="inline-flex cursor-pointer">

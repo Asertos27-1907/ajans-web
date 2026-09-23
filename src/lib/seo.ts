@@ -6,7 +6,7 @@ export const DEFAULT_TITLE =
   "+Akademi | Oyunculuk, Cast ve Menajerlik Ajansı";
 
 export const DEFAULT_DESCRIPTION =
-  "+Akademi; oyunculuk eğitimi, cast, menajerlik, model ajansı ve prodüksiyon alanlarında profesyonel hizmet sunar. Oyuncu başvurusu ve iletişim için bizi keşfedin.";
+  "+Akademi Oyunculuk & Menajerlik; İzmir'de oyunculuk ajansı, oyuncu ajansı, cast ve menajerlik hizmetleri sunar. Oyuncu başvurusu ve iletişim için bizi keşfedin.";
 
 export const SITE_NAME = "+Akademi Oyunculuk & Menajerlik";
 

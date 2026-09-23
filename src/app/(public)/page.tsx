@@ -12,7 +12,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata = createMetadata({
   title: "+Akademi | Oyunculuk, Cast ve Menajerlik Ajansı",
   description:
-    "+Akademi; oyunculuk eğitimi, cast, menajerlik, model ajansı ve prodüksiyon hizmetleri sunar. Oyuncu başvurusu ve iletişim için bizi keşfedin.",
+    "+Akademi; İzmir merkezli oyunculuk ajansı ve oyuncu ajansı olarak cast, menajerlik ve prodüksiyon hizmetleri sunar. Oyuncu başvurusu için bizi keşfedin.",
   path: "/",
   image: "/images/home/anasayfa.jpeg",
   absolute: true,

@@ -29,6 +29,8 @@ export function JsonLd({ settings }: { settings: SiteSettings }) {
     alternateName: settings.agencyName || "+Akademi",
     url: SITE_URL,
     logo: logoPath,
+    description:
+      "+Akademi Oyunculuk & Menajerlik; İzmir'de oyunculuk, cast ve menajerlik hizmetleri sunan profesyonel ajans.",
     address: {
       "@type": "PostalAddress",
       streetAddress: "1471 sokak no:9 iç kapı no:12",
@@ -36,10 +38,10 @@ export function JsonLd({ settings }: { settings: SiteSettings }) {
       addressRegion: "İzmir",
       addressCountry: "TR",
     },
-    areaServed: {
-      "@type": "AdministrativeArea",
-      name: "Türkiye",
-    },
+    areaServed: [
+      { "@type": "City", name: "İzmir" },
+      { "@type": "Country", name: "Türkiye" },
+    ],
     sameAs,
   };
 

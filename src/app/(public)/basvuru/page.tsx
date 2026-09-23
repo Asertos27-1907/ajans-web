@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ApplicationForm } from "@/components/forms/ApplicationForm";
 import { getMergedSiteSettings } from "@/lib/settings/service";
 import { createMetadata } from "@/lib/seo";
@@ -5,7 +6,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata = createMetadata({
   title: "Oyuncu Başvurusu",
   description:
-    "+Akademi oyuncu başvuru formunu doldurun, bilgilerinizi ve fotoğraflarınızı iletin.",
+    "İzmir oyuncu başvurusu için +Akademi formunu doldurun. Oyunculuk başvurusu, dizi ve reklam oyunculuğu başvurusu süreçlerinde cast ekibimiz sizi değerlendirir.",
   path: "/basvuru",
 });
 
@@ -22,8 +23,20 @@ export default async function ApplicationPage() {
             Oyuncu Başvurusu
           </h1>
           <p className="mt-4 max-w-2xl text-white/75">
-            Kısa ön kayıt formudur. Uygun adaylarla telefon üzerinden iletişime
-            geçilir. Fotoğraf seçimi hariç yaklaşık 1–1.5 dakika sürer.
+            Oyunculuk başvurusu için kısa ön kayıt formudur. Dizi ve reklam
+            oyunculuğu başvurusu yapan adaylarla uygun görülmesi halinde telefon
+            üzerinden iletişime geçilir. Fotoğraf seçimi hariç yaklaşık 1–1.5
+            dakika sürer.
+          </p>
+          <p className="mt-3 max-w-2xl text-sm text-white/60">
+            Hizmetlerimizi incelemek için{" "}
+            <Link
+              href="/hizmetler"
+              className="font-medium text-white underline-offset-4 hover:underline"
+            >
+              Hizmetlerimiz
+            </Link>{" "}
+            sayfasına bakabilirsiniz.
           </p>
         </div>
       </section>

@@ -37,11 +37,12 @@ export function ServicesPageContent({ settings }: { settings: SiteSettings }) {
           <Reveal direction="up">
             <p className="eyebrow text-white/50">Hizmetler</p>
             <h1 className="font-display mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
-              {settings.servicesSectionTitle}
+              Hizmetlerimiz
             </h1>
             <p className="mt-4 max-w-2xl text-lg text-white/70">
-              Eğitimden casting süreçlerine, menajerlikten prodüksiyon
-              desteğine kadar profesyonel yetenek yönetimi.
+              Oyunculuk ajansı, cast ajansı ve menajerlik ajansı olarak
+              eğitimden casting süreçlerine, temsilden prodüksiyon desteğine
+              kadar profesyonel yetenek yönetimi sunuyoruz.
             </p>
           </Reveal>
         </div>
@@ -85,9 +86,14 @@ export function ServicesPageContent({ settings }: { settings: SiteSettings }) {
             );
           })}
         </div>
-        <div className="container-wide mt-12">
+        <div className="container-wide mt-12 flex flex-wrap gap-3">
           <Link href="/basvuru" className="inline-flex cursor-pointer">
             <Button size="lg">Oyuncu Başvurusu</Button>
+          </Link>
+          <Link href="/iletisim" className="inline-flex cursor-pointer">
+            <Button size="lg" variant="outline">
+              İletişim
+            </Button>
           </Link>
         </div>
       </section>

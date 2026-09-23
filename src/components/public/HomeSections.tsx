@@ -38,11 +38,13 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
     [...settings.slides]
       .filter((s) => s.isActive)
       .sort((a, b) => a.sortOrder - b.sortOrder)[0] ?? null;
-  const title = slide?.title ?? settings.heroTitle;
-  const description = slide?.description ?? settings.heroDescription;
   const imageUrl = slide?.imageUrl ?? settings.heroImageUrl;
   const ctaText = slide?.buttonText ?? settings.ctaText;
   const ctaLink = slide?.buttonLink ?? settings.ctaLink;
+  const description =
+    slide?.description ??
+    settings.heroDescription ??
+    "+Akademi; oyunculuk ajansı, cast ajansı ve menajerlik ajansı hizmetleriyle yetenekleri doğru projelerle buluşturur.";
 
   return (
     <section className="relative isolate min-h-[88vh] overflow-hidden bg-bg-deep text-white">
@@ -70,7 +72,7 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
               {settings.agencyName || settings.companyName}
             </p>
             <h1 className="font-display mt-4 max-w-3xl text-4xl leading-[1.02] font-semibold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-              {title}
+              Oyunculuk, Cast ve Menajerlik
             </h1>
           </HeroMotion>
           <HeroMotion delay={0.22} direction="up">
@@ -88,7 +90,7 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
                 variant="secondary"
                 className="cursor-pointer border border-white/10"
               >
-                Hizmetlerimizi Keşfedin
+                Hizmetlerimiz
               </Button>
             </Link>
           </HeroMotion>
@@ -150,7 +152,7 @@ export function AboutTeaser({ settings }: { settings: SiteSettings }) {
           </div>
           <Link href="/hakkimizda" className="mt-8 inline-flex">
             <Button variant="outline">
-              Daha fazla <ArrowRight size={16} />
+              Hakkımızda <ArrowRight size={16} />
             </Button>
           </Link>
         </Reveal>
@@ -170,11 +172,12 @@ export function ServicesSection({ settings }: { settings: SiteSettings }) {
         <Reveal direction="up" className="max-w-2xl">
           <p className="eyebrow">Hizmetler</p>
           <h2 className="font-display title-accent mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-            {settings.servicesSectionTitle}
+            {settings.servicesSectionTitle || "Hizmetlerimiz"}
           </h2>
           <p className="mt-3 text-ink-muted">
-            Eğitimden casting süreçlerine, menajerlikten prodüksiyon desteğine
-            kadar profesyonel yetenek yönetimi.
+            Oyunculuk ajansı, cast ajansı ve menajerlik ajansı hizmetlerimizle
+            eğitimden casting süreçlerine, temsilden prodüksiyon desteğine kadar
+            profesyonel yetenek yönetimi sunuyoruz.
           </p>
         </Reveal>
         <Stagger className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -214,7 +217,7 @@ export function ServicesSection({ settings }: { settings: SiteSettings }) {
         </Stagger>
         <Reveal delay={0.1} className="mt-10">
           <Link href="/hizmetler">
-            <Button variant="outline">Tüm hizmetler</Button>
+            <Button variant="outline">Hizmetlerimiz</Button>
           </Link>
         </Reveal>
       </div>
@@ -327,7 +330,7 @@ export function WhySection({ settings }: { settings: SiteSettings }) {
         <Reveal direction="up" className="max-w-2xl">
           <p className="eyebrow">Neden +Akademi</p>
           <h2 className="font-display mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-            Güvenilir süreç, profesyonel yaklaşım
+            İzmir&apos;de güvenilir süreç, profesyonel yaklaşım
           </h2>
         </Reveal>
         <Stagger className="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -355,8 +358,9 @@ export function CtaBand() {
             Kariyerine bir adımla başla
           </h2>
           <p className="mt-3 text-ink-muted">
-            Oyuncu, model veya yetenek adayıysan kısa ön kayıt formunu doldur.
-            Uygun adaylarla telefon üzerinden iletişime geçilir.
+            Oyuncu olmak istiyorsan kısa ön kayıt formunu doldur. Oyunculuk
+            başvurusu sonrası uygun adaylarla telefon üzerinden iletişime
+            geçilir.
           </p>
         </div>
         <Link href="/basvuru">
@@ -393,16 +397,22 @@ export function ContactTeaser({ settings }: { settings: SiteSettings }) {
               </a>
             ) : null}
             <Link href="/iletisim">
-              <Button>İletişim formu</Button>
+              <Button>İletişim</Button>
             </Link>
           </div>
         </Reveal>
         <Reveal direction="right" delay={0.08} className="relative min-h-64 overflow-hidden bg-secondary p-8 text-white">
           <div className="pointer-events-none absolute -right-6 -bottom-6 h-28 w-28 rotate-12 border border-white/15" />
           <p className="relative text-sm leading-relaxed text-white/75">
-            Yapım şirketleri, reklam ajansları ve profesyonel iş ortakları için
-            casting ve menajerlik süreçlerinde hızlı iletişim kuruyoruz.
-            Detaylı taleplerinizi iletişim formu üzerinden iletebilirsiniz.
+            Yapım şirketleri ve reklam ajansları için cast ve menajerlik
+            süreçlerinde hızlı iletişim kuruyoruz. Detaylı taleplerinizi{" "}
+            <Link
+              href="/iletisim"
+              className="font-medium text-white underline-offset-4 hover:underline"
+            >
+              İletişim
+            </Link>{" "}
+            formundan iletebilirsiniz.
           </p>
           {hasValue(settings.googleMapsUrl) ? (
             <a

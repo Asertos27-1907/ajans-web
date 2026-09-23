@@ -6,10 +6,11 @@ import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
 // Contact layout: info + map from siteSettings
 
 export const metadata = createMetadata({
-  title: "İletişim",
+  title: "İletişim | +Akademi Oyunculuk & Menajerlik",
   description:
-    "+Akademi Oyunculuk & Menajerlik ile iletişime geçin. Adres, sosyal medya ve iletişim bilgilerine ulaşın.",
+    "+Akademi Oyunculuk & Menajerlik İzmir Konak / Alsancak ofisiyle iletişime geçin. Adres, sosyal medya ve iletişim bilgilerine ulaşın.",
   path: "/iletisim",
+  absolute: true,
 });
 
 export default async function ContactPage() {
@@ -29,10 +30,11 @@ export default async function ContactPage() {
         <div className="container-wide py-14 md:py-16">
           <p className="eyebrow">İletişim</p>
           <h1 className="font-display title-accent mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-            Bize ulaşın
+            İletişim
           </h1>
           <p className="mt-4 max-w-2xl text-ink-muted">
-            Casting talepleri, iş ortaklığı ve genel sorularınız için formu
+            +Akademi Oyunculuk & Menajerlik İzmir Konak, Alsancak ofisinde
+            casting talepleri, iş ortaklığı ve genel sorularınız için formu
             kullanabilir veya ofisimizi ziyaret edebilirsiniz.
           </p>
         </div>
@@ -41,7 +43,7 @@ export default async function ContactPage() {
       <section className="section-pad">
         <div className="container-wide grid gap-10 lg:grid-cols-2 lg:gap-12">
           <div>
-            <h2 className="text-xl font-semibold">Ofis</h2>
+            <h2 className="text-xl font-semibold">İzmir ofisimiz</h2>
             <address className="mt-4 space-y-1 text-base not-italic text-ink-muted">
               {settings.addressLines.map((line) => (
                 <p key={line}>{line}</p>

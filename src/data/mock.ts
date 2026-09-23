@@ -292,18 +292,18 @@ export const mockSiteSettings: SiteSettings = {
   youtube: undefined,
   tiktok: undefined,
   linkedin: undefined,
-  heroTitle: "Yeteneğini Doğru Hikâyeyle Buluştur.",
+  heroTitle: "Oyunculuk, Cast ve Menajerlik",
   heroDescription:
-    "+Akademi; oyunculuk eğitimi, cast, menajerlik ve prodüksiyon alanlarında yetenekleri sektörün ihtiyaçlarıyla buluşturan profesyonel bir yapıdır. Her adayın güçlü yönünü keşfetmeye, geliştirmeye ve doğru projelerle buluşturmaya odaklanıyoruz.",
+    "+Akademi; oyunculuk ajansı, oyuncu ajansı, cast ajansı ve menajerlik ajansı hizmetleriyle yetenekleri sektörün ihtiyaçlarıyla buluşturan profesyonel bir yapıdır. İzmir menajerlik ajansı olarak her adayın güçlü yönünü keşfetmeye odaklanıyoruz.",
   heroImageUrl: "/images/home/anasayfa.jpeg",
   ctaText: "Oyuncu Başvurusu",
   ctaLink: "/basvuru",
   slides: [
     {
       id: "slide-1",
-      title: "Yeteneğini Doğru Hikâyeyle Buluştur.",
+      title: "Oyunculuk, Cast ve Menajerlik",
       description:
-        "+Akademi; oyunculuk eğitimi, cast, menajerlik ve prodüksiyon alanlarında yetenekleri sektörün ihtiyaçlarıyla buluşturan profesyonel bir yapıdır. Her adayın güçlü yönünü keşfetmeye, geliştirmeye ve doğru projelerle buluşturmaya odaklanıyoruz.",
+        "+Akademi; oyunculuk ajansı, oyuncu ajansı, cast ajansı ve menajerlik ajansı hizmetleriyle yetenekleri sektörün ihtiyaçlarıyla buluşturan profesyonel bir yapıdır. İzmir menajerlik ajansı olarak her adayın güçlü yönünü keşfetmeye odaklanıyoruz.",
       imageUrl: "/images/home/anasayfa.jpeg",
       buttonText: "Oyuncu Başvurusu",
       buttonLink: "/basvuru",
@@ -327,7 +327,7 @@ export const mockSiteSettings: SiteSettings = {
       id: "svc-2",
       title: "Oyunculuk Ajansı",
       description:
-        "Yeni yetenekleri keşfediyor, profesyonel portföylerini güçlendiriyor ve uygun dizi, sinema, reklam ve dijital projelerle buluşmalarına destek oluyoruz.",
+        "Oyuncu ajansı olarak yeni yetenekleri keşfediyor, profesyonel portföylerini güçlendiriyor ve uygun dizi, sinema, reklam ve dijital projelerle buluşmalarına destek oluyoruz.",
       icon: "Drama",
       imageUrl: "/images/services/klaket.jpeg",
       sortOrder: 2,
@@ -355,9 +355,9 @@ export const mockSiteSettings: SiteSettings = {
     },
     {
       id: "svc-5",
-      title: "Menajerlik",
+      title: "Menajerlik Ajansı",
       description:
-        "Oyuncuların kariyer planlaması, proje değerlendirmesi ve profesyonel temsil süreçlerinde uzun vadeli ve sürdürülebilir bir yaklaşım benimsiyoruz.",
+        "Menajerlik ajansı olarak oyuncuların kariyer planlaması, proje değerlendirmesi ve profesyonel temsil süreçlerinde uzun vadeli ve sürdürülebilir bir yaklaşım benimsiyoruz.",
       icon: "Briefcase",
       imageUrl: "/images/services/services-management.jpg",
       sortOrder: 5,
@@ -365,9 +365,9 @@ export const mockSiteSettings: SiteSettings = {
     },
     {
       id: "svc-6",
-      title: "Cast Hizmetleri",
+      title: "Cast Ajansı",
       description:
-        "Yapım şirketleri ve markaların ihtiyaç duyduğu oyuncu profillerini doğru, hızlı ve düzenli bir casting süreciyle projelerle buluşturuyoruz.",
+        "Cast ajansı hizmetimizle yapım şirketleri ve markaların ihtiyaç duyduğu oyuncu profillerini doğru, hızlı ve düzenli bir casting süreciyle projelerle buluşturuyoruz.",
       icon: "Clapperboard",
       imageUrl: "/images/services/kamera.jpeg",
       sortOrder: 6,
@@ -379,7 +379,7 @@ export const mockSiteSettings: SiteSettings = {
   aboutParagraphs: [
     {
       id: "ap-1",
-      text: "+Akademi, oyunculuk ve menajerlik alanında deneyimli ekiplerle çalışan, yeni yeteneklerin sektöre hazırlanmasını ve doğru projelerle buluşmasını hedefleyen profesyonel bir yapıdır.",
+      text: "+Akademi Oyunculuk & Menajerlik, İzmir'de oyunculuk ve menajerlik alanında deneyimli ekiplerle çalışan, yeni yeteneklerin sektöre hazırlanmasını ve doğru projelerle buluşmasını hedefleyen profesyonel bir yapıdır.",
       sortOrder: 1,
     },
     {

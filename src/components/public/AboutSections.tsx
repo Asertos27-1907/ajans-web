@@ -8,7 +8,7 @@ const SECTIONS = [
   {
     id: "biz-kimiz",
     title: "Biz Kimiz",
-    text: "+Akademi, oyunculuk eğitimi, cast, menajerlik ve prodüksiyon alanlarını aynı çatı altında buluşturan profesyonel bir oluşumdur. Sektörün ihtiyaçlarını yakından takip eden ekibimizle, farklı yaş ve deneyim seviyelerindeki yeteneklere kariyerlerinin her aşamasında destek oluyoruz.",
+    text: "+Akademi Oyunculuk & Menajerlik; İzmir merkezli bir yapı olarak oyunculuk, cast, menajerlik ve prodüksiyon alanlarını aynı çatı altında buluşturur. Sektörün ihtiyaçlarını yakından takip eden ekibimizle, farklı yaş ve deneyim seviyelerindeki yeteneklere kariyerlerinin her aşamasında destek oluyoruz.",
   },
   {
     id: "yaklasimimiz",
