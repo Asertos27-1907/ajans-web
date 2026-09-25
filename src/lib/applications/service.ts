@@ -238,24 +238,19 @@ export async function createPublicApplication(input: {
     };
   }
 
+  // Explicit insert only — never spread FormData / never send kvkk or website.
+  // Omit optional profile columns so missing DB columns cannot cause 400.
+  const insertPayload = {
+    first_name: data.first_name,
+    last_name: data.last_name,
+    phone: data.phone,
+    city: data.city,
+    status: "new" as const,
+  };
+
   const { data: inserted, error: insertError } = await admin
     .from("applications")
-    .insert({
-      first_name: data.first_name,
-      last_name: data.last_name,
-      phone: data.phone,
-      birth_date: null,
-      age: null,
-      gender: null,
-      city: data.city,
-      height_cm: null,
-      weight_kg: null,
-      hair_color: null,
-      eye_color: null,
-      experience: null,
-      projects: null,
-      status: "new",
-    })
+    .insert(insertPayload)
     .select("id")
     .single();
 
