@@ -44,12 +44,22 @@ function resolvePhotoMime(file: File): string | null {
   return null;
 }
 
-function validatePhotoFiles(files: File[]): string | null {
-  if (files.length < MIN_PHOTOS) {
-    return "En az 1 fotoğraf gerekli";
+function validatePhotoFiles(
+  files: File[],
+  options: { min?: number; maxRemaining?: number } = {},
+): string | null {
+  const min = options.min ?? MIN_PHOTOS;
+  const max = options.maxRemaining ?? MAX_PHOTOS;
+
+  if (files.length < min) {
+    return min === 1
+      ? "En az 1 fotoğraf gerekli"
+      : `En az ${min} fotoğraf gerekli`;
   }
-  if (files.length > MAX_PHOTOS) {
-    return "En fazla 5 fotoğraf yükleyebilirsiniz";
+  if (files.length > max) {
+    return max < MAX_PHOTOS
+      ? `En fazla ${max} fotoğraf daha ekleyebilirsiniz`
+      : "En fazla 5 fotoğraf yükleyebilirsiniz";
   }
 
   for (const file of files) {
@@ -179,12 +189,7 @@ export async function createPublicApplication(input: {
     first_name: input.fields.first_name,
     last_name: input.fields.last_name,
     phone: input.fields.phone,
-    birth_date: input.fields.birth_date,
-    gender: input.fields.gender,
     city: input.fields.city,
-    height_cm: input.fields.height_cm,
-    weight_kg: input.fields.weight_kg,
-    experience: input.fields.experience,
     kvkk: input.fields.kvkk,
   });
 
@@ -201,16 +206,19 @@ export async function createPublicApplication(input: {
     return { ok: false, message: first };
   }
 
-  const photoError = validatePhotoFiles(input.photos);
-  if (photoError) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("[applications/photos-validation]", {
-        message: photoError,
-        count: input.photos.length,
-        types: input.photos.map((f) => f.type || "(empty)"),
-      });
+  // Photos are optional on the public short form.
+  if (input.photos.length > 0) {
+    const photoError = validatePhotoFiles(input.photos);
+    if (photoError) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[applications/photos-validation]", {
+          message: photoError,
+          count: input.photos.length,
+          types: input.photos.map((f) => f.type || "(empty)"),
+        });
+      }
+      return { ok: false, message: photoError };
     }
-    return { ok: false, message: photoError };
   }
 
   const data = parsed.data as ApplicationFieldsInput;
@@ -235,12 +243,12 @@ export async function createPublicApplication(input: {
       first_name: data.first_name,
       last_name: data.last_name,
       phone: data.phone,
-      birth_date: data.birth_date,
-      gender: data.gender,
+      birth_date: null,
+      gender: null,
       city: data.city,
-      height_cm: data.height_cm ?? null,
-      weight_kg: data.weight_kg ?? null,
-      experience: data.experience || null,
+      height_cm: null,
+      weight_kg: null,
+      experience: null,
       status: "new",
     })
     .select("id")
@@ -257,6 +265,11 @@ export async function createPublicApplication(input: {
   }
 
   const applicationId = inserted.id as string;
+
+  if (!input.photos.length) {
+    return { ok: true, id: applicationId };
+  }
+
   const uploadedPaths: string[] = [];
 
   try {
@@ -313,8 +326,7 @@ export async function createPublicApplication(input: {
 
     if (process.env.NODE_ENV === "development") {
       console.warn("[applications/photos-pipeline]", {
-        stage:
-          err instanceof Error ? err.message : "unknown",
+        stage: err instanceof Error ? err.message : "unknown",
         cause: cause
           ? {
               message: cause.message ?? null,
@@ -389,6 +401,7 @@ export async function listApplications(
 
   if (needsAgeFilter) {
     mapped = mapped.filter((app) => {
+      if (!app.birthDate) return false;
       if (ageMin != null && app.age < ageMin) return false;
       if (ageMax != null && app.age > ageMax) return false;
       return true;
@@ -442,16 +455,27 @@ export async function updateApplication(
     status?: ApplicationStatus;
     adminNotes?: string;
     tags?: string[];
+    birthDate?: string | null;
+    gender?: string | null;
+    heightCm?: number | null;
+    weightKg?: number | null;
+    experience?: string | null;
   },
 ): Promise<Application | null> {
   const parsed = applicationUpdateSchema.safeParse({
     status: patch.status,
     admin_note: patch.adminNotes,
     tags: patch.tags,
+    birth_date: patch.birthDate,
+    gender: patch.gender,
+    height_cm: patch.heightCm,
+    weight_kg: patch.weightKg,
+    experience: patch.experience,
   });
 
   if (!parsed.success) {
-    throw new Error("validation_failed");
+    const first = parsed.error.issues[0]?.message ?? "validation_failed";
+    throw new Error(first);
   }
 
   const updatePayload: Record<string, unknown> = {};
@@ -460,6 +484,21 @@ export async function updateApplication(
     updatePayload.admin_note = parsed.data.admin_note;
   }
   if (parsed.data.tags !== undefined) updatePayload.tags = parsed.data.tags;
+  if (patch.birthDate !== undefined) {
+    updatePayload.birth_date = parsed.data.birth_date ?? null;
+  }
+  if (patch.gender !== undefined) {
+    updatePayload.gender = parsed.data.gender ?? null;
+  }
+  if (patch.heightCm !== undefined) {
+    updatePayload.height_cm = parsed.data.height_cm ?? null;
+  }
+  if (patch.weightKg !== undefined) {
+    updatePayload.weight_kg = parsed.data.weight_kg ?? null;
+  }
+  if (patch.experience !== undefined) {
+    updatePayload.experience = parsed.data.experience || null;
+  }
 
   if (!Object.keys(updatePayload).length) {
     return getApplicationById(id);
@@ -472,10 +511,96 @@ export async function updateApplication(
     .eq("id", id);
 
   if (error) {
+    logApplicationError("applications-update", error);
     throw new Error("update_failed");
   }
 
   return getApplicationById(id);
+}
+
+/**
+ * Append photos to an existing application (dashboard staff only).
+ * Respects MAX_PHOTOS total across existing + new files.
+ */
+export async function addApplicationPhotos(
+  applicationId: string,
+  files: File[],
+): Promise<Application | null> {
+  if (!files.length) {
+    throw new Error("En az 1 fotoğraf seçin.");
+  }
+
+  const existing = await getApplicationById(applicationId);
+  if (!existing) return null;
+
+  const remaining = MAX_PHOTOS - existing.photos.length;
+  if (remaining <= 0) {
+    throw new Error("Bu başvuruda zaten 5 fotoğraf var. Yeni fotoğraf eklenemez.");
+  }
+
+  const photoError = validatePhotoFiles(files, {
+    min: 1,
+    maxRemaining: remaining,
+  });
+  if (photoError) {
+    throw new Error(photoError);
+  }
+
+  const admin = createAdminClient();
+  const startOrder = existing.photos.reduce(
+    (max, photo) => Math.max(max, photo.sortOrder),
+    -1,
+  );
+  const uploadedPaths: string[] = [];
+
+  try {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const mime = resolvePhotoMime(file) ?? "image/jpeg";
+      const ext = extensionForMime(mime);
+      const storagePath = `applications/${applicationId}/${randomUUID()}.${ext}`;
+      const buffer = Buffer.from(await file.arrayBuffer());
+
+      const { error: uploadError } = await admin.storage
+        .from(APPLICATION_PHOTOS_BUCKET)
+        .upload(storagePath, buffer, {
+          contentType: mime,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        logApplicationError("dashboard-storage-upload", uploadError);
+        throw new Error("Fotoğraflar yüklenirken bir sorun oluştu.");
+      }
+
+      uploadedPaths.push(storagePath);
+
+      const { error: photoRowError } = await admin
+        .from("application_photos")
+        .insert({
+          application_id: applicationId,
+          storage_path: storagePath,
+          sort_order: startOrder + 1 + i,
+        });
+
+      if (photoRowError) {
+        logApplicationError("dashboard-photos-insert", photoRowError);
+        throw new Error("Fotoğraf kaydı oluşturulamadı.");
+      }
+    }
+  } catch (err) {
+    if (uploadedPaths.length) {
+      await admin.storage.from(APPLICATION_PHOTOS_BUCKET).remove(uploadedPaths);
+      await admin
+        .from("application_photos")
+        .delete()
+        .eq("application_id", applicationId)
+        .in("storage_path", uploadedPaths);
+    }
+    throw err;
+  }
+
+  return getApplicationById(applicationId);
 }
 
 export async function archiveApplication(id: string) {

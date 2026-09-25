@@ -415,6 +415,13 @@ export async function convertApplicationToActor(
   }
   if (!app) throw new Error("application_not_found");
 
+  const missing: string[] = [];
+  if (!app.birth_date) missing.push("doğum tarihi");
+  if (!app.gender) missing.push("cinsiyet");
+  if (missing.length) {
+    throw new Error(`missing_profile:${missing.join(",")}`);
+  }
+
   const { data: appPhotos, error: photosErr } = await admin
     .from("application_photos")
     .select("storage_path, sort_order")

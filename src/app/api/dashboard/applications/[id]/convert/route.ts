@@ -35,6 +35,20 @@ export async function POST(_req: Request, context: Ctx) {
         { status: 404 },
       );
     }
+    if (message.startsWith("missing_profile:")) {
+      const fields = message.slice("missing_profile:".length);
+      const readable = fields
+        .split(",")
+        .map((f) => f.trim())
+        .filter(Boolean)
+        .join(" ve ");
+      return NextResponse.json(
+        {
+          error: `Oyuncuya dönüştürmeden önce ${readable} bilgilerini tamamlayın.`,
+        },
+        { status: 400 },
+      );
+    }
     if (message === "permission_denied") {
       return NextResponse.json(
         {

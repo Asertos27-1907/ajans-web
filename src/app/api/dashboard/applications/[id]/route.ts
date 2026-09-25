@@ -5,7 +5,7 @@ import {
   getApplicationById,
   updateApplication,
 } from "@/lib/applications/service";
-import type { ApplicationStatus } from "@/types";
+import type { ApplicationStatus, Gender } from "@/types";
 
 async function requireDashboardApi() {
   const auth = await getAuthProfile();
@@ -49,6 +49,11 @@ export async function PATCH(request: Request, context: RouteContext) {
       adminNotes?: string;
       tags?: string[];
       archive?: boolean;
+      birthDate?: string | null;
+      gender?: Gender | "" | null;
+      heightCm?: number | null;
+      weightKg?: number | null;
+      experience?: string | null;
     };
 
     if (body.archive) {
@@ -63,6 +68,11 @@ export async function PATCH(request: Request, context: RouteContext) {
       status: body.status,
       adminNotes: body.adminNotes,
       tags: body.tags,
+      birthDate: body.birthDate,
+      gender: body.gender,
+      heightCm: body.heightCm,
+      weightKg: body.weightKg,
+      experience: body.experience,
     });
 
     if (!updated) {
@@ -70,7 +80,15 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     return NextResponse.json(updated);
-  } catch {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "";
+    if (
+      message &&
+      message !== "update_failed" &&
+      message !== "validation_failed"
+    ) {
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
     return NextResponse.json(
       { error: "Değişiklikler kaydedilemedi." },
       { status: 500 },

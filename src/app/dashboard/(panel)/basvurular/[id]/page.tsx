@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { applicationRepository, actorRepository } from "@/lib/repositories";
-import type { Application, ApplicationStatus } from "@/types";
+import type { Application, ApplicationStatus, Gender } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { FormField, Input, Select, Textarea } from "@/components/ui/Field";
 import { PageHeader, StatusBadge } from "@/components/ui/StatusBadge";
 import { GENDER_LABELS, STATUS_LABELS } from "@/config/constants";
 import { formatDateTR, fullName } from "@/lib/utils";
+import { MAX_PHOTOS } from "@/lib/applications/schema";
 
 export default function ApplicationDetailPage() {
   const params = useParams<{ id: string }>();
@@ -20,19 +21,34 @@ export default function ApplicationDetailPage() {
   const [note, setNote] = useState("");
   const [tag, setTag] = useState("");
   const [status, setStatus] = useState<ApplicationStatus>("new");
+  const [birthDate, setBirthDate] = useState("");
+  const [gender, setGender] = useState<Gender | "">("");
+  const [heightCm, setHeightCm] = useState("");
+  const [weightKg, setWeightKg] = useState("");
+  const [experience, setExperience] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [actionSuccess, setActionSuccess] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [, startTransition] = useTransition();
+
+  function syncProfileFields(data: Application) {
+    setNote(data.adminNotes);
+    setStatus(data.status);
+    setBirthDate(data.birthDate || "");
+    setGender(data.gender || "");
+    setHeightCm(data.heightCm != null ? String(data.heightCm) : "");
+    setWeightKg(data.weightKg != null ? String(data.weightKg) : "");
+    setExperience(data.experience || "");
+  }
 
   useEffect(() => {
     startTransition(async () => {
       try {
         const data = await applicationRepository.getById(params.id);
         setApp(data);
-        if (data) {
-          setNote(data.adminNotes);
-          setStatus(data.status);
-        }
+        if (data) syncProfileFields(data);
       } catch {
         setApp(null);
       } finally {
@@ -45,9 +61,11 @@ export default function ApplicationDetailPage() {
     if (!app) return;
     setSaving(true);
     setActionError("");
+    setActionSuccess("");
     try {
       const updated = await applicationRepository.updateStatus(app.id, status);
       setApp(updated);
+      setActionSuccess("Durum kaydedildi.");
     } catch (err) {
       setActionError(
         err instanceof Error ? err.message : "Durum güncellenemedi.",
@@ -61,11 +79,13 @@ export default function ApplicationDetailPage() {
     if (!app) return;
     setSaving(true);
     setActionError("");
+    setActionSuccess("");
     try {
       const updated = await applicationRepository.update(app.id, {
         adminNotes: note,
       });
       setApp(updated);
+      setActionSuccess("Not kaydedildi.");
     } catch (err) {
       setActionError(
         err instanceof Error ? err.message : "Not kaydedilemedi.",
@@ -75,9 +95,62 @@ export default function ApplicationDetailPage() {
     }
   }
 
+  async function saveProfile() {
+    if (!app) return;
+    setSaving(true);
+    setActionError("");
+    setActionSuccess("");
+    try {
+      const updated = await applicationRepository.update(app.id, {
+        birthDate: birthDate || "",
+        gender: gender || "",
+        heightCm: heightCm.trim() ? Number(heightCm) : null,
+        weightKg: weightKg.trim() ? Number(weightKg) : null,
+        experience: experience,
+      });
+      setApp(updated);
+      syncProfileFields(updated);
+      setActionSuccess("Profil bilgileri kaydedildi.");
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "Profil kaydedilemedi.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function uploadPhotos(fileList: FileList | null) {
+    if (!app || !fileList?.length) return;
+    setUploading(true);
+    setActionError("");
+    setActionSuccess("");
+    try {
+      const remaining = MAX_PHOTOS - app.photos.length;
+      if (remaining <= 0) {
+        setActionError(
+          "Bu başvuruda zaten 5 fotoğraf var. Yeni fotoğraf eklenemez.",
+        );
+        return;
+      }
+      const files = Array.from(fileList).slice(0, remaining);
+      const updated = await applicationRepository.uploadPhotos(app.id, files);
+      setApp(updated);
+      setActionSuccess("Fotoğraflar yüklendi.");
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "Fotoğraflar yüklenemedi.",
+      );
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
   async function addTag() {
     if (!app || !tag.trim()) return;
     setActionError("");
+    setActionSuccess("");
     try {
       const tags = Array.from(new Set([...app.tags, tag.trim()]));
       const updated = await applicationRepository.update(app.id, { tags });
@@ -142,6 +215,7 @@ export default function ApplicationDetailPage() {
     if (!app) return;
     setSaving(true);
     setActionError("");
+    setActionSuccess("");
     try {
       await actorRepository.fromApplication(app);
       router.push("/dashboard/oyuncular");
@@ -158,14 +232,16 @@ export default function ApplicationDetailPage() {
 
   const infoRows: [string, string | number | undefined][] = [
     ["Telefon", app.phone],
-    ["Doğum tarihi", app.birthDate],
-    ["Yaş", app.age],
-    ["Cinsiyet", GENDER_LABELS[app.gender]],
+    ["Doğum tarihi", app.birthDate || undefined],
+    ["Yaş", app.birthDate ? app.age : undefined],
+    ["Cinsiyet", app.gender ? GENDER_LABELS[app.gender] : undefined],
     ["Şehir", app.city],
     ["Boy", app.heightCm ? `${app.heightCm} cm` : undefined],
     ["Kilo", app.weightKg ? `${app.weightKg} kg` : undefined],
     ["Başvuru tarihi", formatDateTR(app.createdAt)],
   ];
+
+  const remainingPhotos = MAX_PHOTOS - app.photos.length;
 
   return (
     <div>
@@ -189,6 +265,9 @@ export default function ApplicationDetailPage() {
 
       {actionError ? (
         <p className="mb-4 text-sm text-danger">{actionError}</p>
+      ) : null}
+      {actionSuccess ? (
+        <p className="mb-4 text-sm text-secondary">{actionSuccess}</p>
       ) : null}
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -226,16 +305,65 @@ export default function ApplicationDetailPage() {
             </dl>
           </section>
 
-          {app.experience ? (
-            <section className="border border-border bg-surface p-5">
-              <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
-                Deneyim
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-                {app.experience}
-              </p>
-            </section>
-          ) : null}
+          <section className="border border-border bg-surface p-5">
+            <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
+              Profil Bilgileri
+            </h2>
+            <p className="mt-2 text-sm text-ink-muted">
+              Kısa başvuruda boş gelen alanları görüşme sonrası buradan
+              tamamlayabilirsiniz.
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <FormField label="Doğum tarihi">
+                <Input
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                />
+              </FormField>
+              <FormField label="Cinsiyet">
+                <Select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value as Gender | "")}
+                >
+                  <option value="">Seçin</option>
+                  {Object.entries(GENDER_LABELS).map(([k, v]) => (
+                    <option key={k} value={k}>
+                      {v}
+                    </option>
+                  ))}
+                </Select>
+              </FormField>
+              <FormField label="Boy (cm)">
+                <Input
+                  type="number"
+                  value={heightCm}
+                  onChange={(e) => setHeightCm(e.target.value)}
+                />
+              </FormField>
+              <FormField label="Kilo (kg)">
+                <Input
+                  type="number"
+                  value={weightKg}
+                  onChange={(e) => setWeightKg(e.target.value)}
+                />
+              </FormField>
+              <FormField label="Deneyim" className="sm:col-span-2">
+                <Textarea
+                  value={experience}
+                  onChange={(e) => setExperience(e.target.value)}
+                  rows={4}
+                />
+              </FormField>
+            </div>
+            <Button
+              className="mt-4"
+              onClick={saveProfile}
+              disabled={saving}
+            >
+              Kaydet
+            </Button>
+          </section>
 
           <section className="border border-border bg-surface p-5">
             <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
@@ -264,6 +392,28 @@ export default function ApplicationDetailPage() {
                   Fotoğraf yok.
                 </p>
               ) : null}
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                multiple
+                className="hidden"
+                disabled={remainingPhotos <= 0 || uploading}
+                onChange={(e) => uploadPhotos(e.target.files)}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={remainingPhotos <= 0 || uploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {uploading ? "Yükleniyor..." : "Fotoğraf ekle"}
+              </Button>
+              <span className="text-xs text-ink-muted">
+                {app.photos.length}/{MAX_PHOTOS} · JPG/PNG/WEBP · max 10 MB
+              </span>
             </div>
           </section>
         </div>

@@ -12,8 +12,8 @@ export interface DbApplicationRow {
   first_name: string;
   last_name: string;
   phone: string;
-  birth_date: string;
-  gender: string;
+  birth_date: string | null;
+  gender: string | null;
   city: string;
   height_cm: number | null;
   weight_kg: number | null;
@@ -57,15 +57,23 @@ export function mapApplication(
   photos: ApplicationPhoto[] = [],
 ): Application {
   const status = isApplicationStatus(row.status) ? row.status : "new";
+  const birthDate = row.birth_date?.trim() || "";
+  const gender =
+    row.gender === "kadin" ||
+    row.gender === "erkek" ||
+    row.gender === "diger" ||
+    row.gender === "belirtmek_istemiyor"
+      ? (row.gender as Gender)
+      : "";
 
   return {
     id: row.id,
     firstName: row.first_name,
     lastName: row.last_name,
     phone: row.phone,
-    birthDate: row.birth_date,
-    age: calcAge(row.birth_date),
-    gender: row.gender as Gender,
+    birthDate,
+    age: birthDate ? calcAge(birthDate) : 0,
+    gender,
     city: row.city,
     heightCm: row.height_cm ?? undefined,
     weightKg: row.weight_kg ?? undefined,

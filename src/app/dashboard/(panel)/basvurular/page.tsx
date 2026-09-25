@@ -273,9 +273,11 @@ export default function ApplicationsAdminPage() {
                     </span>
                   </td>
                   <td className="px-3 py-3">{app.phone}</td>
-                  <td className="px-3 py-3">{app.age}</td>
+                  <td className="px-3 py-3">{app.birthDate ? app.age : "—"}</td>
                   <td className="px-3 py-3">{app.city}</td>
-                  <td className="px-3 py-3">{GENDER_LABELS[app.gender]}</td>
+                  <td className="px-3 py-3">
+                    {app.gender ? GENDER_LABELS[app.gender] : "—"}
+                  </td>
                   <td className="px-3 py-3">{app.heightCm || "—"}</td>
                   <td className="px-3 py-3">{formatDateShort(app.createdAt)}</td>
                   <td className="px-3 py-3">

@@ -23,10 +23,9 @@ export default async function ApplicationPage() {
             Oyuncu Başvurusu
           </h1>
           <p className="mt-4 max-w-2xl text-white/75">
-            Oyunculuk başvurusu için kısa ön kayıt formudur. Dizi ve reklam
-            oyunculuğu başvurusu yapan adaylarla uygun görülmesi halinde telefon
-            üzerinden iletişime geçilir. Fotoğraf seçimi hariç yaklaşık 1–1.5
-            dakika sürer.
+            Oyunculuk başvuru formu için kısa ön kayıt yeterlidir. Uygun
+            görülen adaylarla telefon üzerinden iletişime geçilir; detaylı
+            bilgiler görüşme sonrasında tamamlanır.
           </p>
           <p className="mt-3 max-w-2xl text-sm text-white/60">
             Hizmetlerimizi incelemek için{" "}

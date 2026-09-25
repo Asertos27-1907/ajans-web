@@ -49,7 +49,19 @@ export const applicationRepository = {
     return parseJson<Application>(res);
   },
 
-  async update(id: string, patch: Partial<Application>) {
+  async update(
+    id: string,
+    patch: {
+      status?: Application["status"];
+      adminNotes?: string;
+      tags?: string[];
+      birthDate?: string | null;
+      gender?: Application["gender"] | null;
+      heightCm?: number | null;
+      weightKg?: number | null;
+      experience?: string | null;
+    },
+  ) {
     const res = await fetch(`/api/dashboard/applications/${id}`, {
       method: "PATCH",
       credentials: "same-origin",
@@ -58,7 +70,23 @@ export const applicationRepository = {
         status: patch.status,
         adminNotes: patch.adminNotes,
         tags: patch.tags,
+        birthDate: patch.birthDate,
+        gender: patch.gender,
+        heightCm: patch.heightCm,
+        weightKg: patch.weightKg,
+        experience: patch.experience,
       }),
+    });
+    return parseJson<Application>(res);
+  },
+
+  async uploadPhotos(id: string, files: File[]) {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("photos", file, file.name));
+    const res = await fetch(`/api/dashboard/applications/${id}/photos`, {
+      method: "POST",
+      credentials: "same-origin",
+      body: formData,
     });
     return parseJson<Application>(res);
   },

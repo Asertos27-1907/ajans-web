@@ -59,9 +59,11 @@ export interface Application {
   id: string;
   firstName: string;
   lastName: string;
+  /** Empty when not yet filled by staff (short public form). */
   birthDate: string;
   age: number;
-  gender: Gender;
+  /** Empty string when not yet filled by staff. */
+  gender: Gender | "";
   city: string;
   phone: string;
   heightCm?: number;
