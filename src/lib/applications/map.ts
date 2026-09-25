@@ -1,4 +1,3 @@
-import { calcAge } from "@/lib/utils";
 import type {
   Application,
   ApplicationPhoto,
@@ -13,11 +12,15 @@ export interface DbApplicationRow {
   last_name: string;
   phone: string;
   birth_date: string | null;
+  age: number | null;
   gender: string | null;
   city: string;
   height_cm: number | null;
   weight_kg: number | null;
+  hair_color: string | null;
+  eye_color: string | null;
   experience: string | null;
+  projects: string | null;
   status: string;
   admin_note: string | null;
   tags: string[] | null;
@@ -31,6 +34,9 @@ export interface DbApplicationPhotoRow {
   storage_path: string;
   sort_order: number;
 }
+
+export const APPLICATION_SELECT =
+  "id, first_name, last_name, phone, birth_date, age, gender, city, height_cm, weight_kg, hair_color, eye_color, experience, projects, status, admin_note, tags, created_at, updated_at";
 
 export function isApplicationStatus(value: string): value is ApplicationStatus {
   return (APPLICATION_STATUSES as readonly string[]).includes(value);
@@ -66,18 +72,26 @@ export function mapApplication(
       ? (row.gender as Gender)
       : "";
 
+  const age =
+    row.age != null && Number.isFinite(Number(row.age))
+      ? Math.round(Number(row.age))
+      : null;
+
   return {
     id: row.id,
     firstName: row.first_name,
     lastName: row.last_name,
     phone: row.phone,
     birthDate,
-    age: birthDate ? calcAge(birthDate) : 0,
+    age,
     gender,
     city: row.city,
     heightCm: row.height_cm ?? undefined,
     weightKg: row.weight_kg ?? undefined,
+    hairColor: row.hair_color ?? "",
+    eyeColor: row.eye_color ?? "",
     experience: row.experience ?? "",
+    projects: row.projects ?? "",
     photos: photos.sort((a, b) => a.sortOrder - b.sortOrder),
     status,
     tags: row.tags ?? [],

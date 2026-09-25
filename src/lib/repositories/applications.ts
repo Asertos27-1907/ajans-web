@@ -55,11 +55,19 @@ export const applicationRepository = {
       status?: Application["status"];
       adminNotes?: string;
       tags?: string[];
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      city?: string;
       birthDate?: string | null;
+      age?: number | null;
       gender?: Application["gender"] | null;
       heightCm?: number | null;
       weightKg?: number | null;
+      hairColor?: string | null;
+      eyeColor?: string | null;
       experience?: string | null;
+      projects?: string | null;
     },
   ) {
     const res = await fetch(`/api/dashboard/applications/${id}`, {
@@ -70,11 +78,19 @@ export const applicationRepository = {
         status: patch.status,
         adminNotes: patch.adminNotes,
         tags: patch.tags,
+        firstName: patch.firstName,
+        lastName: patch.lastName,
+        phone: patch.phone,
+        city: patch.city,
         birthDate: patch.birthDate,
+        age: patch.age,
         gender: patch.gender,
         heightCm: patch.heightCm,
         weightKg: patch.weightKg,
+        hairColor: patch.hairColor,
+        eyeColor: patch.eyeColor,
         experience: patch.experience,
+        projects: patch.projects,
       }),
     });
     return parseJson<Application>(res);

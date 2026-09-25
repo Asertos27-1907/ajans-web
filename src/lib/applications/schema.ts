@@ -47,6 +47,13 @@ export function normalizeTrPhone(input: string): string | null {
   return `+90${national}`;
 }
 
+const optionalText = (max: number, label: string) =>
+  z
+    .union([z.string(), z.null(), z.undefined()])
+    .optional()
+    .transform((value) => (value ?? "").trim())
+    .pipe(z.string().max(max, `${label} en fazla ${max} karakter olabilir`));
+
 const heightCmField = z
   .union([z.string(), z.number(), z.null(), z.undefined()])
   .optional()
@@ -57,7 +64,11 @@ const heightCmField = z
       ctx.addIssue({ code: "custom", message: "Boy sayı olmalı" });
       return z.NEVER;
     }
-    if (num < 80 || num > 250) {
+    if (num < 0) {
+      ctx.addIssue({ code: "custom", message: "Boy negatif olamaz" });
+      return z.NEVER;
+    }
+    if (num > 0 && (num < 80 || num > 250)) {
       ctx.addIssue({ code: "custom", message: "Boy 80–250 cm arasında olmalı" });
       return z.NEVER;
     }
@@ -74,18 +85,33 @@ const weightKgField = z
       ctx.addIssue({ code: "custom", message: "Kilo sayı olmalı" });
       return z.NEVER;
     }
-    if (num < 20 || num > 350) {
+    if (num < 0) {
+      ctx.addIssue({ code: "custom", message: "Kilo negatif olamaz" });
+      return z.NEVER;
+    }
+    if (num > 0 && (num < 20 || num > 350)) {
       ctx.addIssue({ code: "custom", message: "Kilo 20–350 kg arasında olmalı" });
       return z.NEVER;
     }
     return Math.round(num);
   });
 
-const experienceField = z
-  .union([z.string(), z.null(), z.undefined()])
+const ageField = z
+  .union([z.string(), z.number(), z.null(), z.undefined()])
   .optional()
-  .transform((value) => (value ?? "").trim())
-  .pipe(z.string().max(3000, "Deneyim en fazla 3000 karakter olabilir"));
+  .transform((value, ctx) => {
+    if (value == null || value === "") return null;
+    const num = typeof value === "number" ? value : Number(value);
+    if (!Number.isFinite(num) || !Number.isInteger(num)) {
+      ctx.addIssue({ code: "custom", message: "Yaş tam sayı olmalı" });
+      return z.NEVER;
+    }
+    if (num < 0 || num > 120) {
+      ctx.addIssue({ code: "custom", message: "Yaş 0–120 arasında olmalı" });
+      return z.NEVER;
+    }
+    return num;
+  });
 
 const birthDateField = z
   .string()
@@ -152,6 +178,40 @@ export const applicationUpdateSchema = z.object({
   status: applicationStatusSchema.optional(),
   admin_note: z.string().max(5000).optional(),
   tags: z.array(z.string().trim().min(1).max(40)).max(30).optional(),
+  first_name: z
+    .string()
+    .trim()
+    .min(2, "Ad en az 2 karakter olmalı")
+    .max(50, "Ad en fazla 50 karakter olabilir")
+    .optional(),
+  last_name: z
+    .string()
+    .trim()
+    .min(2, "Soyad en az 2 karakter olmalı")
+    .max(50, "Soyad en fazla 50 karakter olabilir")
+    .optional(),
+  phone: z
+    .string()
+    .trim()
+    .min(1, "Telefon gerekli")
+    .transform((value, ctx) => {
+      const normalized = normalizeTrPhone(value);
+      if (!normalized) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Geçerli bir Türkiye telefon numarası girin",
+        });
+        return z.NEVER;
+      }
+      return normalized;
+    })
+    .optional(),
+  city: z
+    .string()
+    .trim()
+    .min(2, "Şehir en az 2 karakter olmalı")
+    .max(100, "Şehir en fazla 100 karakter olabilir")
+    .optional(),
   birth_date: z
     .union([birthDateField, z.literal(""), z.null()])
     .optional()
@@ -159,6 +219,8 @@ export const applicationUpdateSchema = z.object({
       if (value == null || value === "") return null;
       return value;
     }),
+  /** Independent of birth_date — never auto-derived. */
+  age: ageField,
   gender: z
     .union([z.enum(APPLICATION_GENDERS), z.literal(""), z.null()])
     .optional()
@@ -168,7 +230,10 @@ export const applicationUpdateSchema = z.object({
     }),
   height_cm: heightCmField,
   weight_kg: weightKgField,
-  experience: experienceField,
+  hair_color: optionalText(80, "Saç rengi"),
+  eye_color: optionalText(80, "Göz rengi"),
+  experience: optionalText(3000, "Deneyim"),
+  projects: optionalText(5000, "Oynadığı projeler"),
 });
 
 export type ApplicationUpdateInput = z.infer<typeof applicationUpdateSchema>;

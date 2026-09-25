@@ -49,11 +49,19 @@ export async function PATCH(request: Request, context: RouteContext) {
       adminNotes?: string;
       tags?: string[];
       archive?: boolean;
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      city?: string;
       birthDate?: string | null;
+      age?: number | null;
       gender?: Gender | "" | null;
       heightCm?: number | null;
       weightKg?: number | null;
+      hairColor?: string | null;
+      eyeColor?: string | null;
       experience?: string | null;
+      projects?: string | null;
     };
 
     if (body.archive) {
@@ -68,11 +76,19 @@ export async function PATCH(request: Request, context: RouteContext) {
       status: body.status,
       adminNotes: body.adminNotes,
       tags: body.tags,
+      firstName: body.firstName,
+      lastName: body.lastName,
+      phone: body.phone,
+      city: body.city,
       birthDate: body.birthDate,
+      age: body.age,
       gender: body.gender,
       heightCm: body.heightCm,
       weightKg: body.weightKg,
+      hairColor: body.hairColor,
+      eyeColor: body.eyeColor,
       experience: body.experience,
+      projects: body.projects,
     });
 
     if (!updated) {

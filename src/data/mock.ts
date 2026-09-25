@@ -81,12 +81,15 @@ export const mockApplications: Application[] = Array.from({ length: 20 }).map((_
     phone: `0532${String(1000000 + i * 1111).slice(0, 7)}`,
     heightCm: 160 + (i % 25),
     weightKg: 52 + (i % 30),
+    hairColor: i % 2 === 0 ? "Kahverengi" : "Siyah",
+    eyeColor: i % 3 === 0 ? "Yeşil" : "Kahverengi",
     experience:
       i % 2 === 0
         ? "2 yıl amatör tiyatro, kısa film deneyimi"
         : i % 3 === 0
           ? "Reklam ve katalog çekimleri"
           : "",
+    projects: i % 4 === 0 ? "Kısa film, yerel tiyatro" : "",
     photos: appPhotos(id, i + 1),
     status: statuses[i],
     tags: i % 2 === 0 ? ["öncelikli"] : ["yeni-yetenek"],

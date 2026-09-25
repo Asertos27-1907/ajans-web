@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
   META_PIXEL_ID,
@@ -10,12 +10,11 @@ import {
 
 /**
  * Meta Pixel — public pages only (mounted from (public)/layout).
- * Bootstraps window.fbq in the browser (Chrome/Edge/Opera safe),
- * loads fbevents.js once, inits once, and tracks PageView per pathname.
+ * Bootstraps fbq + fbevents.js once; PageView on each distinct pathname.
+ * Dashboard / login / update-password never mount this component.
  */
 export function MetaPixelTag() {
   const pathname = usePathname();
-  const lastPageViewPath = useRef<string | null>(null);
 
   useEffect(() => {
     ensureMetaPixel();
@@ -23,12 +22,8 @@ export function MetaPixelTag() {
 
   useEffect(() => {
     if (!pathname) return;
-    if (lastPageViewPath.current === pathname) return;
-
     ensureMetaPixel();
-    if (trackMetaPageView()) {
-      lastPageViewPath.current = pathname;
-    }
+    trackMetaPageView(pathname);
   }, [pathname]);
 
   return (

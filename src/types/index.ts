@@ -61,14 +61,18 @@ export interface Application {
   lastName: string;
   /** Empty when not yet filled by staff (short public form). */
   birthDate: string;
-  age: number;
+  /** Independent of birthDate — may differ from calendar age. */
+  age: number | null;
   /** Empty string when not yet filled by staff. */
   gender: Gender | "";
   city: string;
   phone: string;
   heightCm?: number;
   weightKg?: number;
+  hairColor: string;
+  eyeColor: string;
   experience: string;
+  projects: string;
   photos: ApplicationPhoto[];
   status: ApplicationStatus;
   tags: string[];

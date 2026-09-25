@@ -21,11 +21,19 @@ export default function ApplicationDetailPage() {
   const [note, setNote] = useState("");
   const [tag, setTag] = useState("");
   const [status, setStatus] = useState<ApplicationStatus>("new");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [city, setCity] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [age, setAge] = useState("");
   const [gender, setGender] = useState<Gender | "">("");
   const [heightCm, setHeightCm] = useState("");
   const [weightKg, setWeightKg] = useState("");
+  const [hairColor, setHairColor] = useState("");
+  const [eyeColor, setEyeColor] = useState("");
   const [experience, setExperience] = useState("");
+  const [projects, setProjects] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [actionError, setActionError] = useState("");
@@ -33,14 +41,22 @@ export default function ApplicationDetailPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [, startTransition] = useTransition();
 
-  function syncProfileFields(data: Application) {
+  function syncFields(data: Application) {
     setNote(data.adminNotes);
     setStatus(data.status);
+    setFirstName(data.firstName || "");
+    setLastName(data.lastName || "");
+    setPhone(data.phone || "");
+    setCity(data.city || "");
     setBirthDate(data.birthDate || "");
+    setAge(data.age != null ? String(data.age) : "");
     setGender(data.gender || "");
     setHeightCm(data.heightCm != null ? String(data.heightCm) : "");
     setWeightKg(data.weightKg != null ? String(data.weightKg) : "");
+    setHairColor(data.hairColor || "");
+    setEyeColor(data.eyeColor || "");
     setExperience(data.experience || "");
+    setProjects(data.projects || "");
   }
 
   useEffect(() => {
@@ -48,7 +64,7 @@ export default function ApplicationDetailPage() {
       try {
         const data = await applicationRepository.getById(params.id);
         setApp(data);
-        if (data) syncProfileFields(data);
+        if (data) syncFields(data);
       } catch {
         setApp(null);
       } finally {
@@ -102,15 +118,24 @@ export default function ApplicationDetailPage() {
     setActionSuccess("");
     try {
       const updated = await applicationRepository.update(app.id, {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        phone: phone.trim(),
+        city: city.trim(),
         birthDate: birthDate || "",
+        age: age.trim() ? Number(age) : null,
         gender: gender || "",
         heightCm: heightCm.trim() ? Number(heightCm) : null,
         weightKg: weightKg.trim() ? Number(weightKg) : null,
+        hairColor: hairColor,
+        eyeColor: eyeColor,
         experience: experience,
+        projects: projects,
+        adminNotes: note,
       });
       setApp(updated);
-      syncProfileFields(updated);
-      setActionSuccess("Profil bilgileri kaydedildi.");
+      syncFields(updated);
+      setActionSuccess("Başvuru bilgileri kaydedildi.");
     } catch (err) {
       setActionError(
         err instanceof Error ? err.message : "Profil kaydedilemedi.",
@@ -230,17 +255,6 @@ export default function ApplicationDetailPage() {
   if (loading) return <div className="skeleton h-64 rounded" />;
   if (!app) return <p>Başvuru bulunamadı.</p>;
 
-  const infoRows: [string, string | number | undefined][] = [
-    ["Telefon", app.phone],
-    ["Doğum tarihi", app.birthDate || undefined],
-    ["Yaş", app.birthDate ? app.age : undefined],
-    ["Cinsiyet", app.gender ? GENDER_LABELS[app.gender] : undefined],
-    ["Şehir", app.city],
-    ["Boy", app.heightCm ? `${app.heightCm} cm` : undefined],
-    ["Kilo", app.weightKg ? `${app.weightKg} kg` : undefined],
-    ["Başvuru tarihi", formatDateTR(app.createdAt)],
-  ];
-
   const remainingPhotos = MAX_PHOTOS - app.photos.length;
 
   return (
@@ -291,27 +305,44 @@ export default function ApplicationDetailPage() {
         <div className="space-y-6">
           <section className="border border-border bg-surface p-5">
             <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
-              Başvuru bilgileri
+              İletişim Bilgileri
             </h2>
-            <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-              {infoRows
-                .filter(([, v]) => v !== undefined && v !== "")
-                .map(([k, v]) => (
-                  <div key={k}>
-                    <dt className="text-ink-soft">{k}</dt>
-                    <dd className="mt-0.5 font-medium">{v}</dd>
-                  </div>
-                ))}
-            </dl>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <FormField label="Ad" required>
+                <Input
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+              </FormField>
+              <FormField label="Soyad" required>
+                <Input
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+              </FormField>
+              <FormField label="Telefon" required>
+                <Input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  inputMode="tel"
+                />
+              </FormField>
+              <FormField label="Şehir" required>
+                <Input
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+              </FormField>
+            </div>
           </section>
 
           <section className="border border-border bg-surface p-5">
             <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
-              Profil Bilgileri
+              Kişisel Bilgiler
             </h2>
             <p className="mt-2 text-sm text-ink-muted">
-              Kısa başvuruda boş gelen alanları görüşme sonrası buradan
-              tamamlayabilirsiniz.
+              Doğum tarihi ve yaş birbirinden bağımsızdır; biri diğerini
+              otomatik değiştirmez.
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <FormField label="Doğum tarihi">
@@ -321,7 +352,16 @@ export default function ApplicationDetailPage() {
                   onChange={(e) => setBirthDate(e.target.value)}
                 />
               </FormField>
-              <FormField label="Cinsiyet">
+              <FormField label="Yaş">
+                <Input
+                  type="number"
+                  min={0}
+                  max={120}
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                />
+              </FormField>
+              <FormField label="Cinsiyet" className="sm:col-span-2">
                 <Select
                   value={gender}
                   onChange={(e) => setGender(e.target.value as Gender | "")}
@@ -334,6 +374,14 @@ export default function ApplicationDetailPage() {
                   ))}
                 </Select>
               </FormField>
+            </div>
+          </section>
+
+          <section className="border border-border bg-surface p-5">
+            <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
+              Fiziksel Özellikler
+            </h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <FormField label="Boy (cm)">
                 <Input
                   type="number"
@@ -348,19 +396,50 @@ export default function ApplicationDetailPage() {
                   onChange={(e) => setWeightKg(e.target.value)}
                 />
               </FormField>
-              <FormField label="Deneyim" className="sm:col-span-2">
+              <FormField label="Saç rengi">
+                <Input
+                  value={hairColor}
+                  onChange={(e) => setHairColor(e.target.value)}
+                />
+              </FormField>
+              <FormField label="Göz rengi">
+                <Input
+                  value={eyeColor}
+                  onChange={(e) => setEyeColor(e.target.value)}
+                />
+              </FormField>
+            </div>
+          </section>
+
+          <section className="border border-border bg-surface p-5">
+            <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
+              Oyunculuk Bilgileri
+            </h2>
+            <div className="mt-4 grid gap-4">
+              <FormField label="Deneyim">
                 <Textarea
                   value={experience}
                   onChange={(e) => setExperience(e.target.value)}
                   rows={4}
                 />
               </FormField>
+              <FormField label="Oynadığı projeler">
+                <Textarea
+                  value={projects}
+                  onChange={(e) => setProjects(e.target.value)}
+                  rows={4}
+                  placeholder="Dizi, film, reklam, tiyatro vb."
+                />
+              </FormField>
+              <FormField label="Not">
+                <Textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={3}
+                />
+              </FormField>
             </div>
-            <Button
-              className="mt-4"
-              onClick={saveProfile}
-              disabled={saving}
-            >
+            <Button className="mt-4" onClick={saveProfile} disabled={saving}>
               Kaydet
             </Button>
           </section>
@@ -389,7 +468,8 @@ export default function ApplicationDetailPage() {
               ))}
               {!app.photos.length ? (
                 <p className="col-span-full text-sm text-ink-muted">
-                  Fotoğraf yok.
+                  Fotoğraf yok. Public formda fotoğraf istenmez; buradan
+                  ekleyebilirsiniz.
                 </p>
               ) : null}
             </div>
@@ -437,7 +517,7 @@ export default function ApplicationDetailPage() {
             </Button>
           </div>
           <div className="border border-border bg-surface p-4">
-            <FormField label="Admin notu">
+            <FormField label="Admin notu (hızlı)">
               <Textarea value={note} onChange={(e) => setNote(e.target.value)} />
             </FormField>
             <Button

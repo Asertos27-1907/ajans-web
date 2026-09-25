@@ -273,7 +273,7 @@ export default function ApplicationsAdminPage() {
                     </span>
                   </td>
                   <td className="px-3 py-3">{app.phone}</td>
-                  <td className="px-3 py-3">{app.birthDate ? app.age : "—"}</td>
+                  <td className="px-3 py-3">{app.age != null ? app.age : "—"}</td>
                   <td className="px-3 py-3">{app.city}</td>
                   <td className="px-3 py-3">
                     {app.gender ? GENDER_LABELS[app.gender] : "—"}

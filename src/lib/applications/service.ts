@@ -16,6 +16,7 @@ import {
 import {
   mapApplication,
   mapPhoto,
+  APPLICATION_SELECT,
   type DbApplicationPhotoRow,
   type DbApplicationRow,
 } from "@/lib/applications/map";
@@ -244,11 +245,15 @@ export async function createPublicApplication(input: {
       last_name: data.last_name,
       phone: data.phone,
       birth_date: null,
+      age: null,
       gender: null,
       city: data.city,
       height_cm: null,
       weight_kg: null,
+      hair_color: null,
+      eye_color: null,
       experience: null,
+      projects: null,
       status: "new",
     })
     .select("id")
@@ -364,10 +369,7 @@ export async function listApplications(
 
   let query = admin
     .from("applications")
-    .select(
-      "id, first_name, last_name, phone, birth_date, gender, city, height_cm, weight_kg, experience, status, admin_note, tags, created_at, updated_at",
-      { count: "exact" },
-    )
+    .select(APPLICATION_SELECT, { count: "exact" })
     .order("created_at", { ascending: false });
 
   if (city) query = query.eq("city", city);
@@ -401,7 +403,7 @@ export async function listApplications(
 
   if (needsAgeFilter) {
     mapped = mapped.filter((app) => {
-      if (!app.birthDate) return false;
+      if (app.age == null) return false;
       if (ageMin != null && app.age < ageMin) return false;
       if (ageMax != null && app.age > ageMax) return false;
       return true;
@@ -437,9 +439,7 @@ export async function getApplicationById(
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("applications")
-    .select(
-      "id, first_name, last_name, phone, birth_date, gender, city, height_cm, weight_kg, experience, status, admin_note, tags, created_at, updated_at",
-    )
+    .select(APPLICATION_SELECT)
     .eq("id", id)
     .maybeSingle();
 
@@ -455,22 +455,38 @@ export async function updateApplication(
     status?: ApplicationStatus;
     adminNotes?: string;
     tags?: string[];
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    city?: string;
     birthDate?: string | null;
+    age?: number | null;
     gender?: string | null;
     heightCm?: number | null;
     weightKg?: number | null;
+    hairColor?: string | null;
+    eyeColor?: string | null;
     experience?: string | null;
+    projects?: string | null;
   },
 ): Promise<Application | null> {
   const parsed = applicationUpdateSchema.safeParse({
     status: patch.status,
     admin_note: patch.adminNotes,
     tags: patch.tags,
+    first_name: patch.firstName,
+    last_name: patch.lastName,
+    phone: patch.phone,
+    city: patch.city,
     birth_date: patch.birthDate,
+    age: patch.age,
     gender: patch.gender,
     height_cm: patch.heightCm,
     weight_kg: patch.weightKg,
+    hair_color: patch.hairColor,
+    eye_color: patch.eyeColor,
     experience: patch.experience,
+    projects: patch.projects,
   });
 
   if (!parsed.success) {
@@ -484,8 +500,23 @@ export async function updateApplication(
     updatePayload.admin_note = parsed.data.admin_note;
   }
   if (parsed.data.tags !== undefined) updatePayload.tags = parsed.data.tags;
+  if (patch.firstName !== undefined && parsed.data.first_name !== undefined) {
+    updatePayload.first_name = parsed.data.first_name;
+  }
+  if (patch.lastName !== undefined && parsed.data.last_name !== undefined) {
+    updatePayload.last_name = parsed.data.last_name;
+  }
+  if (patch.phone !== undefined && parsed.data.phone !== undefined) {
+    updatePayload.phone = parsed.data.phone;
+  }
+  if (patch.city !== undefined && parsed.data.city !== undefined) {
+    updatePayload.city = parsed.data.city;
+  }
   if (patch.birthDate !== undefined) {
     updatePayload.birth_date = parsed.data.birth_date ?? null;
+  }
+  if (patch.age !== undefined) {
+    updatePayload.age = parsed.data.age ?? null;
   }
   if (patch.gender !== undefined) {
     updatePayload.gender = parsed.data.gender ?? null;
@@ -496,8 +527,17 @@ export async function updateApplication(
   if (patch.weightKg !== undefined) {
     updatePayload.weight_kg = parsed.data.weight_kg ?? null;
   }
+  if (patch.hairColor !== undefined) {
+    updatePayload.hair_color = parsed.data.hair_color || null;
+  }
+  if (patch.eyeColor !== undefined) {
+    updatePayload.eye_color = parsed.data.eye_color || null;
+  }
   if (patch.experience !== undefined) {
     updatePayload.experience = parsed.data.experience || null;
+  }
+  if (patch.projects !== undefined) {
+    updatePayload.projects = parsed.data.projects || null;
   }
 
   if (!Object.keys(updatePayload).length) {
