@@ -3,6 +3,9 @@ import Link from "next/link";
 import { SITE_IMAGES } from "@/config/site-images";
 import { cn } from "@/lib/utils";
 
+/** Horizontal logo aspect ≈ 1024×341 */
+const LOGO_ASPECT = "aspect-[1024/341]";
+
 export function BrandLogo({
   className,
   priority,
@@ -15,8 +18,14 @@ export function BrandLogo({
 }) {
   const frame =
     size === "nav"
-      ? "relative block h-12 w-[11.75rem] overflow-hidden bg-white sm:h-[3.25rem] sm:w-[13.75rem]"
-      : "relative block h-10 w-[148px] overflow-hidden bg-white sm:h-11 sm:w-[168px]";
+      ? cn(
+          "relative block h-11 w-auto bg-white sm:h-12",
+          LOGO_ASPECT,
+        )
+      : cn(
+          "relative block h-10 w-auto bg-white sm:h-11",
+          LOGO_ASPECT,
+        );
 
   return (
     <Link
@@ -29,14 +38,12 @@ export function BrandLogo({
           src={SITE_IMAGES.brand.logo}
           alt="+Akademi Oyunculuk & Menajerlik"
           fill
-          className={cn(
-            "object-contain object-left",
-            // Crop baked-in white padding so the mark reads larger.
+          className="object-contain object-left"
+          sizes={
             size === "nav"
-              ? "origin-left scale-[1.28]"
-              : "origin-left scale-[1.12]",
-          )}
-          sizes={size === "nav" ? "(max-width: 640px) 188px, 220px" : "168px"}
+              ? "(max-width: 640px) 176px, 200px"
+              : "(max-width: 640px) 160px, 176px"
+          }
           priority={priority}
         />
       </span>
