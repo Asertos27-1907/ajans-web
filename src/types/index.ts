@@ -88,18 +88,25 @@ export interface Actor {
   firstName: string;
   lastName: string;
   birthDate: string;
+  /** Independent of birthDate when set in DB; otherwise calendar age. */
   age: number;
   city: string;
   gender: Gender;
   phone?: string;
   heightCm?: number;
   weightKg?: number;
+  hairColor: string;
+  eyeColor: string;
   experience: string;
+  projects: string;
+  adminNotes: string;
   photos: ActorPhoto[];
   coverPhotoUrl: string;
   isActive: boolean;
+  /** Public website roster visibility (is_public). */
   showOnWebsite: boolean;
   isFeatured: boolean;
+  displayOrder: number | null;
   applicationId?: string;
   createdAt: string;
   updatedAt: string;
@@ -288,6 +295,13 @@ export interface ApplicationFilters {
 export interface ActorFilters {
   search?: string;
   gender?: Gender;
+  city?: string;
+  hairColor?: string;
+  eyeColor?: string;
+  ageMin?: number;
+  ageMax?: number;
+  heightMin?: number;
+  heightMax?: number;
   isActive?: boolean;
   showOnWebsite?: boolean;
   isFeatured?: boolean;

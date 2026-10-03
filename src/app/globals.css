@@ -265,6 +265,23 @@ select,
   animation: fade-up 0.7s ease 0.24s both;
 }
 
+@keyframes actors-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.actors-marquee {
+  animation: actors-marquee-scroll 55s linear infinite;
+}
+
+.actors-marquee-paused {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -275,7 +292,8 @@ select,
   .animate-fade-up-delay-2,
   .decor-geo::before,
   .decor-float::after,
-  .skeleton {
+  .skeleton,
+  .actors-marquee {
     animation: none !important;
   }
 }

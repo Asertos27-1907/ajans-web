@@ -60,11 +60,13 @@ export const CALL_EXPORT_COLUMNS = [
   { key: "note", label: "Not" },
 ] as const;
 
-/** Public navbar/footer links. Oyuncular & Referanslar hidden until content is ready. */
+/** Public navbar/footer links. */
 export const NAV_LINKS = [
   { href: "/", label: "Ana Sayfa" },
   { href: "/hakkimizda", label: "Hakkımızda" },
+  { href: "/oyuncular", label: "Oyuncular" },
   { href: "/hizmetler", label: "Hizmetler" },
+  { href: "/basvuru", label: "Başvuru" },
   { href: "/iletisim", label: "İletişim" },
 ] as const;
 

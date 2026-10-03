@@ -36,7 +36,12 @@ export default function ActorDetailPage() {
     ["Şehir", actor.city],
     ["Boy", actor.heightCm ? `${actor.heightCm} cm` : undefined],
     ["Kilo", actor.weightKg ? `${actor.weightKg} kg` : undefined],
+    ["Saç rengi", actor.hairColor || undefined],
+    ["Göz rengi", actor.eyeColor || undefined],
     ["Durum", actor.isActive ? "Aktif" : "Pasif"],
+    ["Web sitesinde", actor.showOnWebsite ? "Görünür" : "Gizli"],
+    ["Ana sayfa", actor.isFeatured ? "Öne çıkan" : "—"],
+    ["Sıra", actor.displayOrder ?? undefined],
   ];
 
   return (
@@ -86,8 +91,28 @@ export default function ActorDetailPage() {
               <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
                 Deneyim
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+              <p className="mt-3 text-sm leading-relaxed whitespace-pre-line text-ink-muted">
                 {actor.experience}
+              </p>
+            </section>
+          ) : null}
+          {actor.projects ? (
+            <section className="border border-border bg-surface p-5">
+              <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
+                Projeler
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed whitespace-pre-line text-ink-muted">
+                {actor.projects}
+              </p>
+            </section>
+          ) : null}
+          {actor.adminNotes ? (
+            <section className="border border-border bg-surface p-5">
+              <h2 className="text-sm font-semibold tracking-wide text-secondary uppercase">
+                Not
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed whitespace-pre-line text-ink-muted">
+                {actor.adminNotes}
               </p>
             </section>
           ) : null}
@@ -110,6 +135,11 @@ export default function ActorDetailPage() {
                       sizes="160px"
                       unoptimized
                     />
+                    {photo.isCover ? (
+                      <span className="absolute bottom-2 left-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                        Ana
+                      </span>
+                    ) : null}
                   </div>
                 ))}
               </div>

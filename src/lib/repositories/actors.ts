@@ -41,8 +41,16 @@ export const actorRepository = {
     city: string;
     heightCm?: number;
     weightKg?: number;
+    age?: number | null;
+    hairColor?: string;
+    eyeColor?: string;
     experience: string;
+    projects?: string;
+    adminNotes?: string;
     isActive: boolean;
+    showOnWebsite?: boolean;
+    isFeatured?: boolean;
+    displayOrder?: number | null;
     photos?: File[];
   }) {
     const form = new FormData();
@@ -54,8 +62,17 @@ export const actorRepository = {
     form.set("city", input.city);
     if (input.heightCm) form.set("height_cm", String(input.heightCm));
     if (input.weightKg) form.set("weight_kg", String(input.weightKg));
+    if (input.age != null) form.set("age", String(input.age));
+    if (input.hairColor) form.set("hair_color", input.hairColor);
+    if (input.eyeColor) form.set("eye_color", input.eyeColor);
     form.set("experience", input.experience);
+    if (input.projects) form.set("projects", input.projects);
+    if (input.adminNotes) form.set("admin_note", input.adminNotes);
     form.set("active", input.isActive ? "true" : "false");
+    form.set("is_public", input.showOnWebsite ? "true" : "false");
+    form.set("is_featured", input.isFeatured ? "true" : "false");
+    if (input.displayOrder != null)
+      form.set("display_order", String(input.displayOrder));
     input.photos?.forEach((f) => form.append("photos", f));
 
     const res = await fetch("/api/dashboard/actors", {
@@ -68,13 +85,22 @@ export const actorRepository = {
 
   async update(
     id: string,
-    patch: Partial<Actor> & { newPhotos?: File[]; deletePhotoId?: string },
+    patch: Partial<Omit<Actor, "age" | "displayOrder">> & {
+      age?: number | null;
+      displayOrder?: number | null;
+      newPhotos?: File[];
+      deletePhotoId?: string;
+      primaryPhotoId?: string;
+    },
   ) {
-    if (patch.newPhotos?.length || patch.deletePhotoId) {
+    if (patch.newPhotos?.length || patch.deletePhotoId || patch.primaryPhotoId) {
       const form = new FormData();
       if (patch.deletePhotoId) {
         form.set("action", "delete_photo");
         form.set("photo_id", patch.deletePhotoId);
+      } else if (patch.primaryPhotoId) {
+        form.set("action", "set_primary");
+        form.set("photo_id", patch.primaryPhotoId);
       } else if (patch.newPhotos?.length) {
         form.set("action", "add_photos");
         patch.newPhotos.forEach((f) => form.append("photos", f));
@@ -100,8 +126,16 @@ export const actorRepository = {
         city: patch.city,
         heightCm: patch.heightCm,
         weightKg: patch.weightKg,
+        age: patch.age,
+        hairColor: patch.hairColor,
+        eyeColor: patch.eyeColor,
         experience: patch.experience,
+        projects: patch.projects,
+        adminNotes: patch.adminNotes,
         isActive: patch.isActive,
+        showOnWebsite: patch.showOnWebsite,
+        isFeatured: patch.isFeatured,
+        displayOrder: patch.displayOrder,
       }),
     });
     return parseJson<Actor>(res);

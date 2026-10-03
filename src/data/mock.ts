@@ -126,8 +126,12 @@ export const mockActors: Actor[] = Array.from({ length: 12 }).map((_, i) => {
     phone: `0533${String(2000000 + i * 2222).slice(0, 7)}`,
     heightCm: 165 + (i % 20),
     weightKg: 55 + (i % 20),
+    hairColor: i % 2 === 0 ? "Kahverengi" : "Siyah",
+    eyeColor: i % 3 === 0 ? "Yeşil" : "Kahverengi",
     experience:
       "Oyunculuk atölyeleri, kısa filmler, sahne ve kamera önü çalışmaları",
+    projects: i % 3 === 0 ? "Kısa film\nYerel tiyatro" : "",
+    adminNotes: "",
     photos: [
       {
         id: `${id}-1`,
@@ -144,6 +148,7 @@ export const mockActors: Actor[] = Array.from({ length: 12 }).map((_, i) => {
     isActive: i % 7 !== 0,
     showOnWebsite: i < 10,
     isFeatured: i < 6,
+    displayOrder: i < 10 ? i + 1 : null,
     applicationId: i < 3 ? `app-${String(i + 4).padStart(3, "0")}` : undefined,
     createdAt: `2025-${String((i % 12) + 1).padStart(2, "0")}-10T12:00:00.000Z`,
     updatedAt: now,

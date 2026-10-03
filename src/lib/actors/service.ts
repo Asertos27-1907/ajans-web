@@ -25,7 +25,7 @@ import { APPLICATION_PHOTOS_BUCKET } from "@/lib/applications/schema";
 export const ACTOR_PHOTOS_BUCKET = "actor-photos";
 
 const ACTOR_SELECT =
-  "id, first_name, last_name, phone, birth_date, gender, city, height_cm, weight_kg, experience, active, application_id, created_at, updated_at";
+  "id, first_name, last_name, phone, birth_date, age, gender, city, height_cm, weight_kg, hair_color, eye_color, experience, projects, admin_note, active, is_public, is_featured, display_order, application_id, created_at, updated_at";
 
 function logActorError(
   stage: string,
@@ -82,41 +82,74 @@ async function attachPhotos(rows: DbActorRow[]): Promise<Actor[]> {
     photos.map((p) => p.storage_path),
   );
 
-  return rows.map((row) =>
-    mapActor(
+  return rows.map((row) => {
+    const name = `${row.first_name} ${row.last_name}`.trim();
+    return mapActor(
       row,
       photos
         .filter((p) => p.actor_id === row.id)
-        .map((p) => mapActorPhoto(p, signed.get(p.storage_path) ?? null)),
-    ),
-  );
+        .map((p) =>
+          mapActorPhoto(p, signed.get(p.storage_path) ?? null, name),
+        ),
+    );
+  });
 }
 
-export async function listActors(
-  filters: ActorFilters = {},
-): Promise<PaginatedResult<Actor>> {
-  const admin = createAdminClient();
+function applyActorFilters(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: any,
+  filters: ActorFilters,
+) {
   const {
     search,
     gender,
+    city,
+    hairColor,
+    eyeColor,
+    ageMin,
+    ageMax,
+    heightMin,
+    heightMax,
     isActive,
-    page = 1,
-    pageSize = 60,
+    showOnWebsite,
+    isFeatured,
   } = filters;
 
-  let query = admin
-    .from("actors")
-    .select(ACTOR_SELECT, { count: "exact" })
-    .order("created_at", { ascending: false });
-
   if (gender) query = query.eq("gender", gender);
+  if (city?.trim()) query = query.ilike("city", `%${city.trim()}%`);
+  if (hairColor?.trim())
+    query = query.ilike("hair_color", `%${hairColor.trim()}%`);
+  if (eyeColor?.trim())
+    query = query.ilike("eye_color", `%${eyeColor.trim()}%`);
+  if (ageMin != null) query = query.gte("age", ageMin);
+  if (ageMax != null) query = query.lte("age", ageMax);
+  if (heightMin != null) query = query.gte("height_cm", heightMin);
+  if (heightMax != null) query = query.lte("height_cm", heightMax);
   if (isActive != null) query = query.eq("active", isActive);
+  if (showOnWebsite != null) query = query.eq("is_public", showOnWebsite);
+  if (isFeatured != null) query = query.eq("is_featured", isFeatured);
   if (search?.trim()) {
     const q = search.trim().replace(/[%_,]/g, "");
     query = query.or(
       `first_name.ilike.%${q}%,last_name.ilike.%${q}%,city.ilike.%${q}%`,
     );
   }
+  return query;
+}
+
+export async function listActors(
+  filters: ActorFilters = {},
+): Promise<PaginatedResult<Actor>> {
+  const admin = createAdminClient();
+  const { page = 1, pageSize = 60 } = filters;
+
+  let query = admin
+    .from("actors")
+    .select(ACTOR_SELECT, { count: "exact" })
+    .order("display_order", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: false });
+
+  query = applyActorFilters(query, filters);
 
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -134,8 +167,34 @@ export async function listActors(
   };
 }
 
-export async function listPublicActors(page = 1, pageSize = 24) {
-  return listActors({ isActive: true, page, pageSize });
+export async function listPublicActors(
+  page = 1,
+  pageSize = 24,
+  filters: Omit<ActorFilters, "showOnWebsite" | "isActive" | "page" | "pageSize"> = {},
+) {
+  return listActors({
+    ...filters,
+    showOnWebsite: true,
+    page,
+    pageSize,
+  });
+}
+
+export async function listFeaturedPublicActors(limit = 12): Promise<Actor[]> {
+  const featured = await listActors({
+    showOnWebsite: true,
+    isFeatured: true,
+    page: 1,
+    pageSize: limit,
+  });
+  if (featured.data.length) return featured.data;
+
+  const fallback = await listActors({
+    showOnWebsite: true,
+    page: 1,
+    pageSize: limit,
+  });
+  return fallback.data;
 }
 
 export async function getActorById(id: string): Promise<Actor | null> {
@@ -164,8 +223,16 @@ export async function createActor(input: {
   city: string;
   heightCm?: number;
   weightKg?: number;
+  age?: number | null;
+  hairColor?: string;
+  eyeColor?: string;
   experience?: string;
+  projects?: string;
+  adminNotes?: string;
   isActive?: boolean;
+  showOnWebsite?: boolean;
+  isFeatured?: boolean;
+  displayOrder?: number | null;
   applicationId?: string;
   photos?: File[];
 }): Promise<Actor> {
@@ -177,12 +244,20 @@ export async function createActor(input: {
       last_name: input.lastName,
       phone: input.phone || null,
       birth_date: input.birthDate,
+      age: input.age ?? null,
       gender: input.gender,
       city: input.city,
       height_cm: input.heightCm ?? null,
       weight_kg: input.weightKg ?? null,
+      hair_color: input.hairColor || null,
+      eye_color: input.eyeColor || null,
       experience: input.experience || null,
+      projects: input.projects || null,
+      admin_note: input.adminNotes || null,
       active: input.isActive ?? true,
+      is_public: input.showOnWebsite ?? false,
+      is_featured: input.isFeatured ?? false,
+      display_order: input.displayOrder ?? null,
       application_id: input.applicationId ?? null,
     })
     .select(ACTOR_SELECT)
@@ -239,8 +314,16 @@ export async function updateActor(
     city?: string;
     heightCm?: number | null;
     weightKg?: number | null;
+    age?: number | null;
+    hairColor?: string;
+    eyeColor?: string;
     experience?: string;
+    projects?: string;
+    adminNotes?: string;
     isActive?: boolean;
+    showOnWebsite?: boolean;
+    isFeatured?: boolean;
+    displayOrder?: number | null;
   },
 ): Promise<Actor | null> {
   const payload: Record<string, unknown> = {};
@@ -252,13 +335,38 @@ export async function updateActor(
   if (patch.city !== undefined) payload.city = patch.city;
   if (patch.heightCm !== undefined) payload.height_cm = patch.heightCm;
   if (patch.weightKg !== undefined) payload.weight_kg = patch.weightKg;
+  if (patch.age !== undefined) payload.age = patch.age;
+  if (patch.hairColor !== undefined) payload.hair_color = patch.hairColor || null;
+  if (patch.eyeColor !== undefined) payload.eye_color = patch.eyeColor || null;
   if (patch.experience !== undefined) payload.experience = patch.experience || null;
+  if (patch.projects !== undefined) payload.projects = patch.projects || null;
+  if (patch.adminNotes !== undefined) payload.admin_note = patch.adminNotes || null;
   if (patch.isActive !== undefined) payload.active = patch.isActive;
+  if (patch.showOnWebsite !== undefined) payload.is_public = patch.showOnWebsite;
+  if (patch.isFeatured !== undefined) payload.is_featured = patch.isFeatured;
+  if (patch.displayOrder !== undefined) payload.display_order = patch.displayOrder;
 
   const admin = createAdminClient();
   const { error } = await admin.from("actors").update(payload).eq("id", id);
   if (error) throw new Error("update_failed");
   return getActorById(id);
+}
+
+/** Sets the given photo as cover (sort_order = 0); others shift up. */
+export async function setActorPrimaryPhoto(actorId: string, photoId: string) {
+  const admin = createAdminClient();
+  const { data: photos, error } = await admin
+    .from("actor_photos")
+    .select("id")
+    .eq("actor_id", actorId)
+    .order("sort_order", { ascending: true });
+
+  if (error || !photos?.length) throw new Error("not_found");
+  const ids = photos.map((p) => p.id as string);
+  if (!ids.includes(photoId)) throw new Error("not_found");
+
+  const ordered = [photoId, ...ids.filter((id) => id !== photoId)];
+  return reorderActorPhotos(actorId, ordered);
 }
 
 export async function addActorPhotos(actorId: string, files: File[]) {
@@ -306,7 +414,7 @@ export async function deleteActorPhoto(actorId: string, photoId: string) {
   const admin = createAdminClient();
   const { data: photo } = await admin
     .from("actor_photos")
-    .select("id, storage_path")
+    .select("id, storage_path, sort_order")
     .eq("id", photoId)
     .eq("actor_id", actorId)
     .maybeSingle();
@@ -315,6 +423,21 @@ export async function deleteActorPhoto(actorId: string, photoId: string) {
 
   await admin.from("actor_photos").delete().eq("id", photoId);
   await admin.storage.from(ACTOR_PHOTOS_BUCKET).remove([photo.storage_path]);
+
+  // Keep a single cover: resequence remaining photos so one is sort_order 0.
+  const { data: remaining } = await admin
+    .from("actor_photos")
+    .select("id")
+    .eq("actor_id", actorId)
+    .order("sort_order", { ascending: true });
+
+  if (remaining?.length) {
+    await reorderActorPhotos(
+      actorId,
+      remaining.map((p) => p.id as string),
+    );
+  }
+
   return getActorById(actorId);
 }
 
@@ -401,7 +524,7 @@ export async function convertApplicationToActor(
   const { data: app, error: appErr } = await admin
     .from("applications")
     .select(
-      "id, first_name, last_name, phone, birth_date, gender, city, height_cm, weight_kg, experience",
+      "id, first_name, last_name, phone, birth_date, age, gender, city, height_cm, weight_kg, hair_color, eye_color, experience, projects",
     )
     .eq("id", applicationId)
     .maybeSingle();
@@ -442,12 +565,18 @@ export async function convertApplicationToActor(
       last_name: app.last_name,
       phone: app.phone,
       birth_date: app.birth_date,
+      age: app.age ?? null,
       gender: app.gender,
       city: app.city,
       height_cm: app.height_cm,
       weight_kg: app.weight_kg,
+      hair_color: app.hair_color ?? null,
+      eye_color: app.eye_color ?? null,
       experience: app.experience,
+      projects: app.projects ?? null,
       active: true,
+      is_public: false,
+      is_featured: false,
       application_id: applicationId,
     })
     .select(ACTOR_SELECT)

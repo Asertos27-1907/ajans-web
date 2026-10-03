@@ -10,6 +10,7 @@ import {
   deleteActorPhoto,
   getActorById,
   reorderActorPhotos,
+  setActorPrimaryPhoto,
   updateActor,
 } from "@/lib/actors/service";
 import type { Gender } from "@/types";
@@ -58,6 +59,13 @@ export async function PATCH(request: Request, context: Ctx) {
         return NextResponse.json(actor);
       }
 
+      if (action === "set_primary") {
+        const photoId = String(formData.get("photo_id") || "");
+        if (!photoId) return badRequest("Fotoğraf seçilmedi.");
+        const actor = await setActorPrimaryPhoto(id, photoId);
+        return NextResponse.json(actor);
+      }
+
       if (action === "reorder_photos") {
         const raw = String(formData.get("ordered_ids") || "[]");
         const orderedIds = JSON.parse(raw) as string[];
@@ -78,11 +86,29 @@ export async function PATCH(request: Request, context: Ctx) {
         weightKg: formData.get("weight_kg")
           ? Number(formData.get("weight_kg"))
           : undefined,
+        age: formData.get("age") ? Number(formData.get("age")) : undefined,
+        hairColor: String(formData.get("hair_color") ?? "") || undefined,
+        eyeColor: String(formData.get("eye_color") ?? "") || undefined,
         experience: String(formData.get("experience") ?? ""),
+        projects: String(formData.get("projects") ?? ""),
+        adminNotes: String(formData.get("admin_note") ?? ""),
         isActive:
           formData.get("active") == null
             ? undefined
             : formData.get("active") !== "false",
+        showOnWebsite:
+          formData.get("is_public") == null
+            ? undefined
+            : formData.get("is_public") === "true",
+        isFeatured:
+          formData.get("is_featured") == null
+            ? undefined
+            : formData.get("is_featured") === "true",
+        displayOrder: formData.get("display_order")
+          ? Number(formData.get("display_order"))
+          : formData.get("display_order") === ""
+            ? null
+            : undefined,
       });
 
       const photos = formData
@@ -104,14 +130,28 @@ export async function PATCH(request: Request, context: Ctx) {
       city?: string;
       heightCm?: number | null;
       weightKg?: number | null;
+      age?: number | null;
+      hairColor?: string;
+      eyeColor?: string;
       experience?: string;
+      projects?: string;
+      adminNotes?: string;
       isActive?: boolean;
+      showOnWebsite?: boolean;
+      isFeatured?: boolean;
+      displayOrder?: number | null;
       deletePhotoId?: string;
+      primaryPhotoId?: string;
       orderedPhotoIds?: string[];
     };
 
     if (body.deletePhotoId) {
       return NextResponse.json(await deleteActorPhoto(id, body.deletePhotoId));
+    }
+    if (body.primaryPhotoId) {
+      return NextResponse.json(
+        await setActorPrimaryPhoto(id, body.primaryPhotoId),
+      );
     }
     if (body.orderedPhotoIds) {
       return NextResponse.json(

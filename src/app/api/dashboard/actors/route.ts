@@ -72,8 +72,18 @@ export async function POST(request: Request) {
       weightKg: formData.get("weight_kg")
         ? Number(formData.get("weight_kg"))
         : undefined,
+      age: formData.get("age") ? Number(formData.get("age")) : null,
+      hairColor: String(formData.get("hair_color") || "").trim() || undefined,
+      eyeColor: String(formData.get("eye_color") || "").trim() || undefined,
       experience: String(formData.get("experience") || ""),
+      projects: String(formData.get("projects") || "").trim() || undefined,
+      adminNotes: String(formData.get("admin_note") || "").trim() || undefined,
       isActive: formData.get("active") !== "false",
+      showOnWebsite: formData.get("is_public") === "true",
+      isFeatured: formData.get("is_featured") === "true",
+      displayOrder: formData.get("display_order")
+        ? Number(formData.get("display_order"))
+        : null,
       photos,
     });
 

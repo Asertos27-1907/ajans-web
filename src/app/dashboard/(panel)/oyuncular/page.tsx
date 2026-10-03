@@ -10,19 +10,27 @@ import { Button } from "@/components/ui/Button";
 import { FormField, Input, Select, Textarea } from "@/components/ui/Field";
 import { EmptyState, PageHeader } from "@/components/ui/StatusBadge";
 import { GENDER_LABELS } from "@/config/constants";
-import { calcAge, cn, fullName } from "@/lib/utils";
+import { fullName, cn } from "@/lib/utils";
 
 const emptyForm = {
   firstName: "",
   lastName: "",
   phone: "",
   birthDate: "",
+  age: "",
   gender: "kadin" as Gender,
   city: "",
   heightCm: "",
   weightKg: "",
+  hairColor: "",
+  eyeColor: "",
   experience: "",
+  projects: "",
+  adminNotes: "",
   isActive: true,
+  showOnWebsite: false,
+  isFeatured: false,
+  displayOrder: "",
 };
 
 export default function ActorsAdminPage() {
@@ -84,12 +92,21 @@ export default function ActorsAdminPage() {
       lastName: actor.lastName,
       phone: actor.phone || "",
       birthDate: actor.birthDate,
+      age: actor.age ? String(actor.age) : "",
       gender: actor.gender,
       city: actor.city,
       heightCm: actor.heightCm ? String(actor.heightCm) : "",
       weightKg: actor.weightKg ? String(actor.weightKg) : "",
+      hairColor: actor.hairColor || "",
+      eyeColor: actor.eyeColor || "",
       experience: actor.experience || "",
+      projects: actor.projects || "",
+      adminNotes: actor.adminNotes || "",
       isActive: actor.isActive,
+      showOnWebsite: actor.showOnWebsite,
+      isFeatured: actor.isFeatured,
+      displayOrder:
+        actor.displayOrder != null ? String(actor.displayOrder) : "",
     });
     setNewPhotos([]);
     setPhotoPreviews([]);
@@ -111,24 +128,34 @@ export default function ActorsAdminPage() {
     setPhotoPreviews(list.map((f) => URL.createObjectURL(f)));
   }
 
+  function buildPayload() {
+    return {
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      phone: form.phone.trim() || undefined,
+      birthDate: form.birthDate,
+      age: form.age ? Number(form.age) : null,
+      gender: form.gender,
+      city: form.city.trim(),
+      heightCm: Number(form.heightCm) || undefined,
+      weightKg: Number(form.weightKg) || undefined,
+      hairColor: form.hairColor.trim(),
+      eyeColor: form.eyeColor.trim(),
+      experience: form.experience.trim(),
+      projects: form.projects.trim(),
+      adminNotes: form.adminNotes.trim(),
+      isActive: form.isActive,
+      showOnWebsite: form.showOnWebsite,
+      isFeatured: form.isFeatured,
+      displayOrder: form.displayOrder ? Number(form.displayOrder) : null,
+    };
+  }
+
   async function save() {
     setSaving(true);
     setError("");
     try {
-      const age = form.birthDate ? calcAge(form.birthDate) : 0;
-      void age;
-      const payload = {
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
-        phone: form.phone.trim() || undefined,
-        birthDate: form.birthDate,
-        gender: form.gender,
-        city: form.city.trim(),
-        heightCm: Number(form.heightCm) || undefined,
-        weightKg: Number(form.weightKg) || undefined,
-        experience: form.experience.trim(),
-        isActive: form.isActive,
-      };
+      const payload = buildPayload();
 
       if (!payload.firstName || !payload.lastName || !payload.city || !payload.birthDate) {
         setError("Ad, soyad, şehir ve doğum tarihi zorunlu.");
@@ -163,6 +190,7 @@ export default function ActorsAdminPage() {
 
   async function removePhoto(photoId: string) {
     if (!editing) return;
+    if (!confirm("Bu fotoğraf silinsin mi?")) return;
     setSaving(true);
     setError("");
     try {
@@ -180,16 +208,39 @@ export default function ActorsAdminPage() {
     }
   }
 
-  async function toggleActive(actor: Actor, e: React.MouseEvent) {
+  async function setPrimary(photoId: string) {
+    if (!editing) return;
+    setSaving(true);
+    setError("");
+    try {
+      const updated = await actorRepository.update(editing.id, {
+        primaryPhotoId: photoId,
+      });
+      if (updated) {
+        setEditing(updated);
+        setItems((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Ana fotoğraf ayarlanamadı.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function toggleField(
+    actor: Actor,
+    field: "isActive" | "showOnWebsite" | "isFeatured",
+    e: React.MouseEvent,
+  ) {
     e.preventDefault();
     e.stopPropagation();
-    const prev = actor.isActive;
+    const prev = actor[field];
     setItems((items) =>
-      items.map((a) => (a.id === actor.id ? { ...a, isActive: !prev } : a)),
+      items.map((a) => (a.id === actor.id ? { ...a, [field]: !prev } : a)),
     );
     try {
       const updated = await actorRepository.update(actor.id, {
-        isActive: !prev,
+        [field]: !prev,
       });
       if (updated) {
         setItems((items) =>
@@ -198,7 +249,7 @@ export default function ActorsAdminPage() {
       }
     } catch {
       setItems((items) =>
-        items.map((a) => (a.id === actor.id ? { ...a, isActive: prev } : a)),
+        items.map((a) => (a.id === actor.id ? { ...a, [field]: prev } : a)),
       );
       setError("Durum güncellenemedi.");
     }
@@ -274,9 +325,9 @@ export default function ActorsAdminPage() {
       </div>
 
       {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="skeleton aspect-[3/4]" />
+        <div className="space-y-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="skeleton h-16 rounded" />
           ))}
         </div>
       ) : !items.length ? (
@@ -285,81 +336,119 @@ export default function ActorsAdminPage() {
           description="Filtreleri değiştirmeyi deneyin."
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {items.map((actor) => (
-            <article
-              key={actor.id}
-              className="group overflow-hidden border border-border bg-surface transition hover:border-secondary/40"
-            >
-              <div className="relative aspect-[3/4] bg-bg-muted">
-                <Link
-                  href={`/dashboard/oyuncular/${actor.id}`}
-                  className="absolute inset-0 cursor-pointer"
-                  aria-label={`${fullName(actor.firstName, actor.lastName)} detay`}
-                >
-                  {actor.coverPhotoUrl ? (
-                    <Image
-                      src={actor.coverPhotoUrl}
-                      alt={fullName(actor.firstName, actor.lastName)}
-                      fill
-                      className="object-cover transition duration-500 group-hover:scale-[1.02]"
-                      sizes="(max-width:768px) 50vw, 25vw"
-                      unoptimized
-                    />
-                  ) : null}
-                </Link>
-                <button
-                  type="button"
-                  onClick={(e) => toggleActive(actor, e)}
-                  title={actor.isActive ? "Pasif yap" : "Aktif yap"}
-                  aria-label={actor.isActive ? "Pasif yap" : "Aktif yap"}
-                  className={cn(
-                    "absolute top-3 left-3 z-10 inline-flex cursor-pointer items-center gap-1.5 rounded px-2.5 py-1.5 text-[11px] font-semibold text-white shadow",
-                    actor.isActive ? "bg-success" : "bg-danger",
-                  )}
-                >
-                  {actor.isActive ? "Aktif" : "Pasif"}
-                </button>
-                <div className="absolute top-3 right-3 z-10 flex gap-1">
-                  <Link
-                    href={`/dashboard/oyuncular/${actor.id}`}
-                    className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded bg-black/65 text-white hover:bg-primary"
-                    aria-label="Görüntüle"
-                  >
-                    <Eye size={14} />
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => openEdit(actor)}
-                    className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded bg-black/65 text-white hover:bg-secondary"
-                    aria-label="Düzenle"
-                  >
-                    <Pencil size={14} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeActor(actor)}
-                    className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded bg-black/65 text-white hover:bg-danger"
-                    aria-label="Sil"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-              <div className="p-3">
-                <button
-                  type="button"
-                  onClick={() => openEdit(actor)}
-                  className="cursor-pointer text-left text-sm font-semibold text-ink hover:text-primary"
-                >
-                  {fullName(actor.firstName, actor.lastName)}
-                </button>
-                <p className="mt-1 text-xs text-ink-muted">
-                  {actor.city} · {actor.age} · {GENDER_LABELS[actor.gender]}
-                </p>
-              </div>
-            </article>
-          ))}
+        <div className="overflow-x-auto rounded border border-border bg-surface">
+          <table className="min-w-full text-left text-sm">
+            <thead className="border-b border-border bg-bg-muted text-xs tracking-wide text-ink-soft uppercase">
+              <tr>
+                <th className="px-3 py-3 font-semibold">Oyuncu</th>
+                <th className="hidden px-3 py-3 font-semibold sm:table-cell">Şehir</th>
+                <th className="hidden px-3 py-3 font-semibold md:table-cell">Yaş</th>
+                <th className="px-3 py-3 font-semibold">Durum</th>
+                <th className="hidden px-3 py-3 font-semibold lg:table-cell">Web</th>
+                <th className="hidden px-3 py-3 font-semibold lg:table-cell">Öne çıkan</th>
+                <th className="px-3 py-3 font-semibold">İşlem</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((actor) => (
+                <tr key={actor.id} className="border-b border-border last:border-0">
+                  <td className="px-3 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-12 w-10 shrink-0 overflow-hidden bg-bg-muted">
+                        {actor.coverPhotoUrl ? (
+                          <Image
+                            src={actor.coverPhotoUrl}
+                            alt={fullName(actor.firstName, actor.lastName)}
+                            fill
+                            className="object-cover"
+                            sizes="40px"
+                            unoptimized
+                          />
+                        ) : null}
+                      </div>
+                      <div>
+                        <p className="font-medium">
+                          {fullName(actor.firstName, actor.lastName)}
+                        </p>
+                        <p className="text-xs text-ink-muted sm:hidden">
+                          {actor.city} · {actor.age}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="hidden px-3 py-3 sm:table-cell">{actor.city}</td>
+                  <td className="hidden px-3 py-3 md:table-cell">{actor.age || "—"}</td>
+                  <td className="px-3 py-3">
+                    <button
+                      type="button"
+                      onClick={(e) => toggleField(actor, "isActive", e)}
+                      className={cn(
+                        "cursor-pointer rounded px-2 py-1 text-[11px] font-semibold text-white",
+                        actor.isActive ? "bg-success" : "bg-danger",
+                      )}
+                    >
+                      {actor.isActive ? "Aktif" : "Pasif"}
+                    </button>
+                  </td>
+                  <td className="hidden px-3 py-3 lg:table-cell">
+                    <button
+                      type="button"
+                      onClick={(e) => toggleField(actor, "showOnWebsite", e)}
+                      className={cn(
+                        "cursor-pointer rounded px-2 py-1 text-[11px] font-semibold",
+                        actor.showOnWebsite
+                          ? "bg-primary/15 text-primary"
+                          : "bg-bg-muted text-ink-muted",
+                      )}
+                    >
+                      {actor.showOnWebsite ? "Görünür" : "Gizli"}
+                    </button>
+                  </td>
+                  <td className="hidden px-3 py-3 lg:table-cell">
+                    <button
+                      type="button"
+                      onClick={(e) => toggleField(actor, "isFeatured", e)}
+                      className={cn(
+                        "cursor-pointer rounded px-2 py-1 text-[11px] font-semibold",
+                        actor.isFeatured
+                          ? "bg-secondary/15 text-secondary"
+                          : "bg-bg-muted text-ink-muted",
+                      )}
+                    >
+                      {actor.isFeatured ? "Öne çıkan" : "—"}
+                    </button>
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="flex items-center gap-1">
+                      <Link
+                        href={`/dashboard/oyuncular/${actor.id}`}
+                        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded border border-border hover:bg-bg-muted"
+                        aria-label="Görüntüle"
+                      >
+                        <Eye size={14} />
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => openEdit(actor)}
+                        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded border border-border hover:bg-bg-muted"
+                        aria-label="Düzenle"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeActor(actor)}
+                        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded border border-border hover:bg-danger/10 hover:text-danger"
+                        aria-label="Sil"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -410,6 +499,15 @@ export default function ActorsAdminPage() {
                     onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
                   />
                 </FormField>
+                <FormField label="Yaş">
+                  <Input
+                    type="number"
+                    min={0}
+                    max={120}
+                    value={form.age}
+                    onChange={(e) => setForm({ ...form, age: e.target.value })}
+                  />
+                </FormField>
                 <FormField label="Cinsiyet">
                   <Select
                     value={form.gender}
@@ -443,11 +541,48 @@ export default function ActorsAdminPage() {
                     onChange={(e) => setForm({ ...form, weightKg: e.target.value })}
                   />
                 </FormField>
+                <FormField label="Saç rengi">
+                  <Input
+                    value={form.hairColor}
+                    onChange={(e) => setForm({ ...form, hairColor: e.target.value })}
+                  />
+                </FormField>
+                <FormField label="Göz rengi">
+                  <Input
+                    value={form.eyeColor}
+                    onChange={(e) => setForm({ ...form, eyeColor: e.target.value })}
+                  />
+                </FormField>
+                <FormField label="Sıra">
+                  <Input
+                    type="number"
+                    value={form.displayOrder}
+                    onChange={(e) =>
+                      setForm({ ...form, displayOrder: e.target.value })
+                    }
+                    placeholder="1, 2, 3…"
+                  />
+                </FormField>
                 <FormField label="Deneyim" className="sm:col-span-2">
                   <Textarea
                     value={form.experience}
                     onChange={(e) => setForm({ ...form, experience: e.target.value })}
                     rows={3}
+                  />
+                </FormField>
+                <FormField label="Oynadığı projeler" className="sm:col-span-2">
+                  <Textarea
+                    value={form.projects}
+                    onChange={(e) => setForm({ ...form, projects: e.target.value })}
+                    rows={3}
+                    placeholder="Her satıra bir proje"
+                  />
+                </FormField>
+                <FormField label="Not (yalnızca dashboard)" className="sm:col-span-2">
+                  <Textarea
+                    value={form.adminNotes}
+                    onChange={(e) => setForm({ ...form, adminNotes: e.target.value })}
+                    rows={2}
                   />
                 </FormField>
                 <FormField label="Fotoğraf ekle" className="sm:col-span-2">
@@ -458,7 +593,8 @@ export default function ActorsAdminPage() {
                     onChange={(e) => onPickPhotos(e.target.files)}
                   />
                 </FormField>
-                <label className="flex cursor-pointer items-center gap-2 text-sm sm:col-span-2">
+
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
                   <input
                     type="checkbox"
                     className="cursor-pointer"
@@ -469,11 +605,36 @@ export default function ActorsAdminPage() {
                   />
                   Aktif
                 </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="cursor-pointer"
+                    checked={form.showOnWebsite}
+                    onChange={(e) =>
+                      setForm({ ...form, showOnWebsite: e.target.checked })
+                    }
+                  />
+                  Web sitesinde göster
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm sm:col-span-2">
+                  <input
+                    type="checkbox"
+                    className="cursor-pointer"
+                    checked={form.isFeatured}
+                    onChange={(e) =>
+                      setForm({ ...form, isFeatured: e.target.checked })
+                    }
+                  />
+                  Ana sayfada öne çıkar
+                </label>
 
                 {editing?.photos?.length ? (
                   <div className="grid grid-cols-3 gap-2 sm:col-span-2">
                     {editing.photos.map((photo) => (
-                      <div key={photo.id} className="relative aspect-[3/4] overflow-hidden border border-border">
+                      <div
+                        key={photo.id}
+                        className="relative aspect-[3/4] overflow-hidden border border-border"
+                      >
                         {photo.url ? (
                           <Image
                             src={photo.url}
@@ -484,6 +645,19 @@ export default function ActorsAdminPage() {
                             unoptimized
                           />
                         ) : null}
+                        {photo.isCover ? (
+                          <span className="absolute bottom-1 left-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                            Ana
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-white"
+                            onClick={() => setPrimary(photo.id)}
+                          >
+                            Ana fotoğraf yap
+                          </button>
+                        )}
                         <button
                           type="button"
                           className="absolute top-1 right-1 rounded bg-black/70 p-1 text-white"
@@ -500,7 +674,10 @@ export default function ActorsAdminPage() {
                 {photoPreviews.length ? (
                   <div className="grid grid-cols-3 gap-2 sm:col-span-2">
                     {photoPreviews.map((src) => (
-                      <div key={src} className="relative aspect-[3/4] overflow-hidden border border-border">
+                      <div
+                        key={src}
+                        className="relative aspect-[3/4] overflow-hidden border border-border"
+                      >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={src} alt="" className="h-full w-full object-cover" />
                       </div>
@@ -514,7 +691,7 @@ export default function ActorsAdminPage() {
                 İptal
               </Button>
               <Button onClick={save} disabled={saving}>
-                {saving ? "Kaydediliyor..." : "Güncelle"}
+                {saving ? "Kaydediliyor..." : "Kaydet"}
               </Button>
             </div>
           </div>
