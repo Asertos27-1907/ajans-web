@@ -88,7 +88,10 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(actor);
-  } catch {
+  } catch (err) {
+    console.warn("[api/dashboard/actors] POST", {
+      message: err instanceof Error ? err.message : "unknown",
+    });
     return serverError("Oyuncu oluşturulamadı.");
   }
 }

@@ -38,7 +38,7 @@ function logActorError(
     name?: string;
   } | null,
 ) {
-  if (process.env.NODE_ENV !== "development" || !error) return;
+  if (!error) return;
   console.warn(`[actors/${stage}]`, {
     message: error.message ?? null,
     code: error.code ?? null,
@@ -263,7 +263,10 @@ export async function createActor(input: {
     .select(ACTOR_SELECT)
     .single();
 
-  if (error || !data) throw new Error("create_failed");
+  if (error || !data) {
+    logActorError("actors-insert", error);
+    throw new Error("create_failed");
+  }
 
   const actorId = (data as DbActorRow).id;
   const uploaded: string[] = [];
@@ -348,7 +351,10 @@ export async function updateActor(
 
   const admin = createAdminClient();
   const { error } = await admin.from("actors").update(payload).eq("id", id);
-  if (error) throw new Error("update_failed");
+  if (error) {
+    logActorError("actors-update", error);
+    throw new Error("update_failed");
+  }
   return getActorById(id);
 }
 
