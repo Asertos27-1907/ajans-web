@@ -6,7 +6,7 @@ export interface DbActorRow {
   first_name: string;
   last_name: string;
   phone: string | null;
-  birth_date: string;
+  birth_date: string | null;
   gender: string;
   city: string;
   height_cm: number | null;
@@ -67,7 +67,7 @@ export function mapActor(row: DbActorRow, photos: ActorPhoto[] = []): Actor {
     firstName: row.first_name,
     lastName: row.last_name,
     phone: row.phone ?? undefined,
-    birthDate: row.birth_date,
+    birthDate: row.birth_date ?? "",
     age,
     gender: row.gender as Gender,
     city: row.city,

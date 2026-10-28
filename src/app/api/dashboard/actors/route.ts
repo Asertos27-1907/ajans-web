@@ -52,12 +52,17 @@ export async function POST(request: Request) {
     const firstName = String(formData.get("first_name") || "").trim();
     const lastName = String(formData.get("last_name") || "").trim();
     const city = String(formData.get("city") || "").trim();
-    const birthDate = String(formData.get("birth_date") || "").trim();
+    const birthDate = String(formData.get("birth_date") || "").trim() || null;
     const gender = String(formData.get("gender") || "").trim() as Gender;
 
-    if (!firstName || !lastName || !city || !birthDate || !gender) {
-      return badRequest("Zorunlu alanları doldurun.");
+    if (!firstName || !lastName || !city || !gender) {
+      return badRequest("Ad, soyad, şehir ve cinsiyet zorunlu.");
     }
+
+    const heightRaw = String(formData.get("height_cm") || "").trim();
+    const weightRaw = String(formData.get("weight_kg") || "").trim();
+    const ageRaw = String(formData.get("age") || "").trim();
+    const orderRaw = String(formData.get("display_order") || "").trim();
 
     const actor = await createActor({
       firstName,
@@ -66,24 +71,18 @@ export async function POST(request: Request) {
       birthDate,
       gender,
       city,
-      heightCm: formData.get("height_cm")
-        ? Number(formData.get("height_cm"))
-        : undefined,
-      weightKg: formData.get("weight_kg")
-        ? Number(formData.get("weight_kg"))
-        : undefined,
-      age: formData.get("age") ? Number(formData.get("age")) : null,
+      heightCm: heightRaw ? Number(heightRaw) : null,
+      weightKg: weightRaw ? Number(weightRaw) : null,
+      age: ageRaw ? Number(ageRaw) : null,
       hairColor: String(formData.get("hair_color") || "").trim() || undefined,
       eyeColor: String(formData.get("eye_color") || "").trim() || undefined,
-      experience: String(formData.get("experience") || ""),
+      experience: String(formData.get("experience") || "").trim() || undefined,
       projects: String(formData.get("projects") || "").trim() || undefined,
       adminNotes: String(formData.get("admin_note") || "").trim() || undefined,
       isActive: formData.get("active") !== "false",
       showOnWebsite: formData.get("is_public") === "true",
       isFeatured: formData.get("is_featured") === "true",
-      displayOrder: formData.get("display_order")
-        ? Number(formData.get("display_order"))
-        : null,
+      displayOrder: orderRaw ? Number(orderRaw) : null,
       photos,
     });
 

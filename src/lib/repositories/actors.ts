@@ -36,15 +36,15 @@ export const actorRepository = {
     firstName: string;
     lastName: string;
     phone?: string;
-    birthDate: string;
+    birthDate?: string | null;
     gender: Actor["gender"];
     city: string;
-    heightCm?: number;
-    weightKg?: number;
+    heightCm?: number | null;
+    weightKg?: number | null;
     age?: number | null;
     hairColor?: string;
     eyeColor?: string;
-    experience: string;
+    experience?: string;
     projects?: string;
     adminNotes?: string;
     isActive: boolean;
@@ -57,15 +57,15 @@ export const actorRepository = {
     form.set("first_name", input.firstName);
     form.set("last_name", input.lastName);
     if (input.phone) form.set("phone", input.phone);
-    form.set("birth_date", input.birthDate);
+    if (input.birthDate) form.set("birth_date", input.birthDate);
     form.set("gender", input.gender);
     form.set("city", input.city);
-    if (input.heightCm) form.set("height_cm", String(input.heightCm));
-    if (input.weightKg) form.set("weight_kg", String(input.weightKg));
+    if (input.heightCm != null) form.set("height_cm", String(input.heightCm));
+    if (input.weightKg != null) form.set("weight_kg", String(input.weightKg));
     if (input.age != null) form.set("age", String(input.age));
     if (input.hairColor) form.set("hair_color", input.hairColor);
     if (input.eyeColor) form.set("eye_color", input.eyeColor);
-    form.set("experience", input.experience);
+    if (input.experience) form.set("experience", input.experience);
     if (input.projects) form.set("projects", input.projects);
     if (input.adminNotes) form.set("admin_note", input.adminNotes);
     form.set("active", input.isActive ? "true" : "false");
@@ -85,7 +85,10 @@ export const actorRepository = {
 
   async update(
     id: string,
-    patch: Partial<Omit<Actor, "age" | "displayOrder">> & {
+    patch: Partial<Omit<Actor, "age" | "displayOrder" | "birthDate" | "heightCm" | "weightKg">> & {
+      birthDate?: string | null;
+      heightCm?: number | null;
+      weightKg?: number | null;
       age?: number | null;
       displayOrder?: number | null;
       newPhotos?: File[];

@@ -15,7 +15,10 @@ export async function GET() {
   if (!auth) return unauthorized();
   try {
     return NextResponse.json(await getMergedSiteSettings());
-  } catch {
+  } catch (err) {
+    console.warn("[api/dashboard/settings] GET", {
+      message: err instanceof Error ? err.message : "unknown",
+    });
     return serverError("Ayarlar yüklenemedi.");
   }
 }
@@ -27,7 +30,10 @@ export async function PUT(request: Request) {
     const body = (await request.json()) as SiteSettings;
     const saved = await saveSiteSettings(body);
     return NextResponse.json(saved);
-  } catch {
+  } catch (err) {
+    console.warn("[api/dashboard/settings] PUT", {
+      message: err instanceof Error ? err.message : "unknown",
+    });
     return serverError("Ayarlar kaydedilemedi.");
   }
 }

@@ -214,15 +214,21 @@ export async function getActorBySlug(slug: string): Promise<Actor | null> {
   return result.data.find((a) => a.slug === slug) ?? null;
 }
 
+function emptyToNull(value?: string | null): string | null {
+  if (value == null) return null;
+  const trimmed = String(value).trim();
+  return trimmed ? trimmed : null;
+}
+
 export async function createActor(input: {
   firstName: string;
   lastName: string;
   phone?: string;
-  birthDate: string;
+  birthDate?: string | null;
   gender: Gender;
   city: string;
-  heightCm?: number;
-  weightKg?: number;
+  heightCm?: number | null;
+  weightKg?: number | null;
   age?: number | null;
   hairColor?: string;
   eyeColor?: string;
@@ -242,18 +248,19 @@ export async function createActor(input: {
     .insert({
       first_name: input.firstName,
       last_name: input.lastName,
-      phone: input.phone || null,
-      birth_date: input.birthDate,
+      phone: emptyToNull(input.phone),
+      // Never send "" — Postgres date rejects empty string (22007).
+      birth_date: emptyToNull(input.birthDate),
       age: input.age ?? null,
       gender: input.gender,
       city: input.city,
       height_cm: input.heightCm ?? null,
       weight_kg: input.weightKg ?? null,
-      hair_color: input.hairColor || null,
-      eye_color: input.eyeColor || null,
-      experience: input.experience || null,
-      projects: input.projects || null,
-      admin_note: input.adminNotes || null,
+      hair_color: emptyToNull(input.hairColor),
+      eye_color: emptyToNull(input.eyeColor),
+      experience: emptyToNull(input.experience),
+      projects: emptyToNull(input.projects),
+      admin_note: emptyToNull(input.adminNotes),
       active: input.isActive ?? true,
       is_public: input.showOnWebsite ?? false,
       is_featured: input.isFeatured ?? false,
@@ -332,18 +339,18 @@ export async function updateActor(
   const payload: Record<string, unknown> = {};
   if (patch.firstName !== undefined) payload.first_name = patch.firstName;
   if (patch.lastName !== undefined) payload.last_name = patch.lastName;
-  if (patch.phone !== undefined) payload.phone = patch.phone || null;
-  if (patch.birthDate !== undefined) payload.birth_date = patch.birthDate;
+  if (patch.phone !== undefined) payload.phone = emptyToNull(patch.phone);
+  if (patch.birthDate !== undefined) payload.birth_date = emptyToNull(patch.birthDate);
   if (patch.gender !== undefined) payload.gender = patch.gender;
   if (patch.city !== undefined) payload.city = patch.city;
   if (patch.heightCm !== undefined) payload.height_cm = patch.heightCm;
   if (patch.weightKg !== undefined) payload.weight_kg = patch.weightKg;
   if (patch.age !== undefined) payload.age = patch.age;
-  if (patch.hairColor !== undefined) payload.hair_color = patch.hairColor || null;
-  if (patch.eyeColor !== undefined) payload.eye_color = patch.eyeColor || null;
-  if (patch.experience !== undefined) payload.experience = patch.experience || null;
-  if (patch.projects !== undefined) payload.projects = patch.projects || null;
-  if (patch.adminNotes !== undefined) payload.admin_note = patch.adminNotes || null;
+  if (patch.hairColor !== undefined) payload.hair_color = emptyToNull(patch.hairColor);
+  if (patch.eyeColor !== undefined) payload.eye_color = emptyToNull(patch.eyeColor);
+  if (patch.experience !== undefined) payload.experience = emptyToNull(patch.experience);
+  if (patch.projects !== undefined) payload.projects = emptyToNull(patch.projects);
+  if (patch.adminNotes !== undefined) payload.admin_note = emptyToNull(patch.adminNotes);
   if (patch.isActive !== undefined) payload.active = patch.isActive;
   if (patch.showOnWebsite !== undefined) payload.is_public = patch.showOnWebsite;
   if (patch.isFeatured !== undefined) payload.is_featured = patch.isFeatured;

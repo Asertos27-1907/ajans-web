@@ -1,5 +1,6 @@
 import "server-only";
 
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mockSiteSettings } from "@/data/mock";
 import type { SiteSettings } from "@/types";
@@ -15,6 +16,24 @@ const SETTING_KEYS = [
 ] as const;
 
 type SettingKey = (typeof SETTING_KEYS)[number];
+
+function logSettingsError(
+  stage: string,
+  error: {
+    message?: string;
+    code?: string;
+    details?: string;
+    hint?: string;
+  } | null,
+) {
+  if (!error) return;
+  console.warn(`[settings/${stage}]`, {
+    message: error.message ?? null,
+    code: error.code ?? null,
+    details: error.details ?? null,
+    hint: error.hint ?? null,
+  });
+}
 
 function splitSettings(settings: SiteSettings): Record<SettingKey, unknown> {
   return {
@@ -78,6 +97,17 @@ function mergeSettings(
   return next;
 }
 
+/** Invalidate public pages that render site settings (static at build). */
+function revalidatePublicSettingsPaths() {
+  revalidatePath("/", "layout");
+  revalidatePath("/");
+  revalidatePath("/hakkimizda");
+  revalidatePath("/hizmetler");
+  revalidatePath("/iletisim");
+  revalidatePath("/basvuru");
+  revalidatePath("/oyuncular");
+}
+
 export async function getMergedSiteSettings(): Promise<SiteSettings> {
   try {
     const admin = createAdminClient();
@@ -85,7 +115,12 @@ export async function getMergedSiteSettings(): Promise<SiteSettings> {
       .from("site_settings")
       .select("key, value");
 
-    if (error || !data?.length) {
+    if (error) {
+      logSettingsError("select", error);
+      return structuredClone(mockSiteSettings);
+    }
+
+    if (!data?.length) {
       return structuredClone(mockSiteSettings);
     }
 
@@ -98,7 +133,10 @@ export async function getMergedSiteSettings(): Promise<SiteSettings> {
     }
 
     return mergeSettings(structuredClone(mockSiteSettings), parts);
-  } catch {
+  } catch (err) {
+    console.warn("[settings/select] unexpected", {
+      message: err instanceof Error ? err.message : "unknown",
+    });
     return structuredClone(mockSiteSettings);
   }
 }
@@ -120,6 +158,14 @@ export async function saveSiteSettings(
     onConflict: "key",
   });
 
-  if (error) throw new Error("save_failed");
+  if (error) {
+    logSettingsError("upsert", error);
+    throw new Error("save_failed");
+  }
+
+  // Public routes are statically generated — invalidate so DB changes appear
+  // without a redeploy.
+  revalidatePublicSettingsPaths();
+
   return getMergedSiteSettings();
 }

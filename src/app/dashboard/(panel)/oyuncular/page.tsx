@@ -133,12 +133,12 @@ export default function ActorsAdminPage() {
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
       phone: form.phone.trim() || undefined,
-      birthDate: form.birthDate,
-      age: form.age ? Number(form.age) : null,
+      birthDate: form.birthDate.trim() || null,
+      age: form.age.trim() ? Number(form.age) : null,
       gender: form.gender,
       city: form.city.trim(),
-      heightCm: Number(form.heightCm) || undefined,
-      weightKg: Number(form.weightKg) || undefined,
+      heightCm: form.heightCm.trim() ? Number(form.heightCm) : null,
+      weightKg: form.weightKg.trim() ? Number(form.weightKg) : null,
       hairColor: form.hairColor.trim(),
       eyeColor: form.eyeColor.trim(),
       experience: form.experience.trim(),
@@ -147,7 +147,9 @@ export default function ActorsAdminPage() {
       isActive: form.isActive,
       showOnWebsite: form.showOnWebsite,
       isFeatured: form.isFeatured,
-      displayOrder: form.displayOrder ? Number(form.displayOrder) : null,
+      displayOrder: form.displayOrder.trim()
+        ? Number(form.displayOrder)
+        : null,
     };
   }
 
@@ -157,8 +159,8 @@ export default function ActorsAdminPage() {
     try {
       const payload = buildPayload();
 
-      if (!payload.firstName || !payload.lastName || !payload.city || !payload.birthDate) {
-        setError("Ad, soyad, şehir ve doğum tarihi zorunlu.");
+      if (!payload.firstName || !payload.lastName || !payload.city || !payload.gender) {
+        setError("Ad, soyad, şehir ve cinsiyet zorunlu.");
         return;
       }
 
